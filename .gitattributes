@@ -1,0 +1,3 @@
+# Keep LF line endings in the repo and in working copies on every OS, so Prettier output
+# never shows up as a diff on Windows.
+* text=auto eol=lf

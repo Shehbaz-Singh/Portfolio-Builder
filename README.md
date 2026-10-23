@@ -43,13 +43,17 @@ Open http://localhost:3000 to see the frontend.
 
 ## Other scripts
 
-| Command                                   | What it does                               |
-| ----------------------------------------- | ------------------------------------------ |
-| `npm run build`                           | Build shared, backend (`tsc`) and frontend |
-| `npm run start -w @portfolio/backend`     | Run the built backend                      |
-| `npm run typecheck`                       | Type-check all workspaces                  |
-| `npm run lint`                            | ESLint                                     |
-| `npm run format` / `npm run format:check` | Prettier                                   |
+| Command                                                    | What it does                               |
+| ---------------------------------------------------------- | ------------------------------------------ |
+| `npm run build`                                            | Build shared, backend (`tsc`) and frontend |
+| `npm run build:backend`                                    | Build only shared and the backend          |
+| `npm run start -w @portfolio/backend`                      | Run the built backend                      |
+| `npm run prisma:migrate -w @portfolio/backend -- --name x` | Create and apply a migration (dev)         |
+| `npm run prisma:deploy -w @portfolio/backend`              | Apply pending migrations (production)      |
+| `npm run db:seed -w @portfolio/backend`                    | Seed a sample user and profile             |
+| `npm run typecheck`                                        | Type-check all workspaces                  |
+| `npm run lint`                                             | ESLint                                     |
+| `npm run format` / `npm run format:check`                  | Prettier                                   |
 
 ## Environment variables
 
@@ -58,7 +62,25 @@ Open http://localhost:3000 to see the frontend.
 - `NODE_ENV` (development | test | production)
 - `PORT` (default 4000)
 - `FRONTEND_URL` (origin allowed by CORS, default http://localhost:3000)
+- `DATABASE_URL` (Neon pooled connection string, used by the app)
+- `DIRECT_URL` (Neon direct connection string, used by Prisma migrations)
+- `JWT_SECRET` (32+ characters; generate with `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`)
+- `JWT_EXPIRES_IN` (number + unit, e.g. `7d`; default `7d`)
 
 **frontend/.env.local**
 
 - `NEXT_PUBLIC_API_URL` (Express API base URL)
+
+## Deploy
+
+**Backend on Render** (installs only `shared` and `backend`, not the frontend's dependencies):
+
+| Setting       | Value                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------ |
+| Build command | `npm ci --include=dev -w @portfolio/shared -w @portfolio/backend && npm run build:backend` |
+| Start command | `npm run prisma:deploy -w @portfolio/backend && npm run start -w @portfolio/backend`       |
+| Env vars      | everything under **backend/.env** above, with `NODE_ENV=production`                        |
+
+`--include=dev` is required: Render sets `NODE_ENV=production`, which would otherwise skip the type packages and `prisma` that the build needs.
+
+**Frontend on Vercel**: not set up yet. Note that the frontend build needs `shared` built first (`npm run build:shared`).

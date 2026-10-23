@@ -1,0 +1,113 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "cjs"
+  importFileExtension = ""
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum LinkType {
+  linkedin
+  github
+  email
+  phone
+  website
+  other
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+  profile      Profile?
+}
+
+model Profile {
+  id        String  @id @default(cuid())
+  userId    String  @unique
+  slug      String  @unique
+  fullName  String
+  tagline   String?
+  about     String?
+  location  String?
+  avatarUrl String?
+  theme     String  @default("minimal")
+  published Boolean @default(false)
+
+  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links      Link[]
+  skills     Skill[]
+  experience Experience[]
+  projects   Project[]
+  education  Education[]
+}
+
+model Link {
+  id        String   @id @default(cuid())
+  profileId String
+  type      LinkType
+  url       String
+  visible   Boolean  @default(true)
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+}
+
+model Skill {
+  id        String @id @default(cuid())
+  profileId String
+  name      String
+  order     Int    @default(0)
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+}
+
+model Experience {
+  id          String    @id @default(cuid())
+  profileId   String
+  title       String
+  company     String
+  startDate   DateTime
+  endDate     DateTime?
+  description String
+  order       Int       @default(0)
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  profileId   String
+  name        String
+  url         String?
+  description String
+  techTags    String[]
+  order       Int      @default(0)
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+}
+
+model Education {
+  id          String    @id @default(cuid())
+  profileId   String
+  degree      String
+  institution String
+  startDate   DateTime
+  endDate     DateTime?
+  order       Int       @default(0)
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId])
+}
