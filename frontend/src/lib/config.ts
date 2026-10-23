@@ -19,3 +19,7 @@ export const SITE_URL = fromEnv(
   'NEXT_PUBLIC_SITE_URL',
   'http://localhost:3000',
 );
+
+// Server-only (no NEXT_PUBLIC_ prefix, never sent to the browser). Optional: when set, the API
+// proxy sends it so the backend can trust the visitor IP it forwards (see backend rate limits).
+export const PROXY_SECRET = process.env.PROXY_SECRET || undefined;

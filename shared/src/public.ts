@@ -46,12 +46,24 @@ export const publicEducationSchema = z.object({
   order: z.number(),
 });
 
-export const publicProfileSchema = profileSchema.omit({ id: true, published: true }).extend({
-  links: z.array(publicLinkSchema),
+// The four ordered lists are identical in both views.
+const sectionLists = {
   skills: z.array(publicSkillSchema),
   experience: z.array(publicExperienceSchema),
   projects: z.array(publicProjectSchema),
   education: z.array(publicEducationSchema),
+};
+
+export const publicProfileSchema = profileSchema.omit({ id: true, published: true }).extend({
+  links: z.array(publicLinkSchema),
+  ...sectionLists,
+});
+
+// The body of GET /profile/me: what the editor needs. Unlike the public view it keeps the
+// profile id and published flag, and hidden links (with their visible flag).
+export const myProfileSchema = profileSchema.extend({
+  links: z.array(publicLinkSchema.extend({ visible: z.boolean() })),
+  ...sectionLists,
 });
 
 export type PublicLink = z.infer<typeof publicLinkSchema>;
@@ -60,3 +72,5 @@ export type PublicExperience = z.infer<typeof publicExperienceSchema>;
 export type PublicProject = z.infer<typeof publicProjectSchema>;
 export type PublicEducation = z.infer<typeof publicEducationSchema>;
 export type PublicProfile = z.infer<typeof publicProfileSchema>;
+export type MyProfile = z.infer<typeof myProfileSchema>;
+export type MyLink = MyProfile['links'][number];

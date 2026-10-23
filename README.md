@@ -66,12 +66,22 @@ Open http://localhost:3000 to see the frontend.
 - `DIRECT_URL` (Neon direct connection string, used by Prisma migrations)
 - `JWT_SECRET` (32+ characters; generate with `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`)
 - `JWT_EXPIRES_IN` (number + unit, e.g. `7d`; default `7d`)
+- `PROXY_SECRET` (optional, 32+ characters; same value as in the frontend. Makes rate limits count real visitors instead of the frontend server; generate like `JWT_SECRET`)
 - `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` (avatar uploads; from the Cloudinary dashboard)
 
 **frontend/.env.local**
 
 - `NEXT_PUBLIC_API_URL` (Express API base URL)
 - `NEXT_PUBLIC_SITE_URL` (public URL of the site, used for Open Graph and canonical links)
+- `PROXY_SECRET` (optional, server-only; must match the backend value)
+
+## How login works
+
+The browser never calls the Express API directly. It calls `/api/...` on the Next.js site (`frontend/src/app/api/[...path]/route.ts`), which forwards to the API. On login or register that route stores the JWT in an **httpOnly, SameSite=Lax cookie** and removes it from the response, so page scripts (and any XSS) can never read the token. Every other call gets the token attached from the cookie. A 401 clears the cookie and sends the user to `/login`. Logging out just deletes the cookie.
+
+Why a cookie and not localStorage: anything in localStorage is readable by every script on the page. The cost of the cookie is the proxy hop, which also removes the need for CORS. The proxy waits up to 55 seconds for a sleeping free-tier API.
+
+`/dashboard` is guarded by `frontend/src/proxy.ts` (a cookie check only; the API is the real gate).
 
 ## Deploy
 

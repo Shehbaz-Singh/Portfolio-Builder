@@ -12,6 +12,9 @@ const envSchema = z.object({
     .string()
     .regex(/^\d+[smhd]$/, 'JWT_EXPIRES_IN must look like 30m, 12h or 7d')
     .default('7d'),
+  // Shared with the Next.js server (same name in frontend/.env.local). Lets it vouch for the
+  // real client IP it forwards, so rate limits apply per user instead of per frontend server.
+  PROXY_SECRET: z.string().min(32, 'PROXY_SECRET must be at least 32 characters').optional(),
   CLOUDINARY_CLOUD_NAME: z.string().min(1, 'CLOUDINARY_CLOUD_NAME is required'),
   CLOUDINARY_API_KEY: z.string().min(1, 'CLOUDINARY_API_KEY is required'),
   CLOUDINARY_API_SECRET: z.string().min(1, 'CLOUDINARY_API_SECRET is required'),

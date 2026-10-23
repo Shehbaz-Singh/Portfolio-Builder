@@ -121,7 +121,7 @@ export type SkillInput = z.infer<typeof skillInputSchema>;
 
 const dateRange = <T extends { startDate: Date; endDate: Date | null }>(v: T) =>
   v.endDate === null || v.endDate >= v.startDate;
-const dateRangeIssue = { message: 'endDate must not be before startDate', path: ['endDate'] };
+const dateRangeIssue = { message: 'End date must not be before the start date', path: ['endDate'] };
 
 export const experienceInputSchema = z
   .object({
