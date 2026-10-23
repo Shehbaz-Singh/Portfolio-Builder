@@ -1,98 +1,43 @@
 # Portfolio Generator
 
-Users sign up, fill in their profile, skills, experience, education, projects and links (or upload a resume to auto-fill), and get a public page at `/[username]`.
+Fill in your details once and get a clean, shareable portfolio page at your own link, like `yoursite.com/jane-doe`. No design work and no hosting to set up.
 
-## Structure
+## What it does
 
-| Folder      | Description                                                              |
-| ----------- | ------------------------------------------------------------------------ |
-| `frontend/` | Next.js (App Router), React, TypeScript, Tailwind                        |
-| `backend/`  | Express, TypeScript (`routes/ controllers/ services/ middleware/ lib/`)  |
-| `shared/`   | Zod schemas and shared types, compiled to `shared/dist` and used by both |
+**For the person building a portfolio**
 
-Managed as npm workspaces (Node 20+).
+- Sign up, then build your page step by step: basics, about, skills, experience, projects and education.
+- See a live preview next to the form while you type, using the same theme your visitors will see.
+- Add links (LinkedIn, GitHub, email, phone, website) and hide any of them with a switch without deleting it.
+- Upload a profile photo; it is cropped to a square automatically.
+- Drag to reorder links, skills, experience, projects and education. Keyboard reordering works too.
+- Choose your own page address, and publish or unpublish whenever you like. Unpublishing takes the page down immediately.
 
-## Setup
+**For the people visiting a portfolio**
 
-```bash
-npm install
-cp backend/.env.example backend/.env
-cp frontend/.env.example frontend/.env.local
-```
+- A fast, readable page that works on phones and follows the visitor's light or dark setting.
+- Proper link previews when the page is shared, with a generated social image showing the name, tagline and photo.
+- Unpublished or missing pages look identical, so nobody can tell which names are taken.
 
-On Windows PowerShell use `Copy-Item` instead of `cp`.
+**Coming next**
 
-## Run in development
+- Upload a resume and have the profile filled in automatically.
+- More themes. A theme is a single component that receives the profile, so adding one does not touch the rest of the app.
 
-```bash
-npm run dev
-```
+## How it is put together
 
-This builds `shared` once, then runs three processes together: `shared` in watch mode, the backend on http://localhost:4000 and the frontend on http://localhost:3000.
+| Part        | What it is                                                                                            |
+| ----------- | ----------------------------------------------------------------------------------------------------- |
+| `frontend/` | Next.js (App Router), React and Tailwind: the public pages and the editor                             |
+| `backend/`  | Express API with PostgreSQL through Prisma, organised as routes, controllers, services and middleware |
+| `shared/`   | Zod schemas and types used by both sides, so a field is validated the same way everywhere             |
 
-Run them individually with `npm run dev:backend` or `npm run dev:frontend` (build shared first with `npm run build:shared`).
+Photos are stored on Cloudinary. Everything is a TypeScript npm workspace in one repository.
 
-## Verify
+## Design choices worth knowing
 
-```bash
-curl http://localhost:4000/health
-# {"status":"ok","uptime":12.3,"timestamp":"..."}
-```
-
-Open http://localhost:3000 to see the frontend.
-
-## Other scripts
-
-| Command                                                    | What it does                               |
-| ---------------------------------------------------------- | ------------------------------------------ |
-| `npm run build`                                            | Build shared, backend (`tsc`) and frontend |
-| `npm run build:backend`                                    | Build only shared and the backend          |
-| `npm run start -w @portfolio/backend`                      | Run the built backend                      |
-| `npm run prisma:migrate -w @portfolio/backend -- --name x` | Create and apply a migration (dev)         |
-| `npm run prisma:deploy -w @portfolio/backend`              | Apply pending migrations (production)      |
-| `npm run db:seed -w @portfolio/backend`                    | Seed a sample user and profile             |
-| `npm run typecheck`                                        | Type-check all workspaces                  |
-| `npm run lint`                                             | ESLint                                     |
-| `npm run format` / `npm run format:check`                  | Prettier                                   |
-
-## Environment variables
-
-**backend/.env** (validated with Zod in `backend/src/lib/config.ts`; the backend exits on invalid values)
-
-- `NODE_ENV` (development | test | production)
-- `PORT` (default 4000)
-- `FRONTEND_URL` (origin allowed by CORS, default http://localhost:3000)
-- `DATABASE_URL` (Neon pooled connection string, used by the app)
-- `DIRECT_URL` (Neon direct connection string, used by Prisma migrations)
-- `JWT_SECRET` (32+ characters; generate with `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`)
-- `JWT_EXPIRES_IN` (number + unit, e.g. `7d`; default `7d`)
-- `PROXY_SECRET` (optional, 32+ characters; same value as in the frontend. Makes rate limits count real visitors instead of the frontend server; generate like `JWT_SECRET`)
-- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` (avatar uploads; from the Cloudinary dashboard)
-
-**frontend/.env.local**
-
-- `NEXT_PUBLIC_API_URL` (Express API base URL)
-- `NEXT_PUBLIC_SITE_URL` (public URL of the site, used for Open Graph and canonical links)
-- `PROXY_SECRET` (optional, server-only; must match the backend value)
-
-## How login works
-
-The browser never calls the Express API directly. It calls `/api/...` on the Next.js site (`frontend/src/app/api/[...path]/route.ts`), which forwards to the API. On login or register that route stores the JWT in an **httpOnly, SameSite=Lax cookie** and removes it from the response, so page scripts (and any XSS) can never read the token. Every other call gets the token attached from the cookie. A 401 clears the cookie and sends the user to `/login`. Logging out just deletes the cookie.
-
-Why a cookie and not localStorage: anything in localStorage is readable by every script on the page. The cost of the cookie is the proxy hop, which also removes the need for CORS. The proxy waits up to 55 seconds for a sleeping free-tier API.
-
-`/dashboard` is guarded by `frontend/src/proxy.ts` (a cookie check only; the API is the real gate).
-
-## Deploy
-
-**Backend on Render** (installs only `shared` and `backend`, not the frontend's dependencies):
-
-| Setting       | Value                                                                                      |
-| ------------- | ------------------------------------------------------------------------------------------ |
-| Build command | `npm ci --include=dev -w @portfolio/shared -w @portfolio/backend && npm run build:backend` |
-| Start command | `npm run prisma:deploy -w @portfolio/backend && npm run start -w @portfolio/backend`       |
-| Env vars      | everything under **backend/.env** above, with `NODE_ENV=production`                        |
-
-`--include=dev` is required: Render sets `NODE_ENV=production`, which would otherwise skip the type packages and `prisma` that the build needs.
-
-**Frontend on Vercel**: not set up yet. Note that the frontend build needs `shared` built first (`npm run build:shared`).
+- **Login lives in a protected cookie.** The browser never talks to the API directly. The site forwards requests and keeps the login token in an httpOnly cookie, so scripts on the page can never read it.
+- **Everything is validated on the server** with the shared schemas, and the API never returns password hashes or other people's data.
+- **Built for a sleepy free-tier backend.** Slow responses show a "waking up" message, reads retry automatically, and a failed save keeps what you typed.
+- **Public pages are cached briefly** for speed, and the cache is cleared the moment you save, so edits and unpublishing show up at once.
+- **Safe by default:** links only accept http(s), email and phone formats, uploads are checked by their actual contents, and login and upload attempts are rate limited per visitor.
