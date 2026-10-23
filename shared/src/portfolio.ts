@@ -90,6 +90,7 @@ export const linkInputSchema = z
     type: linkTypeSchema,
     url: trimmed(2048),
     visible: z.boolean().default(true),
+    order: orderField,
   })
   .superRefine((link, ctx) => {
     const valid =
@@ -175,12 +176,6 @@ export const sectionInputSchemas = {
   skills: skillInputSchema,
   links: linkInputSchema,
 } satisfies Record<Section, z.ZodTypeAny>;
-
-// Links have no `order` column, so they cannot be reordered.
-export const ORDERED_SECTIONS = ['experience', 'education', 'projects', 'skills'] as const;
-export type OrderedSection = (typeof ORDERED_SECTIONS)[number];
-export const isOrderedSection = (section: Section): section is OrderedSection =>
-  (ORDERED_SECTIONS as readonly string[]).includes(section);
 
 // Keeps one account from filling the database.
 export const SECTION_LIMITS: Record<Section, number> = {

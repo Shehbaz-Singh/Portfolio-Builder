@@ -45,3 +45,19 @@ export async function replaceAvatar(profileId: string, file: Buffer) {
 
   return { avatarUrl: uploaded.url };
 }
+
+// Safe to repeat: with no avatar there is nothing to do. The profile is cleared first, so a
+// failed Cloudinary delete can only leave an unused image behind, never a broken avatar.
+export async function removeAvatar(profileId: string) {
+  const current = await prisma.profile.findUnique({
+    where: { id: profileId },
+    select: { avatarUrl: true },
+  });
+  if (!current) throw AppError.notFound('Profile not found');
+  if (!current.avatarUrl) return;
+
+  await prisma.profile.update({ where: { id: profileId }, data: { avatarUrl: null } });
+
+  const publicId = avatarPublicId(current.avatarUrl, profileId);
+  if (publicId) await deleteQuietly(publicId);
+}

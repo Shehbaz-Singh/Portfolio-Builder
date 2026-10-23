@@ -31,6 +31,19 @@ function AvatarUpload() {
   const input = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
 
+  async function onRemove() {
+    setUploading(true);
+    try {
+      await api('/profile/me/avatar', { method: 'DELETE' });
+      update((p) => ({ ...p, avatarUrl: null }));
+      notify('success', 'Photo removed.');
+    } catch (err) {
+      notify('error', errorText(err));
+    } finally {
+      setUploading(false);
+    }
+  }
+
   async function onFile(file: File | undefined) {
     if (!file) return;
     // Same limits as the API, checked here first so a wrong file fails instantly.
@@ -86,9 +99,16 @@ function AvatarUpload() {
             e.target.value = ''; // picking the same file again should still trigger onChange
           }}
         />
-        <Button disabled={uploading} onClick={() => input.current?.click()}>
-          {uploading ? 'Uploading…' : profile.avatarUrl ? 'Change photo' : 'Upload photo'}
-        </Button>
+        <div className="flex gap-2">
+          <Button disabled={uploading} onClick={() => input.current?.click()}>
+            {uploading ? 'Working…' : profile.avatarUrl ? 'Change photo' : 'Upload photo'}
+          </Button>
+          {profile.avatarUrl && (
+            <Button variant="danger" disabled={uploading} onClick={onRemove}>
+              Remove
+            </Button>
+          )}
+        </div>
         <p className="text-xs text-slate-500 dark:text-slate-400">JPG, PNG or WebP, up to 2 MB.</p>
         <SlowNotice pending={uploading} />
       </div>
@@ -281,7 +301,7 @@ export function BasicsStep() {
             Links
           </h2>
           <p className="text-sm text-slate-600 dark:text-slate-400">
-            Use the switch to hide a link without deleting it.
+            Drag the grip to reorder. Use the switch to hide a link without deleting it.
           </p>
         </div>
         <SectionManager

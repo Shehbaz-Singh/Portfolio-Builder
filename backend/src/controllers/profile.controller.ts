@@ -14,6 +14,11 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
   res.json(await profileService.updateProfile(getProfileId(req), req.body as ProfileUpdateInput));
 });
 
+export const deleteMyAvatar = asyncHandler(async (req, res) => {
+  await avatarService.removeAvatar(getProfileId(req));
+  res.status(204).end();
+});
+
 // req.file is set by the avatarUpload middleware (multipart field "avatar").
 export const uploadMyAvatar = asyncHandler(async (req, res) => {
   if (!req.file) throw new AppError(400, 'NO_FILE', 'Attach an image in the "avatar" form field');

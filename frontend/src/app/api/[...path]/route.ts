@@ -1,4 +1,6 @@
+import { revalidateTag } from 'next/cache';
 import { NextResponse, type NextRequest } from 'next/server';
+import { PUBLIC_PROFILES_TAG } from '@/lib/api';
 import { API_URL, PROXY_SECRET } from '@/lib/config';
 import { SESSION_COOKIE, sessionCookieOptions } from '@/lib/session';
 
@@ -93,6 +95,12 @@ async function handle(req: NextRequest, { params }: Context) {
     const res = NextResponse.json(session, { status: upstream.status });
     res.cookies.set(SESSION_COOKIE, issued, sessionCookieOptions(issued));
     return res;
+  }
+
+  // Any successful profile write can change a public page or unpublish it. Drop the cached
+  // copies now; { expire: 0 } means the next visitor gets fresh data, never a stale page.
+  if (!isRead && upstream.ok && path[0] === 'profile') {
+    revalidateTag(PUBLIC_PROFILES_TAG, { expire: 0 });
   }
 
   const res = new NextResponse(upstream.status === 204 ? null : upstream.body, {

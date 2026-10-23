@@ -11,7 +11,7 @@ const publicSelect = {
   links: {
     where: { visible: true },
     omit: { profileId: true, visible: true },
-    orderBy: { id: 'asc' },
+    orderBy: [{ order: 'asc' }, { id: 'asc' }],
   },
   skills: orderedList,
   experience: orderedList,

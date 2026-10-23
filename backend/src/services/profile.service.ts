@@ -9,7 +9,7 @@ import { assertSlugAvailable, slugTaken } from './slug.service';
 // The whole profile as the editor (and later the public page) needs it, in one query.
 const fullProfileSelect = {
   ...profileSelect,
-  links: { omit: { profileId: true }, orderBy: { id: 'asc' } },
+  links: orderedList,
   skills: orderedList,
   experience: orderedList,
   projects: orderedList,

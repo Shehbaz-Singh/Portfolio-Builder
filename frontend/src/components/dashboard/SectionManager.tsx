@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type ComponentType, type ReactNode } from 'react';
-import { isOrderedSection, type Section } from '@portfolio/shared';
+import type { Section } from '@portfolio/shared';
 import { Button } from '../ui';
 import { errorText, useEditor, useSection, type SectionItem } from './editor-context';
 import { SortableList } from './SortableList';
@@ -37,7 +37,7 @@ export function SectionManager<S extends Section>({
   // An item id, "new", or nothing. One form at a time keeps unsaved edits from being lost.
   const [editing, setEditing] = useState<string | 'new' | null>(null);
   const [deleting, setDeleting] = useState<string | null>(null);
-  const sortable = isOrderedSection(section) && items.length > 1;
+  const sortable = items.length > 1;
   const close = () => setEditing(null);
 
   async function onDelete(id: string) {

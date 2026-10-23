@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { profileUpdateSchema, publishSchema, reorderSchema } from '@portfolio/shared';
 import {
+  deleteMyAvatar,
   getMyProfile,
   publishMyProfile,
   updateMyProfile,
@@ -33,6 +34,7 @@ profileRouter.post('/me/publish', validateBody(publishSchema), publishMyProfile)
 // Auth has already run (router-level), so unauthenticated uploads are rejected before any
 // bytes are read. Then: rate limit, multipart parse (2 MB, jpg/png/webp), upload.
 profileRouter.post('/me/avatar', uploadLimiter, avatarUpload, uploadMyAvatar);
+profileRouter.delete('/me/avatar', deleteMyAvatar);
 
 // :section is one of experience | education | projects | skills | links
 profileRouter.patch('/me/:section/reorder', validateBody(reorderSchema), reorderSection);

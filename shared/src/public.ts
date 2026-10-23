@@ -10,6 +10,7 @@ export const publicLinkSchema = z.object({
   id: z.string(),
   type: linkTypeSchema,
   url: z.string(),
+  order: z.number(),
 });
 
 export const publicSkillSchema = z.object({

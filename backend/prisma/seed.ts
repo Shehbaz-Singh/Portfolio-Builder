@@ -90,7 +90,7 @@ async function main() {
       profile: {
         create: {
           ...profile,
-          links: { create: links },
+          links: { create: links.map((link, order) => ({ ...link, order })) },
           skills: { create: skills },
           experience: { create: experience },
           projects: { create: projects },

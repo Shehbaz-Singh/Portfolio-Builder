@@ -1,4 +1,4 @@
-import { isOrderedSection, SECTION_LIMITS, type Section } from '@portfolio/shared';
+import { SECTION_LIMITS, type Section } from '@portfolio/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
@@ -34,8 +34,7 @@ const notFound = () => AppError.notFound('Item not found');
 export function listItems(section: Section, profileId: string) {
   return delegates[section].findMany({
     where: { profileId },
-    // Links have no order column; their ids sort by creation time.
-    orderBy: isOrderedSection(section) ? [{ order: 'asc' }, { id: 'asc' }] : { id: 'asc' },
+    orderBy: [{ order: 'asc' }, { id: 'asc' }],
     omit,
   });
 }
@@ -59,7 +58,7 @@ export async function createItem(section: Section, profileId: string, input: Row
 
   // New items go to the end unless the client picked a position.
   let order: number | undefined;
-  if (isOrderedSection(section) && input.order === undefined) {
+  if (input.order === undefined) {
     const { _max } = await delegate.aggregate({ where: { profileId }, _max: { order: true } });
     order = (_max.order ?? -1) + 1;
   }
@@ -91,9 +90,6 @@ export async function deleteItem(section: Section, profileId: string, id: string
 // `ids` is the new order. It must list every item in the section exactly once, which also
 // guarantees it can only contain the caller's own records.
 export async function reorderItems(section: Section, profileId: string, ids: string[]) {
-  if (!isOrderedSection(section)) {
-    throw new AppError(400, 'NOT_REORDERABLE', `Items in ${section} cannot be reordered`);
-  }
   const delegate = delegates[section];
 
   const current = await delegate.findMany({ where: { profileId }, select: { id: true } });
