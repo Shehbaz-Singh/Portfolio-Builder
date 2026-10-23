@@ -12,21 +12,35 @@ const optionalText = (max: number) =>
     .nullish()
     .transform((v) => (v ? v : null));
 
-const urlString = z.string().trim().url().max(2048);
-const orderField = z.number().int().min(0).default(0);
+// Only http(s): z.string().url() also accepts "javascript:..." which is an XSS risk once
+// the value is rendered as a link on the public page.
+const httpUrl = z
+  .string()
+  .trim()
+  .max(2048)
+  .url()
+  .refine((u) => /^https?:\/\//i.test(u), 'Must start with http:// or https://');
+
+// Optional: when omitted on create the item is appended; on update it keeps its position.
+const orderField = z.number().int().min(0).optional();
 
 // Slugs become public URLs (/[slug]), so they must not collide with app routes.
 export const RESERVED_SLUGS = [
+  'admin',
   'api',
   'login',
-  'signup',
   'register',
+  'signup',
   'dashboard',
   'settings',
-  'admin',
-  'health',
+  'about',
+  'privacy',
+  'terms',
   '_next',
 ] as const;
+
+export const isReservedSlug = (slug: string) =>
+  (RESERVED_SLUGS as readonly string[]).includes(slug);
 
 export const slugSchema = z
   .string()
@@ -35,7 +49,7 @@ export const slugSchema = z
   .min(3)
   .max(30)
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use lowercase letters, numbers and single hyphens')
-  .refine((s) => !(RESERVED_SLUGS as readonly string[]).includes(s), 'This slug is reserved');
+  .refine((s) => !isReservedSlug(s), 'This slug is reserved');
 
 export const themeSchema = z.string().trim().min(1).max(50);
 
@@ -48,7 +62,7 @@ export const profileInputSchema = z.object({
   tagline: optionalText(160),
   about: optionalText(5000),
   location: optionalText(100),
-  avatarUrl: urlString.nullish().transform((v) => v ?? null),
+  avatarUrl: httpUrl.nullish().transform((v) => v ?? null),
   theme: themeSchema.default('minimal'),
   published: z.boolean().default(false),
 });
@@ -59,12 +73,44 @@ export type ProfileInput = z.infer<typeof profileInputSchema>;
 export const profileSchema = profileInputSchema.extend({ id: z.string() });
 export type Profile = z.infer<typeof profileSchema>;
 
-export const linkInputSchema = z.object({
-  type: linkTypeSchema,
-  // email/phone links are not URLs, so only require a non-empty value here.
-  url: trimmed(2048),
-  visible: z.boolean().default(true),
-});
+// PUT /profile/me. Publishing has its own endpoint, and omitting the slug keeps the current one.
+export const profileUpdateSchema = profileInputSchema
+  .omit({ slug: true, published: true })
+  .extend({ slug: slugSchema.optional() });
+export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;
+
+// POST /profile/me/publish. No value toggles; a value sets it (safe to retry).
+export const publishSchema = z.object({ published: z.boolean().optional() });
+export type PublishInput = z.infer<typeof publishSchema>;
+
+const PHONE = /^\+?[\d\s().-]{5,25}$/;
+
+export const linkInputSchema = z
+  .object({
+    type: linkTypeSchema,
+    url: trimmed(2048),
+    visible: z.boolean().default(true),
+  })
+  .superRefine((link, ctx) => {
+    const valid =
+      link.type === 'email'
+        ? z.string().email().safeParse(link.url).success
+        : link.type === 'phone'
+          ? PHONE.test(link.url)
+          : httpUrl.safeParse(link.url).success;
+    if (!valid) {
+      ctx.addIssue({
+        code: 'custom',
+        path: ['url'],
+        message:
+          link.type === 'email'
+            ? 'Must be a valid email address'
+            : link.type === 'phone'
+              ? 'Must be a valid phone number'
+              : 'Must be a valid http(s) URL',
+      });
+    }
+  });
 export type LinkInput = z.infer<typeof linkInputSchema>;
 
 export const skillInputSchema = z.object({
@@ -94,7 +140,7 @@ export type ExperienceInput = z.infer<typeof experienceInputSchema>;
 
 export const projectInputSchema = z.object({
   name: trimmed(100),
-  url: urlString.nullish().transform((v) => v ?? null),
+  url: httpUrl.nullish().transform((v) => v ?? null),
   description: z.string().trim().max(3000).default(''),
   techTags: z.array(trimmed(30)).max(20).default([]),
   order: orderField,
@@ -114,6 +160,46 @@ export const educationInputSchema = z
   })
   .refine(dateRange, dateRangeIssue);
 export type EducationInput = z.infer<typeof educationInputSchema>;
+
+// ---- Sections: the five lists under a profile, managed through one generic API ----
+
+export const SECTIONS = ['experience', 'education', 'projects', 'skills', 'links'] as const;
+export type Section = (typeof SECTIONS)[number];
+export const isSection = (value: string): value is Section =>
+  (SECTIONS as readonly string[]).includes(value);
+
+export const sectionInputSchemas = {
+  experience: experienceInputSchema,
+  education: educationInputSchema,
+  projects: projectInputSchema,
+  skills: skillInputSchema,
+  links: linkInputSchema,
+} satisfies Record<Section, z.ZodTypeAny>;
+
+// Links have no `order` column, so they cannot be reordered.
+export const ORDERED_SECTIONS = ['experience', 'education', 'projects', 'skills'] as const;
+export type OrderedSection = (typeof ORDERED_SECTIONS)[number];
+export const isOrderedSection = (section: Section): section is OrderedSection =>
+  (ORDERED_SECTIONS as readonly string[]).includes(section);
+
+// Keeps one account from filling the database.
+export const SECTION_LIMITS: Record<Section, number> = {
+  experience: 30,
+  education: 20,
+  projects: 30,
+  skills: 60,
+  links: 20,
+};
+
+// PATCH /profile/me/:section/reorder
+export const reorderSchema = z.object({
+  ids: z
+    .array(z.string().min(1))
+    .min(1)
+    .max(200)
+    .refine((ids) => new Set(ids).size === ids.length, 'ids must be unique'),
+});
+export type ReorderInput = z.infer<typeof reorderSchema>;
 
 // A whole portfolio in one payload (used by the seed script and later by resume auto-fill).
 export const fullProfileInputSchema = profileInputSchema.extend({
