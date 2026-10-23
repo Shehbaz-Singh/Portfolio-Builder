@@ -6,6 +6,12 @@ const envSchema = z.object({
   PORT: z.coerce.number().int().positive().default(4000),
   FRONTEND_URL: z.string().url().default('http://localhost:3000'),
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required'),
+  JWT_SECRET: z.string().min(32, 'JWT_SECRET must be at least 32 characters'),
+  // Number + unit, e.g. 30m, 12h, 7d.
+  JWT_EXPIRES_IN: z
+    .string()
+    .regex(/^\d+[smhd]$/, 'JWT_EXPIRES_IN must look like 30m, 12h or 7d')
+    .default('7d'),
 });
 
 const parsed = envSchema.safeParse(process.env);
