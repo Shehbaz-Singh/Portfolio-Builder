@@ -66,6 +66,7 @@ Open http://localhost:3000 to see the frontend.
 - `DIRECT_URL` (Neon direct connection string, used by Prisma migrations)
 - `JWT_SECRET` (32+ characters; generate with `node -e "console.log(require('crypto').randomBytes(48).toString('base64url'))"`)
 - `JWT_EXPIRES_IN` (number + unit, e.g. `7d`; default `7d`)
+- `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` (avatar uploads; from the Cloudinary dashboard)
 
 **frontend/.env.local**
 

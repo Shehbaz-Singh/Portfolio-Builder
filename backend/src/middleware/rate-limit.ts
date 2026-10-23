@@ -19,3 +19,6 @@ export const loginLimiter = limiter({
 });
 
 export const registerLimiter = limiter({ windowMs: 60 * 60 * 1000, limit: 10 });
+
+// Each upload costs Cloudinary storage and transformation quota.
+export const uploadLimiter = limiter({ windowMs: 60 * 60 * 1000, limit: 20 });

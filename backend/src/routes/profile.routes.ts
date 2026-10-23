@@ -1,6 +1,11 @@
 import { Router } from 'express';
 import { profileUpdateSchema, publishSchema, reorderSchema } from '@portfolio/shared';
-import { getMyProfile, publishMyProfile, updateMyProfile } from '../controllers/profile.controller';
+import {
+  getMyProfile,
+  publishMyProfile,
+  updateMyProfile,
+  uploadMyAvatar,
+} from '../controllers/profile.controller';
 import {
   createSectionItem,
   deleteSectionItem,
@@ -10,6 +15,8 @@ import {
   updateSectionItem,
 } from '../controllers/section.controller';
 import { requireAuth } from '../middleware/auth';
+import { uploadLimiter } from '../middleware/rate-limit';
+import { avatarUpload } from '../middleware/upload';
 import { sectionParam, validateSectionBody } from '../middleware/section';
 import { validateBody } from '../middleware/validate';
 
@@ -21,8 +28,11 @@ profileRouter.param('section', sectionParam);
 
 profileRouter.get('/me', getMyProfile);
 profileRouter.put('/me', validateBody(profileUpdateSchema), updateMyProfile);
-// Declared before /me/:section so "publish" is not read as a section name.
+// Declared before /me/:section so "publish" and "avatar" are not read as section names.
 profileRouter.post('/me/publish', validateBody(publishSchema), publishMyProfile);
+// Auth has already run (router-level), so unauthenticated uploads are rejected before any
+// bytes are read. Then: rate limit, multipart parse (2 MB, jpg/png/webp), upload.
+profileRouter.post('/me/avatar', uploadLimiter, avatarUpload, uploadMyAvatar);
 
 // :section is one of experience | education | projects | skills | links
 profileRouter.patch('/me/:section/reorder', validateBody(reorderSchema), reorderSection);
