@@ -71,6 +71,7 @@ Open http://localhost:3000 to see the frontend.
 **frontend/.env.local**
 
 - `NEXT_PUBLIC_API_URL` (Express API base URL)
+- `NEXT_PUBLIC_SITE_URL` (public URL of the site, used for Open Graph and canonical links)
 
 ## Deploy
 
