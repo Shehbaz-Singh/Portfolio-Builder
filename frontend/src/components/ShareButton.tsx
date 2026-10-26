@@ -15,7 +15,7 @@ const noSubscription = () => () => {};
 const hasWebShare = () => typeof navigator.share === 'function';
 
 const itemClass =
-  'block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent';
+  'block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-fg';
 
 // Share button. Where the device has the Web Share API it opens the system share sheet;
 // otherwise it opens a small menu (copy link, LinkedIn, X, WhatsApp, email). The menu is a
@@ -49,7 +49,16 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
       setOpen(false);
       if (refocus) trigger.current?.focus();
     };
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close(true);
+    // Escape closes the menu; Up and Down move between its items.
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') return close(true);
+      if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
+      const items = [...(menu.current?.querySelectorAll<HTMLElement>('a, button') ?? [])];
+      const at = items.indexOf(document.activeElement as HTMLElement);
+      if (at === -1) return;
+      e.preventDefault();
+      items[(at + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length].focus();
+    };
     const onPointer = (e: PointerEvent) =>
       !root.current?.contains(e.target as Node) && close(false);
     const onFocus = (e: FocusEvent) => !root.current?.contains(e.target as Node) && close(false);
@@ -90,16 +99,6 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
     trigger.current?.focus();
   }
 
-  // Up and Down arrows move between the menu items.
-  function onMenuKey(e: React.KeyboardEvent) {
-    if (e.key !== 'ArrowDown' && e.key !== 'ArrowUp') return;
-    e.preventDefault();
-    const items = [...e.currentTarget.querySelectorAll<HTMLElement>('a, button')];
-    const at = items.indexOf(document.activeElement as HTMLElement);
-    const next = (at + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
-    items[next].focus();
-  }
-
   const u = encodeURIComponent(url);
   const t = encodeURIComponent(title);
   const targets = [
@@ -110,11 +109,11 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
   ];
 
   const look = {
-    pill: 'rounded-full bg-accent px-4 py-2 text-on-accent hover:bg-accent/90 focus-visible:outline-accent',
+    pill: 'rounded-full bg-accent px-4 py-2 text-on-accent hover:underline focus-visible:outline-accent-fg',
     outline:
-      'rounded-lg border border-line px-4 py-2 hover:bg-surface focus-visible:outline-accent',
+      'rounded-lg border border-line px-4 py-2 hover:bg-surface focus-visible:outline-accent-fg',
     inverse:
-      'rounded-full bg-on-accent px-4 py-2 text-accent hover:opacity-90 focus-visible:outline-on-accent',
+      'rounded-full bg-on-accent px-4 py-2 text-accent hover:underline focus-visible:outline-on-accent',
   }[variant];
 
   return (
@@ -137,7 +136,6 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
         <ul
           ref={menu}
           id={menuId}
-          onKeyDown={onMenuKey}
           className={`absolute top-full z-20 mt-2 w-48 rounded-xl border border-line bg-page p-1 text-ink shadow-lg ${alignEnd ? 'end-0' : 'start-0'}`}
         >
           <li>

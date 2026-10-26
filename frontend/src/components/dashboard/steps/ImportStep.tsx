@@ -13,7 +13,7 @@ const MAX_BYTES = 4.5 * 1024 * 1024;
 // First step of onboarding: read a resume PDF and fill in what it says. Nothing is saved here.
 // The parsed result lands in the other steps' forms as unsaved edits and suggestions.
 export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
-  const { applyImport, hasPendingImport } = useEditor();
+  const { applyImport, hasPendingImport, notify } = useEditor();
   const input = useRef<HTMLInputElement>(null);
   const [reading, setReading] = useState(false);
   const [error, setError] = useState<string>();
@@ -38,6 +38,7 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
         form,
       });
       applyImport(resume, skipped);
+      notify('success', 'Resume read. Check each step, then save.');
       goTo('basics');
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
@@ -86,7 +87,9 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
         <p className="text-xs text-muted">
           PDF with selectable text, up to 4.5 MB. Scanned images are not supported.
         </p>
-        {reading && <p className="text-sm text-muted">This usually takes 10 to 20 seconds.</p>}
+        <p role="status" className="text-sm text-muted">
+          {reading ? 'Reading your resume. This usually takes 10 to 20 seconds.' : ''}
+        </p>
         <SlowNotice pending={reading} />
         <ErrorText>{error}</ErrorText>
       </div>

@@ -2,20 +2,21 @@
 
 import { useFormContext, useWatch } from 'react-hook-form';
 import { DEFAULT_ACCENT } from '@portfolio/shared';
-import { ACCENT_PRESETS, MIN_CONTRAST, accentContrast, normalizeHex } from '@/lib/color';
+import { ACCENT_PRESETS, normalizeHex, readableAccent } from '@/lib/color';
+import { PALETTES } from '@/lib/palettes';
 import { getTheme } from '@/lib/themes';
 import { ErrorText, inputClass } from '../ui';
 
 // Choose the page's accent color: 8 swatches, the browser's color picker, or a typed hex code.
 // All three write the form's `accentColor` field, which the live preview shows at once. A color
-// that is hard to read on the chosen theme's background gets a warning but can still be saved.
+// that cannot be read as text on the chosen theme is still allowed: buttons and the header use it
+// as it is, and links and tags use the nearest readable shade (see readableAccent).
 export function AccentPicker() {
   const { control, register, setValue } = useFormContext<{ accentColor: string; theme: string }>();
   const value = useWatch({ control, name: 'accentColor' });
   const theme = getTheme(useWatch({ control, name: 'theme' }));
   const hex = normalizeHex(value);
-  const ratio = hex ? accentContrast(hex, theme) : null;
-  const poor = ratio !== null && ratio < MIN_CONTRAST;
+  const adjusted = hex !== null && readableAccent(hex, PALETTES[theme.key]) !== hex;
   const set = (next: string) =>
     setValue('accentColor', next, { shouldDirty: true, shouldValidate: true });
 
@@ -54,6 +55,7 @@ export function AccentPicker() {
           {...register('accentColor')}
           aria-label="Hex color code"
           aria-invalid={!hex}
+          aria-describedby={hex ? undefined : 'accent-error'}
           maxLength={7}
           spellCheck={false}
           autoCapitalize="none"
@@ -63,12 +65,12 @@ export function AccentPicker() {
       </div>
 
       {/* Shown as soon as the value is not a full #RRGGBB, not only after a save attempt. */}
-      <ErrorText>{hex ? undefined : 'Use a hex color like #2563eb.'}</ErrorText>
-      {poor && (
+      <ErrorText id="accent-error">{hex ? undefined : 'Use a hex color like #2563eb.'}</ErrorText>
+      {adjusted && (
         <p role="status" className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
-          This color is hard to read on the {theme.name} theme (contrast {ratio.toFixed(1)}:1; text
-          needs {MIN_CONTRAST}:1). Choose a {theme.scheme === 'dark' ? 'lighter' : 'darker'} color
-          so your links and tags stay readable.
+          This color is too {theme.scheme === 'dark' ? 'dark' : 'light'} to read as text on the{' '}
+          {theme.name} theme. Buttons and the header use it as it is, and links and tags use a
+          nearby shade that stays readable.
         </p>
       )}
     </fieldset>

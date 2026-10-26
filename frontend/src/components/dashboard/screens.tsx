@@ -9,7 +9,10 @@ import { Button } from '../ui';
 
 function Centered({ children }: { children: ReactNode }) {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
+    <main
+      id="main"
+      className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center"
+    >
       {children}
     </main>
   );

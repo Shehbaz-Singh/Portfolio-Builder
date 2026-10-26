@@ -84,7 +84,7 @@ function Workspace() {
   const [stepId, setStepId] = useState(() => (isBlank(profile) ? 'import' : 'basics'));
   // Below the lg breakpoint the form and the preview do not fit side by side.
   const [showPreview, setShowPreview] = useState(false);
-  const { Component } = STEPS.find((s) => s.id === stepId) ?? STEPS[0];
+  const { Component, label } = STEPS.find((s) => s.id === stepId) ?? STEPS[0];
 
   function goTo(id: string) {
     if (id === stepId) return;
@@ -100,40 +100,46 @@ function Workspace() {
   return (
     <div className="mx-auto max-w-7xl">
       <Header />
-      <PublishPanel onFix={goTo} />
-      <ImportBanner />
-      <div className="grid gap-6 p-4 lg:grid-cols-2">
-        <div className={`min-w-0 ${showPreview ? 'hidden lg:block' : ''}`}>
-          <nav aria-label="Editor steps" className="mb-6 flex flex-wrap gap-1">
-            {STEPS.map((step, i) => (
-              <button
-                key={step.id}
-                type="button"
-                aria-current={step.id === stepId ? 'step' : undefined}
-                onClick={() => goTo(step.id)}
-                className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-accent ${
-                  step.id === stepId ? 'bg-accent text-on-accent' : 'hover:bg-surface'
-                }`}
-              >
-                {i === 0 ? step.label : `${i}. ${step.label}`}
-              </button>
-            ))}
-          </nav>
-          <Component goTo={goTo} />
+      <main id="main">
+        <PublishPanel onFix={goTo} />
+        <ImportBanner />
+        <div className="grid gap-6 p-4 lg:grid-cols-2">
+          <div className={`min-w-0 ${showPreview ? 'hidden lg:block' : ''}`}>
+            <nav aria-label="Editor steps" className="mb-6 flex flex-wrap gap-1">
+              {STEPS.map((step, i) => (
+                <button
+                  key={step.id}
+                  type="button"
+                  aria-current={step.id === stepId ? 'step' : undefined}
+                  onClick={() => goTo(step.id)}
+                  className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-accent ${
+                    step.id === stepId ? 'bg-accent text-on-accent' : 'hover:bg-surface'
+                  }`}
+                >
+                  {i === 0 ? step.label : `${i}. ${step.label}`}
+                </button>
+              ))}
+            </nav>
+            {/* Switching steps swaps the content under the focused tab; say so. */}
+            <p role="status" className="sr-only">
+              {label} step
+            </p>
+            <Component goTo={goTo} />
+          </div>
+
+          <div
+            className={`${showPreview ? '' : 'hidden'} min-w-0 lg:sticky lg:top-4 lg:block lg:self-start`}
+          >
+            <Preview />
+          </div>
         </div>
 
-        <div
-          className={`${showPreview ? '' : 'hidden'} min-w-0 lg:sticky lg:top-4 lg:block lg:self-start`}
-        >
-          <Preview />
+        <div className="fixed right-4 bottom-4 lg:hidden">
+          <Button variant="primary" className="shadow-lg" onClick={() => setShowPreview((v) => !v)}>
+            {showPreview ? 'Back to editing' : 'Preview'}
+          </Button>
         </div>
-      </div>
-
-      <div className="fixed right-4 bottom-4 lg:hidden">
-        <Button variant="primary" className="shadow-lg" onClick={() => setShowPreview((v) => !v)}>
-          {showPreview ? 'Back to editing' : 'Preview'}
-        </Button>
-      </div>
+      </main>
     </div>
   );
 }

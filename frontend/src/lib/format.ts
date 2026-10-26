@@ -9,6 +9,14 @@ const monthYear = new Intl.DateTimeFormat('en-US', {
 
 export const formatMonthYear = (iso: string) => monthYear.format(new Date(iso));
 
+// "Mar 2022 – Present". With no end date: "Present" when `openEnded`, else just the start.
+export const formatRange = (start: string, end: string | null, openEnded = true) =>
+  end
+    ? `${formatMonthYear(start)} – ${formatMonthYear(end)}`
+    : openEnded
+      ? `${formatMonthYear(start)} – Present`
+      : formatMonthYear(start);
+
 // "Jane Q. Doe" -> "JD"
 export function initials(name: string): string {
   const words = name.split(/\s+/).filter(Boolean);

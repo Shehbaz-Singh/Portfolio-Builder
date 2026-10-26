@@ -40,7 +40,7 @@ function ProjectForm({ item, draft, onDone, onSaved }: ItemFormProps<'projects'>
 
   return (
     <EditorForm form={form} onSubmit={onSubmit} submitLabel="Save project" onCancel={onDone}>
-      <TextField name="name" label="Project name" />
+      <TextField name="name" label="Project name" required />
       <TextField
         name="url"
         label="Link"

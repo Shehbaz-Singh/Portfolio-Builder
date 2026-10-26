@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { experienceInputSchema, type ExperienceInput } from '@portfolio/shared';
 import { schemaResolver } from '@/lib/form';
-import { formatMonthYear } from '@/lib/format';
+import { formatRange } from '@/lib/format';
 import { TextArea, TextField } from '../../form-fields';
 import { DateRangeFields, toMonth, type DateRangeValues } from '../DateRangeFields';
 import { EditorForm } from '../EditorForm';
@@ -35,8 +35,8 @@ function ExperienceForm({ item, draft, onDone, onSaved }: ItemFormProps<'experie
 
   return (
     <EditorForm form={form} onSubmit={onSubmit} submitLabel="Save job" onCancel={onDone}>
-      <TextField name="title" label="Job title" />
-      <TextField name="company" label="Company" />
+      <TextField name="title" label="Job title" required />
+      <TextField name="company" label="Company" required />
       <DateRangeFields presentLabel="I currently work here" />
       <TextArea name="description" label="What you did" rows={5} maxLength={3000} />
     </EditorForm>
@@ -61,7 +61,7 @@ export function ExperienceStep() {
         empty="No experience added yet."
         summary={(job) => ({
           title: `${job.title} at ${job.company}`,
-          subtitle: `${formatMonthYear(job.startDate)} – ${job.endDate ? formatMonthYear(job.endDate) : 'Present'}`,
+          subtitle: `${formatRange(job.startDate, job.endDate)}`,
         })}
         Form={ExperienceForm}
       />

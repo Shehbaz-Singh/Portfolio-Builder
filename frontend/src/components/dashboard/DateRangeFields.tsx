@@ -24,7 +24,7 @@ export function DateRangeFields({ presentLabel }: { presentLabel: string }) {
 
   return (
     <div className="grid gap-4 sm:grid-cols-2">
-      <TextField name="startDate" label="Start" type="month" placeholder="YYYY-MM" />
+      <TextField name="startDate" label="Start" type="month" placeholder="YYYY-MM" required />
       <div className="space-y-2">
         <TextField
           name="endDate"

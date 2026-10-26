@@ -14,9 +14,9 @@ import {
   type MyCustomSection,
 } from '@portfolio/shared';
 import { schemaResolver } from '@/lib/form';
-import { formatMonthYear } from '@/lib/format';
+import { formatRange } from '@/lib/format';
 import { TextArea, TextField } from '../../form-fields';
-import { Button, ErrorText, inputClass } from '../../ui';
+import { Button, ErrorText, FocusedInput } from '../../ui';
 import { toMonth } from '../DateRangeFields';
 import { EditorForm } from '../EditorForm';
 import { ListManager, type FormProps } from '../SectionManager';
@@ -67,7 +67,7 @@ function CustomItemForm({ item, onDone, onSaved }: FormProps<CustomItem>) {
 
   return (
     <EditorForm form={form} onSubmit={onSubmit} submitLabel="Save item" onCancel={onDone}>
-      <TextField name="title" label="Title" maxLength={CUSTOM_TITLE_MAX} />
+      <TextField name="title" label="Title" maxLength={CUSTOM_TITLE_MAX} required />
       <TextField
         name="subtitle"
         label="Subtitle (optional)"
@@ -97,11 +97,7 @@ function CustomItemForm({ item, onDone, onSaved }: FormProps<CustomItem>) {
 }
 
 const summarizeItem = (item: CustomItem) => {
-  const dates = item.startDate
-    ? item.endDate
-      ? `${formatMonthYear(item.startDate)} – ${formatMonthYear(item.endDate)}`
-      : formatMonthYear(item.startDate)
-    : null;
+  const dates = item.startDate ? formatRange(item.startDate, item.endDate, false) : null;
   return {
     title: item.title,
     subtitle: [item.subtitle, dates].filter(Boolean).join(' · ') || undefined,
@@ -137,16 +133,15 @@ function RenameForm({ section, onDone }: { section: MyCustomSection; onDone: () 
   return (
     <form onSubmit={onSubmit} className="flex min-w-0 flex-1 flex-wrap items-start gap-2">
       <div className="min-w-48 flex-1">
-        <input
+        <FocusedInput
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           aria-label="Section title"
           aria-invalid={error ? true : undefined}
+          aria-describedby={error ? 'rename-error' : undefined}
           maxLength={CUSTOM_TITLE_MAX}
-          autoFocus
-          className={inputClass}
         />
-        <ErrorText>{error}</ErrorText>
+        <ErrorText id="rename-error">{error}</ErrorText>
       </div>
       <Button type="submit" variant="primary" disabled={saving}>
         {saving ? 'Saving…' : 'Save title'}
@@ -284,16 +279,15 @@ function AddSection({ count }: { count: number }) {
           <label htmlFor="new-section-title" className="mb-1 block text-sm font-medium">
             Section title
           </label>
-          <input
+          <FocusedInput
             id="new-section-title"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             maxLength={CUSTOM_TITLE_MAX}
             aria-invalid={error ? true : undefined}
-            autoFocus
-            className={inputClass}
+            aria-describedby={error ? 'new-section-error' : undefined}
           />
-          <ErrorText>{error}</ErrorText>
+          <ErrorText id="new-section-error">{error}</ErrorText>
         </div>
         <div className="flex gap-2">
           <Button type="submit" variant="primary" disabled={saving}>

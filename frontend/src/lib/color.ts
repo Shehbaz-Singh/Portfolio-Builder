@@ -1,4 +1,5 @@
 import { DEFAULT_ACCENT, accentColorSchema } from '@portfolio/shared';
+import type { Palette } from './palettes';
 
 export const MIN_CONTRAST = 4.5; // WCAG AA for normal text
 
@@ -21,46 +22,66 @@ export function normalizeHex(value: unknown): string | null {
   return result.success ? result.data : null;
 }
 
+const channels = (hex: string) =>
+  [1, 3, 5].map((start) => parseInt(hex.slice(start, start + 2), 16));
+
 // WCAG relative luminance of a #RRGGBB color.
 function luminance(hex: string): number {
-  const channel = (start: number) => {
-    const c = parseInt(hex.slice(start, start + 2), 16) / 255;
+  const [r, g, b] = channels(hex).map((value) => {
+    const c = value / 255;
     return c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4;
-  };
-  return 0.2126 * channel(1) + 0.7152 * channel(3) + 0.0722 * channel(5);
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-export function contrastRatio(a: string, b: string): number {
+function contrastRatio(a: string, b: string): number {
   const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
   return (light + 0.05) / (dark + 0.05);
 }
 
-// Black or white, whichever reads better on this color (for text placed on the accent).
-export const readableTextOn = (hex: string) =>
-  contrastRatio(hex, '#000000') >= contrastRatio(hex, '#ffffff') ? '#000000' : '#ffffff';
-
-// How the accent reads as text on a theme's background. Light themes use it as it is. Dark
-// themes lighten it by mixing in 40% white, which is what `--accent-fg` does in globals.css.
-function mixWithWhite(hex: string, share: number): string {
-  const channel = (start: number) =>
-    Math.round(parseInt(hex.slice(start, start + 2), 16) * (1 - share) + 255 * share)
-      .toString(16)
-      .padStart(2, '0');
-  return `#${channel(1)}${channel(3)}${channel(5)}`;
+// `share` of `a` mixed with the rest of `b` (what CSS color-mix(in srgb) does).
+function mix(a: string, b: string, share: number): string {
+  const [ca, cb] = [channels(a), channels(b)];
+  return (
+    '#' +
+    ca
+      .map((value, i) => Math.round(value * share + cb[i] * (1 - share)))
+      .map((value) => value.toString(16).padStart(2, '0'))
+      .join('')
+  );
 }
 
-export const accentAsText = (hex: string, scheme: 'light' | 'dark') =>
-  scheme === 'dark' ? mixWithWhite(hex, 0.4) : hex;
+// Black or white, whichever reads better on this color (for text placed on the accent). Either
+// one reaches at least 4.58:1, so text on the accent is always readable.
+const readableTextOn = (hex: string) =>
+  contrastRatio(hex, '#000000') >= contrastRatio(hex, '#ffffff') ? '#000000' : '#ffffff';
 
-// Contrast of the accent, used as text, against a theme's page background.
-export const accentContrast = (
-  hex: string,
-  theme: { background: string; scheme: 'light' | 'dark' },
-) => contrastRatio(accentAsText(hex, theme.scheme), theme.background);
+// The accent as the color of text (links, tags) on a theme's page. It has to be readable on the
+// page itself and on the tinted background tags sit on (--accent-soft: 12% accent over the page).
+// If the accent is not, it is moved toward the theme's text color a step at a time until it is,
+// so a pale yellow becomes a dark olive and the default blue on a dark page becomes a lighter
+// blue. The accent itself is still used for fills (buttons, the header) where it is not text.
+export function readableAccent(accent: string, { background, text }: Palette): string {
+  const soft = mix(accent, background, 0.12);
+  const readable = (color: string) =>
+    contrastRatio(color, background) >= MIN_CONTRAST && contrastRatio(color, soft) >= MIN_CONTRAST;
+  for (let towardText = 0; towardText < 1; towardText += 0.05) {
+    const color = mix(text, accent, towardText);
+    if (readable(color)) return color;
+  }
+  return text;
+}
 
 // The variables a theme wrapper sets for the accent. An invalid value falls back to the default
 // instead of reaching the page.
-export function accentVars(hex: string | null | undefined): Record<string, string> {
+export function accentVars(
+  hex: string | null | undefined,
+  palette: Palette,
+): Record<string, string> {
   const accent = normalizeHex(hex) ?? DEFAULT_ACCENT;
-  return { '--accent': accent, '--on-accent': readableTextOn(accent) };
+  return {
+    '--accent': accent,
+    '--on-accent': readableTextOn(accent),
+    '--accent-fg': readableAccent(accent, palette),
+  };
 }

@@ -87,6 +87,7 @@ export function ListManager<T extends { id: string }, D = never>({
     setDeleting(id);
     try {
       await remove(id);
+      notify('success', `Deleted ${noun}.`);
     } catch (err) {
       notify('error', errorText(err));
     } finally {
@@ -123,8 +124,8 @@ export function ListManager<T extends { id: string }, D = never>({
       <div className="flex items-center gap-2 rounded-xl border border-line p-3">
         {handle}
         <div className="min-w-0 flex-1">
-          <p className="truncate font-medium">{title}</p>
-          {subtitle && <p className="truncate text-sm text-muted">{subtitle}</p>}
+          <p className="font-medium">{title}</p>
+          {subtitle && <p className="text-sm text-muted">{subtitle}</p>}
         </div>
         {extra?.(item)}
         <Button
@@ -189,8 +190,8 @@ export function ListManager<T extends { id: string }, D = never>({
                   className="flex items-center gap-2 rounded-xl border border-line bg-page p-3"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="truncate font-medium">{title}</p>
-                    {subtitle && <p className="truncate text-sm text-muted">{subtitle}</p>}
+                    <p className="font-medium">{title}</p>
+                    {subtitle && <p className="text-sm text-muted">{subtitle}</p>}
                   </div>
                   <Button
                     disabled={adding || editing !== null}

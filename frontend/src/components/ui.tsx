@@ -1,6 +1,6 @@
 'use client';
 
-import type { ButtonHTMLAttributes } from 'react';
+import { useEffect, useRef, type ComponentProps, type InputHTMLAttributes } from 'react';
 import { useSlow } from '@/lib/hooks';
 
 const base =
@@ -18,12 +18,20 @@ export function Button({
   className = '',
   type = 'button',
   ...props
-}: ButtonHTMLAttributes<HTMLButtonElement> & { variant?: keyof typeof variants }) {
+}: ComponentProps<'button'> & { variant?: keyof typeof variants }) {
   return <button type={type} className={`${base} ${variants[variant]} ${className}`} {...props} />;
 }
 
 export const inputClass =
   'block w-full rounded-lg border border-line bg-page px-3 py-2 text-sm placeholder:text-muted focus-visible:outline-2 focus-visible:outline-accent disabled:bg-surface disabled:text-muted';
+
+// A text input that takes focus when it appears. For a field the person has just opened (rename,
+// new section): they asked for it, so the keyboard should land there.
+export function FocusedInput(props: InputHTMLAttributes<HTMLInputElement>) {
+  const ref = useRef<HTMLInputElement>(null);
+  useEffect(() => ref.current?.focus(), []);
+  return <input ref={ref} className={inputClass} {...props} />;
+}
 
 export function Switch({
   checked,
@@ -69,9 +77,9 @@ export function SlowNotice({ pending }: { pending: boolean }) {
   );
 }
 
-export function ErrorText({ children }: { children?: string }) {
+export function ErrorText({ children, id }: { children?: string; id?: string }) {
   return children ? (
-    <p role="alert" className="text-sm text-red-700">
+    <p id={id} role="alert" className="text-sm text-red-700">
       {children}
     </p>
   ) : null;

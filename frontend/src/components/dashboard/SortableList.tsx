@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ReactNode } from 'react';
 import {
   DndContext,
   KeyboardSensor,
@@ -34,17 +34,40 @@ interface Props<T extends { id: string }> {
   renderItem: (item: T, handle: ReactNode) => ReactNode;
 }
 
+const moveClass =
+  'flex size-6 shrink-0 items-center justify-center rounded text-muted hover:text-ink disabled:opacity-30';
+
 function Row({
   id,
   label,
   layout,
+  index,
+  count,
+  onMove,
   children,
 }: {
   id: string;
   label: string;
   layout: 'list' | 'wrap';
+  index: number;
+  count: number;
+  onMove: (id: string, direction: -1 | 1) => void;
   children: (handle: ReactNode) => ReactNode;
 }) {
+  // Dragging is not possible for everyone, so every row also has plain buttons (one click each).
+  const [before, after] = layout === 'wrap' ? ['earlier', 'later'] : ['up', 'down'];
+  const arrow = (flip: boolean) => (
+    <svg
+      aria-hidden="true"
+      viewBox="0 0 20 20"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      className={`size-3.5 ${layout === 'wrap' ? '-rotate-90' : ''} ${flip ? 'rotate-180' : ''}`}
+    >
+      <path d="m5 12 5-5 5 5" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
   const {
     attributes,
     listeners,
@@ -56,18 +79,40 @@ function Row({
   } = useSortable({ id });
 
   const handle = (
-    <button
-      type="button"
-      ref={setActivatorNodeRef}
-      aria-label={`Reorder ${label}`}
-      className="flex shrink-0 cursor-grab touch-none items-center justify-center rounded p-1 text-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-accent active:cursor-grabbing"
-      {...attributes}
-      {...listeners}
-    >
-      <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className="size-4">
-        <path d="M7 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm-1.5 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM16 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm-1.5 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM16 16a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
-      </svg>
-    </button>
+    <span className="inline-flex shrink-0 items-center">
+      <button
+        type="button"
+        ref={setActivatorNodeRef}
+        aria-label={`Reorder ${label}`}
+        className="flex shrink-0 cursor-grab touch-none items-center justify-center rounded p-1 text-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-accent active:cursor-grabbing"
+        {...attributes}
+        {...listeners}
+      >
+        <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className="size-4">
+          <path d="M7 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm-1.5 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM16 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm-1.5 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM16 16a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        data-move={`${id}:-1`}
+        disabled={index === 0}
+        aria-label={`Move ${label} ${before}`}
+        onClick={() => onMove(id, -1)}
+        className={moveClass}
+      >
+        {arrow(false)}
+      </button>
+      <button
+        type="button"
+        data-move={`${id}:1`}
+        disabled={index === count - 1}
+        aria-label={`Move ${label} ${after}`}
+        onClick={() => onMove(id, 1)}
+        className={moveClass}
+      >
+        {arrow(true)}
+      </button>
+    </span>
   );
 
   return (
@@ -101,6 +146,31 @@ export function SortableList<T extends { id: string }>({
   };
   const position = (id: UniqueIdentifier) => `${ids.indexOf(String(id)) + 1} of ${ids.length}`;
 
+  // The buttons' alternative to dragging. The row keeps its button's focus after it moves, and the
+  // new position is spoken.
+  const list = useRef<HTMLUListElement>(null);
+  const refocus = useRef<string | null>(null);
+  const [moved, setMoved] = useState('');
+  function onMove(id: string, direction: -1 | 1) {
+    const from = ids.indexOf(id);
+    const to = from + direction;
+    if (to < 0 || to >= ids.length) return;
+    refocus.current = `${id}:${direction}`;
+    setMoved(`${nameOf(id)} moved to position ${to + 1} of ${ids.length}.`);
+    onReorder(arrayMove(ids, from, to));
+  }
+  useEffect(() => {
+    if (!refocus.current) return;
+    const [id, direction] = refocus.current.split(':');
+    const buttons = list.current?.querySelectorAll<HTMLButtonElement>(`[data-move^="${id}:"]`);
+    // At the end of the list the pressed button is disabled; the other one takes the focus.
+    const target =
+      [...(buttons ?? [])].find((b) => !b.disabled && b.dataset.move === refocus.current) ??
+      [...(buttons ?? [])].find((b) => !b.disabled && !b.dataset.move?.endsWith(`:${direction}`));
+    target?.focus();
+    refocus.current = null;
+  });
+
   function onDragEnd({ active, over }: DragEndEvent) {
     if (!over || active.id === over.id) return;
     onReorder(arrayMove(ids, ids.indexOf(String(active.id)), ids.indexOf(String(over.id))));
@@ -130,13 +200,24 @@ export function SortableList<T extends { id: string }>({
         items={ids}
         strategy={layout === 'wrap' ? rectSortingStrategy : verticalListSortingStrategy}
       >
-        <ul className={layout === 'wrap' ? 'flex flex-wrap gap-2' : 'space-y-3'}>
-          {items.map((item) => (
-            <Row key={item.id} id={item.id} label={label(item)} layout={layout}>
+        <ul ref={list} className={layout === 'wrap' ? 'flex flex-wrap gap-2' : 'space-y-3'}>
+          {items.map((item, index) => (
+            <Row
+              key={item.id}
+              id={item.id}
+              label={label(item)}
+              layout={layout}
+              index={index}
+              count={items.length}
+              onMove={onMove}
+            >
               {(handle) => renderItem(item, handle)}
             </Row>
           ))}
         </ul>
+        <p role="status" className="sr-only">
+          {moved}
+        </p>
       </SortableContext>
     </DndContext>
   );

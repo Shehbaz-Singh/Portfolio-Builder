@@ -17,7 +17,7 @@ export function Preview() {
       </p>
       <div className="max-h-[calc(100vh-8rem)] overflow-y-auto">
         <div inert style={{ zoom: 0.75 }}>
-          <Theme profile={preview} />
+          <Theme profile={preview} idPrefix="preview-" />
         </div>
       </div>
     </section>

@@ -4,7 +4,10 @@ import Link from 'next/link';
 // apart, which is deliberate.
 export default function ProfileNotFound() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center px-6 text-center">
+    <main
+      id="main"
+      className="flex min-h-screen flex-col items-center justify-center px-6 text-center"
+    >
       <p className="text-sm font-semibold tracking-wider text-accent uppercase">404</p>
       <h1 className="mt-3 text-3xl font-bold tracking-tight">Portfolio not found</h1>
       <p className="mt-3 max-w-md text-muted">

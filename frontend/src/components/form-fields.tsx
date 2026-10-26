@@ -78,18 +78,21 @@ function Field({
   label,
   error,
   hint,
+  required,
   children,
 }: {
   id: string;
   label: string;
   error?: string;
   hint?: string;
+  required?: boolean;
   children: ReactNode;
 }) {
   return (
     <div>
       <label htmlFor={id} className="mb-1 block text-sm font-medium">
         {label}
+        {required && <span className="font-normal text-muted"> (required)</span>}
       </label>
       {children}
       {hint && !error && (
@@ -106,20 +109,24 @@ function Field({
   );
 }
 
-type FieldProps = { name: string; label: string; hint?: string };
+// `required` marks the field in its label and for screen readers. The form is validated by the
+// shared schema, not by the browser, so this is only the indication.
+type FieldProps = { name: string; label: string; hint?: string; required?: boolean };
 
 export function TextField({
   name,
   label,
   hint,
+  required,
   ...input
 }: FieldProps & Omit<InputHTMLAttributes<HTMLInputElement>, 'name'>) {
   const { id, error, register } = useField(name);
   return (
-    <Field id={id} label={label} error={error} hint={hint}>
+    <Field id={id} label={label} error={error} hint={hint} required={required}>
       <input
         id={id}
         className={inputClass}
+        aria-required={required || undefined}
         aria-invalid={error ? true : undefined}
         aria-describedby={error || hint ? `${id}-note` : undefined}
         {...input}
@@ -135,15 +142,17 @@ export function TextArea({
   hint,
   rows = 4,
   maxLength,
+  required,
 }: FieldProps & { rows?: number; maxLength?: number }) {
   const { id, error, register } = useField(name);
   return (
-    <Field id={id} label={label} error={error} hint={hint}>
+    <Field id={id} label={label} error={error} hint={hint} required={required}>
       <textarea
         id={id}
         rows={rows}
         maxLength={maxLength}
         className={`${inputClass} resize-y`}
+        aria-required={required || undefined}
         aria-invalid={error ? true : undefined}
         aria-describedby={error || hint ? `${id}-note` : undefined}
         {...register(name)}
@@ -156,11 +165,19 @@ export function SelectField({
   name,
   label,
   options,
+  required,
 }: FieldProps & { options: { value: string; label: string }[] }) {
   const { id, error, register } = useField(name);
   return (
-    <Field id={id} label={label} error={error}>
-      <select id={id} className={inputClass} {...register(name)}>
+    <Field id={id} label={label} error={error} required={required}>
+      <select
+        id={id}
+        className={inputClass}
+        aria-required={required || undefined}
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${id}-note` : undefined}
+        {...register(name)}
+      >
         {options.map((o) => (
           <option key={o.value} value={o.value}>
             {o.label}

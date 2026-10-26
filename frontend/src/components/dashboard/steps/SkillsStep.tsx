@@ -24,12 +24,14 @@ export function SkillsStep() {
     defaultValues: { name: '' },
   });
   const { errors, isSubmitting } = form.formState;
+  const skillError = errors.name?.message ?? errors.root?.server?.message;
 
   // Skills are single words, so adding is one field and Enter, not a form per skill.
   const add = form.handleSubmit(async (values) => {
     try {
       await create(values);
       form.reset();
+      notify('success', `Added ${values.name}.`);
     } catch (err) {
       showApiError(form, err);
     }
@@ -68,13 +70,14 @@ export function SkillsStep() {
           autoComplete="off"
           className={inputClass}
           aria-invalid={errors.name ? true : undefined}
+          aria-describedby={skillError ? 'skill-error' : undefined}
           {...form.register('name')}
         />
         <Button type="submit" variant="primary" disabled={isSubmitting}>
           Add
         </Button>
       </form>
-      <ErrorText>{errors.name?.message ?? errors.root?.server?.message}</ErrorText>
+      <ErrorText id="skill-error">{skillError}</ErrorText>
       <SlowNotice pending={isSubmitting} />
 
       {suggestions.length > 0 && (
@@ -138,8 +141,13 @@ export function SkillsStep() {
               <button
                 type="button"
                 aria-label={`Remove ${skill.name}`}
-                className="rounded-full px-2 text-muted hover:bg-line hover:text-red-700 focus-visible:outline-2 focus-visible:outline-accent"
-                onClick={() => remove(skill.id).catch((err) => notify('error', errorText(err)))}
+                className="min-h-6 min-w-6 rounded-full px-2 text-muted hover:bg-line hover:text-red-700 focus-visible:outline-2 focus-visible:outline-accent"
+                onClick={() =>
+                  remove(skill.id).then(
+                    () => notify('success', `Removed ${skill.name}.`),
+                    (err) => notify('error', errorText(err)),
+                  )
+                }
               >
                 ×
               </button>

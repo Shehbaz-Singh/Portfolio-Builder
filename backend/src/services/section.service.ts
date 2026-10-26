@@ -2,7 +2,7 @@ import { SECTION_LIMITS, type Section } from '@portfolio/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
-import { isRecordNotFound } from '../lib/prisma-errors';
+import { orNotFound } from '../lib/prisma-errors';
 
 // experience, education, projects, skills and links all follow the same rules, so one
 // service handles them. This is the minimal slice of a Prisma model delegate it relies on.
@@ -69,22 +69,15 @@ export async function createItem(section: Section, profileId: string, input: Row
   });
 }
 
-export async function updateItem(section: Section, profileId: string, id: string, input: Row) {
-  try {
-    return await delegates[section].update({ where: { id, profileId }, data: input, omit });
-  } catch (err) {
-    if (isRecordNotFound(err)) throw notFound();
-    throw err;
-  }
+export function updateItem(section: Section, profileId: string, id: string, input: Row) {
+  return orNotFound(
+    delegates[section].update({ where: { id, profileId }, data: input, omit }),
+    notFound,
+  );
 }
 
 export async function deleteItem(section: Section, profileId: string, id: string) {
-  try {
-    await delegates[section].delete({ where: { id, profileId } });
-  } catch (err) {
-    if (isRecordNotFound(err)) throw notFound();
-    throw err;
-  }
+  await orNotFound(delegates[section].delete({ where: { id, profileId } }), notFound);
 }
 
 // `ids` is the new order. It must list every item in the section exactly once, which also

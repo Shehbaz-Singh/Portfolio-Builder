@@ -3,7 +3,7 @@
 import { useForm } from 'react-hook-form';
 import { educationInputSchema, type EducationInput } from '@portfolio/shared';
 import { schemaResolver } from '@/lib/form';
-import { formatMonthYear } from '@/lib/format';
+import { formatRange } from '@/lib/format';
 import { TextField } from '../../form-fields';
 import { DateRangeFields, toMonth, type DateRangeValues } from '../DateRangeFields';
 import { EditorForm } from '../EditorForm';
@@ -34,8 +34,8 @@ function EducationForm({ item, draft, onDone, onSaved }: ItemFormProps<'educatio
 
   return (
     <EditorForm form={form} onSubmit={onSubmit} submitLabel="Save education" onCancel={onDone}>
-      <TextField name="degree" label="Degree or course" />
-      <TextField name="institution" label="School or university" />
+      <TextField name="degree" label="Degree or course" required />
+      <TextField name="institution" label="School or university" required />
       <DateRangeFields presentLabel="I am still studying here" />
     </EditorForm>
   );
@@ -59,7 +59,7 @@ export function EducationStep() {
         empty="No education added yet."
         summary={(entry) => ({
           title: entry.degree,
-          subtitle: `${entry.institution} · ${formatMonthYear(entry.startDate)} – ${entry.endDate ? formatMonthYear(entry.endDate) : 'Present'}`,
+          subtitle: `${entry.institution} · ${formatRange(entry.startDate, entry.endDate)}`,
         })}
         Form={EducationForm}
       />

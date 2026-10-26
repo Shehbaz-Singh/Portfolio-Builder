@@ -62,6 +62,7 @@ export default async function Image({ params }: { params: Promise<{ username: st
       <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
         {avatar ? (
           <img
+            alt=""
             src={avatar}
             width={AVATAR_PX}
             height={AVATAR_PX}

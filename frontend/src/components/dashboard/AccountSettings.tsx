@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
   changePasswordSchema,
@@ -56,12 +56,14 @@ function ChangePassword() {
         <TextField
           name="currentPassword"
           label="Current password"
+          required
           type="password"
           autoComplete="current-password"
         />
         <TextField
           name="newPassword"
           label="New password"
+          required
           type="password"
           autoComplete="new-password"
           hint="At least 8 characters."
@@ -69,6 +71,7 @@ function ChangePassword() {
         <TextField
           name="confirmPassword"
           label="Repeat new password"
+          required
           type="password"
           autoComplete="new-password"
         />
@@ -85,10 +88,20 @@ function ChangePassword() {
 
 function DeleteAccount() {
   const [confirming, setConfirming] = useState(false);
+  const panel = useRef<HTMLDivElement>(null);
+  const openButton = useRef<HTMLButtonElement>(null);
+  const wasConfirming = useRef(false);
   const form = useForm<DeleteAccountInput, unknown, DeleteAccountInput>({
     resolver: schemaResolver(deleteAccountSchema),
     defaultValues: { password: '' },
   });
+
+  // Opening the confirmation moves the keyboard into it; cancelling brings it back to the button.
+  useEffect(() => {
+    if (confirming) panel.current?.querySelector('input')?.focus();
+    else if (wasConfirming.current) openButton.current?.focus();
+    wasConfirming.current = confirming;
+  }, [confirming]);
 
   async function onSubmit(values: DeleteAccountInput) {
     await api('/auth/me', { method: 'DELETE', body: values });
@@ -108,7 +121,7 @@ function DeleteAccount() {
         stops working. It cannot be undone.
       </p>
       {confirming ? (
-        <div className="space-y-4 rounded-lg bg-red-50 p-4">
+        <div ref={panel} className="space-y-4 rounded-lg bg-red-50 p-4">
           <p className="text-sm font-medium">Enter your password to confirm.</p>
           <Form
             form={form}
@@ -124,13 +137,14 @@ function DeleteAccount() {
             <TextField
               name="password"
               label="Password"
+              required
               type="password"
               autoComplete="current-password"
             />
           </Form>
         </div>
       ) : (
-        <Button variant="danger" onClick={() => setConfirming(true)}>
+        <Button ref={openButton} variant="danger" onClick={() => setConfirming(true)}>
           Delete my account
         </Button>
       )}
@@ -147,7 +161,7 @@ export function AccountSettings() {
   }
 
   return (
-    <main className="mx-auto max-w-xl space-y-10 px-4 py-8">
+    <main id="main" className="mx-auto max-w-xl space-y-10 px-4 py-8">
       <div>
         <Link href="/dashboard" className="text-sm font-medium text-accent underline">
           ← Back to editor

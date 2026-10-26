@@ -6,14 +6,14 @@
    of other colors. Which palette applies is the profile's theme setting: nothing follows the
    visitor's system light or dark mode. The editor and the account pages are always light. */
 .theme-root {
-  --bg: #ffffff; /* page background (also PAGE_BACKGROUND in lib/color.ts) */
+  --bg: #ffffff; /* page background */
   --surface: #f1f5f9; /* chips, hovered controls, code */
   --text: #0f172a;
   --muted: #475569;
   --border: #cbd5e1;
   --accent: #2563eb;
   --on-accent: #ffffff; /* text placed on the accent */
-  --accent-fg: var(--accent); /* the accent as text on the page background (links, tags) */
+  --accent-fg: var(--accent); /* the accent as text on the page: set readable by accentVars */
   --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--bg));
   color-scheme: light;
   /* Text the owner typed can be one very long word (a URL, a pasted string). Let it break rather
@@ -23,16 +23,20 @@
   color: var(--text);
 }
 
-/* The palettes of the themes. Each background here is also the theme's `background` in
-   lib/themes.ts, which the accent picker checks contrast against. */
+/* Button labels are short and must not break mid-word when a flex row gets tight. */
+button,
+[type='submit'] {
+  overflow-wrap: normal;
+}
+
+/* The palettes of the themes. --bg and --text are also in lib/palettes.ts, which the accent
+   color math uses; change them together. */
 .theme-dark {
   --bg: #0b1020;
   --surface: #161d33;
   --text: #e8ecf5;
   --muted: #a3adc2;
   --border: #2b3452;
-  /* A dark accent would be hard to read as text on this background, so it is lightened. */
-  --accent-fg: color-mix(in srgb, var(--accent) 60%, white);
   color-scheme: dark;
 }
 
@@ -65,4 +69,47 @@
   --color-accent-fg: var(--accent-fg);
   --color-on-accent: var(--on-accent);
   --color-accent-soft: var(--accent-soft);
+}
+
+/* Keyboard focus is always visible: a 2px ring in the readable shade of the accent (so it is not
+   lost on a pale or dark accent). Controls with their own focus style keep it. */
+:focus-visible {
+  outline: 2px solid var(--accent-fg);
+  outline-offset: 2px;
+}
+
+/* "Skip to main content": the first thing keyboard and screen reader users reach. Hidden until
+   it has focus. */
+/* The skip link moves focus to <main>; that needs no visible ring, it is not a control. */
+main:focus {
+  outline: none;
+}
+
+.skip-link {
+  position: absolute;
+  inset-inline-start: 0.5rem;
+  top: 0.5rem;
+  z-index: 100;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  background: var(--text);
+  color: var(--bg);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transform: translateY(-200%);
+}
+.skip-link:focus {
+  transform: none;
+}
+
+/* People who ask their system for less motion get none: no spinners turning, no sliding. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

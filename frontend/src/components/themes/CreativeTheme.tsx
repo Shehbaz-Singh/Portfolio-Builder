@@ -8,13 +8,13 @@ import type { ThemeProps } from './types';
 // laid out as a big numbered title beside its content (stacked on small screens).
 
 const focusRing =
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-fg';
 
 function Header({ header }: { header: HeaderModel }) {
   const pill =
     'inline-flex items-center rounded-full border-2 border-current px-4 py-2 text-sm font-bold transition hover:bg-on-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-on-accent';
   return (
-    <header className="bg-accent text-on-accent">
+    <header className="bg-accent text-on-accent [--accent-fg:var(--on-accent)]">
       <div className="mx-auto flex max-w-5xl flex-col gap-10 px-5 pt-12 pb-14 sm:px-8 sm:pt-16 sm:pb-20 md:flex-row md:items-end md:justify-between">
         <div className="min-w-0">
           {header.location && (
@@ -152,12 +152,12 @@ function BlockView({ block }: { block: Block }) {
   }
 }
 
-export default function CreativeTheme({ profile, idPrefix }: ThemeProps) {
+export default function CreativeTheme({ profile, idPrefix = '' }: ThemeProps) {
   const blocks = buildBlocks(profile, idPrefix);
   return (
-    <ThemeWrapper profile={profile} className="theme-creative">
+    <ThemeWrapper theme="creative" profile={profile}>
       <Header header={buildHeader(profile)} />
-      <main className="mx-auto max-w-5xl px-5 pb-16 sm:px-8">
+      <main id={`${idPrefix}main`} className="mx-auto max-w-5xl px-5 pb-16 sm:px-8">
         {blocks.map((block, index) => (
           <section
             key={block.id}

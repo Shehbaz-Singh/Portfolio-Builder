@@ -14,7 +14,12 @@ export const viewport: Viewport = { colorScheme: 'light', themeColor: '#ffffff' 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body className="theme-root min-h-screen antialiased">{children}</body>
+      <body className="theme-root min-h-screen antialiased">
+        <a href="#main" className="skip-link">
+          Skip to main content
+        </a>
+        {children}
+      </body>
     </html>
   );
 }

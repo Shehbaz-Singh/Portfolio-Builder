@@ -9,7 +9,7 @@ import type { ThemeProps } from './types';
 
 const chip = 'rounded-full bg-surface px-3 py-1 text-sm text-ink';
 const focusRing =
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-fg';
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
@@ -111,7 +111,7 @@ function EntryList({ block }: { block: Extract<Block, { kind: 'entries' }> }) {
               <NewTabLink
                 href={entry.href}
                 context={entry.title}
-                className={`text-sm font-medium text-accent-fg underline-offset-2 hover:underline ${focusRing}`}
+                className={`text-sm font-medium text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`}
               >
                 View
               </NewTabLink>
@@ -184,12 +184,12 @@ function BlockView({ block }: { block: Block }) {
 // The layout, with the palette class a theme wants: none for Minimal, "theme-dark" for Dark.
 export function MinimalLayout({
   profile,
-  idPrefix,
-  themeClass = '',
-}: ThemeProps & { themeClass?: string }) {
+  idPrefix = '',
+  theme = 'minimal',
+}: ThemeProps & { theme?: 'minimal' | 'dark' }) {
   return (
-    <ThemeWrapper profile={profile} className={themeClass}>
-      <main className="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-16">
+    <ThemeWrapper theme={theme} profile={profile}>
+      <main id={`${idPrefix}main`} className="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-16">
         <Header header={buildHeader(profile)} />
         {buildBlocks(profile, idPrefix).map((block) => (
           <Section key={block.id} id={block.id} title={block.title}>

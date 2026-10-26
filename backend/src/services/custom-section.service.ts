@@ -7,7 +7,7 @@ import {
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
-import { isRecordNotFound } from '../lib/prisma-errors';
+import { orNotFound } from '../lib/prisma-errors';
 import { customItems } from '../lib/selects';
 import { saveSectionConfig } from './section-layout.service';
 
@@ -85,17 +85,15 @@ export function createSection(profileId: string, input: CustomSectionInput) {
   }, WAIT);
 }
 
-export async function updateSection(profileId: string, id: string, input: CustomSectionInput) {
-  try {
-    return await prisma.customSection.update({
+export function updateSection(profileId: string, id: string, input: CustomSectionInput) {
+  return orNotFound(
+    prisma.customSection.update({
       where: { id, profileId },
       data: { title: input.title },
       select: sectionSelect,
-    });
-  } catch (err) {
-    if (isRecordNotFound(err)) throw sectionNotFound();
-    throw err;
-  }
+    }),
+    sectionNotFound,
+  );
 }
 
 // Deletes the section and its items (cascade), and removes it from the page layout.
@@ -153,26 +151,19 @@ export async function updateItem(
   input: CustomItemInput,
 ) {
   await assertOwnSection(prisma, profileId, sectionId);
-  try {
-    return await prisma.customSectionItem.update({
+  return orNotFound(
+    prisma.customSectionItem.update({
       where: { id, sectionId },
       data: input,
       omit: customItems.omit,
-    });
-  } catch (err) {
-    if (isRecordNotFound(err)) throw itemNotFound();
-    throw err;
-  }
+    }),
+    itemNotFound,
+  );
 }
 
 export async function deleteItem(profileId: string, sectionId: string, id: string) {
   await assertOwnSection(prisma, profileId, sectionId);
-  try {
-    await prisma.customSectionItem.delete({ where: { id, sectionId } });
-  } catch (err) {
-    if (isRecordNotFound(err)) throw itemNotFound();
-    throw err;
-  }
+  await orNotFound(prisma.customSectionItem.delete({ where: { id, sectionId } }), itemNotFound);
 }
 
 // `ids` is the new order. It must list every item in the section exactly once, which also

@@ -8,7 +8,7 @@ import type { ThemeProps } from './types';
 // ruled serif headings. Jobs and degrees put the dates on the right (under the title on a phone).
 
 const focusRing =
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-fg';
 const link = `text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`;
 
 function Header({ header }: { header: HeaderModel }) {
@@ -17,11 +17,11 @@ function Header({ header }: { header: HeaderModel }) {
     ...header.links.map((item) => ({
       id: item.id,
       node: item.external ? (
-        <NewTabLink href={item.href} className={link}>
+        <NewTabLink href={item.href} className={`${link} inline-block py-0.5`}>
           {item.label}
         </NewTabLink>
       ) : (
-        <a href={item.href} className={link}>
+        <a href={item.href} className={`${link} inline-block py-0.5`}>
           {item.label}
         </a>
       ),
@@ -129,10 +129,10 @@ function BlockView({ block }: { block: Block }) {
   }
 }
 
-export default function ClassicTheme({ profile, idPrefix }: ThemeProps) {
+export default function ClassicTheme({ profile, idPrefix = '' }: ThemeProps) {
   return (
-    <ThemeWrapper profile={profile} className="theme-classic">
-      <main className="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-16">
+    <ThemeWrapper theme="classic" profile={profile}>
+      <main id={`${idPrefix}main`} className="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-16">
         <Header header={buildHeader(profile)} />
         {buildBlocks(profile, idPrefix).map((block) => (
           <section key={block.id} aria-labelledby={block.id} className="mt-8">

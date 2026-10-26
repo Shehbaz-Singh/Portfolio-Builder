@@ -79,7 +79,7 @@ function AvatarUpload() {
         // A plain <img>, like the public theme: avatars can come from any host.
         <img
           src={profile.avatarUrl}
-          alt="Your current photo"
+          alt="Your current avatar"
           referrerPolicy="no-referrer"
           className="size-20 rounded-full object-cover"
         />
@@ -200,7 +200,7 @@ function DetailsForm() {
       codeFields={{ SLUG_TAKEN: 'slug' }}
       submitLabel="Save details"
     >
-      <TextField name="fullName" label="Full name" autoComplete="name" />
+      <TextField name="fullName" label="Full name" autoComplete="name" required />
       <TextField
         name="tagline"
         label="Tagline"
@@ -210,6 +210,7 @@ function DetailsForm() {
       <TextField
         name="slug"
         label="Page address"
+        required
         autoCapitalize="none"
         spellCheck={false}
         hint={`Your page will be at ${window.location.host}/${slug || 'your-name'}`}
@@ -270,6 +271,7 @@ function LinkForm({ item, draft, onDone, onSaved }: ItemFormProps<'links'>) {
         name="url"
         label={type === 'email' ? 'Email address' : type === 'phone' ? 'Phone number' : 'URL'}
         placeholder={PLACEHOLDERS[type]}
+        required
         autoCapitalize="none"
         spellCheck={false}
       />

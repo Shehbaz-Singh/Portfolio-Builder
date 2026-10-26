@@ -24,7 +24,7 @@ export interface Entry {
   description: string | null;
 }
 
-export interface ProjectEntry {
+interface ProjectEntry {
   id: string;
   name: string;
   href: string | null;
