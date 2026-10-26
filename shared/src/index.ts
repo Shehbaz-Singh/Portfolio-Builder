@@ -14,3 +14,5 @@ export * from './portfolio';
 export * from './public';
 export * from './auth';
 export * from './errors';
+
+export * from './resume';

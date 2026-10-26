@@ -1,6 +1,13 @@
 import 'dotenv/config';
 import { z } from 'zod';
 
+const optionalText = () =>
+  z
+    .string()
+    .trim()
+    .optional()
+    .transform((v) => v || undefined);
+
 const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
   PORT: z.coerce.number().int().positive().default(4000),
@@ -15,6 +22,12 @@ const envSchema = z.object({
   // Shared with the Next.js server (same name in frontend/.env.local). Lets it vouch for the
   // real client IP it forwards, so rate limits apply per user instead of per frontend server.
   PROXY_SECRET: z.string().min(32, 'PROXY_SECRET must be at least 32 characters').optional(),
+  // Resume import. Without LLM_API_KEY the feature reports itself unavailable; nothing else
+  // changes. A line left empty in .env counts as not set.
+  LLM_PROVIDER: z.enum(['gemini', 'openai']).default('gemini'),
+  LLM_API_KEY: optionalText(),
+  LLM_MODEL: optionalText(), // each provider has a default
+  LLM_BASE_URL: optionalText().pipe(z.string().url().optional()), // for OpenAI-compatible servers
   CLOUDINARY_CLOUD_NAME: z.string().min(1, 'CLOUDINARY_CLOUD_NAME is required'),
   CLOUDINARY_API_KEY: z.string().min(1, 'CLOUDINARY_API_KEY is required'),
   CLOUDINARY_API_SECRET: z.string().min(1, 'CLOUDINARY_API_SECRET is required'),

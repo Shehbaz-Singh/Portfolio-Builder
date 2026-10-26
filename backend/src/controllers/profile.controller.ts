@@ -4,6 +4,7 @@ import { AppError } from '../lib/errors';
 import { getProfileId } from '../middleware/auth';
 import * as avatarService from '../services/avatar.service';
 import * as profileService from '../services/profile.service';
+import * as resumeService from '../services/resume.service';
 
 // req.body has already been validated and parsed by validateBody().
 export const getMyProfile = asyncHandler(async (req, res) => {
@@ -28,4 +29,11 @@ export const uploadMyAvatar = asyncHandler(async (req, res) => {
 export const publishMyProfile = asyncHandler(async (req, res) => {
   const { published } = req.body as PublishInput;
   res.json(await profileService.setPublished(getProfileId(req), published));
+});
+
+// req.file is set by the resumeUpload middleware (multipart field "resume"). The result is
+// returned for the person to review; nothing is saved here.
+export const parseMyResume = asyncHandler(async (req, res) => {
+  if (!req.file) throw new AppError(400, 'NO_FILE', 'Attach a PDF in the "resume" form field');
+  res.json(await resumeService.parseResume(req.file.buffer));
 });

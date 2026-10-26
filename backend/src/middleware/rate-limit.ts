@@ -24,10 +24,15 @@ function clientKey(req: Request): string {
   return ipKeyGenerator(ip);
 }
 
-function limiter(options: { windowMs: number; limit: number; skipSuccessfulRequests?: boolean }) {
+function limiter(options: {
+  windowMs: number;
+  limit: number;
+  skipSuccessfulRequests?: boolean;
+  keyGenerator?: (req: Request) => string;
+}) {
   return rateLimit({
-    ...options,
     keyGenerator: clientKey,
+    ...options,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
     handler: (_req, _res, next) =>
@@ -46,3 +51,12 @@ export const registerLimiter = limiter({ windowMs: 60 * 60 * 1000, limit: 10 });
 
 // Each upload costs Cloudinary storage and transformation quota.
 export const uploadLimiter = limiter({ windowMs: 60 * 60 * 1000, limit: 20 });
+
+// Every import is a paid or quota-limited call to an LLM, and the route sits behind login, so
+// the limit is per account (not per IP): one person cannot burn the quota, and people sharing
+// an office network do not share a limit.
+export const resumeLimiter = limiter({
+  windowMs: 60 * 60 * 1000,
+  limit: 10,
+  keyGenerator: (req) => req.user?.id ?? clientKey(req),
+});
