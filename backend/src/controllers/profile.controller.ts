@@ -5,6 +5,7 @@ import { getProfileId } from '../middleware/auth';
 import * as avatarService from '../services/avatar.service';
 import * as profileService from '../services/profile.service';
 import * as resumeService from '../services/resume.service';
+import * as layoutService from '../services/section-layout.service';
 
 // req.body has already been validated and parsed by validateBody().
 export const getMyProfile = asyncHandler(async (req, res) => {
@@ -16,12 +17,12 @@ export const updateMyProfile = asyncHandler(async (req, res) => {
 });
 
 export const getMySections = asyncHandler(async (req, res) => {
-  res.json({ sections: await profileService.getSections(getProfileId(req)) });
+  res.json({ sections: await layoutService.getSections(getProfileId(req)) });
 });
 
 export const updateMySections = asyncHandler(async (req, res) => {
   const { sections } = req.body as SectionsUpdateInput;
-  res.json({ sections: await profileService.updateSections(getProfileId(req), sections) });
+  res.json({ sections: await layoutService.updateSections(getProfileId(req), sections) });
 });
 
 export const deleteMyAvatar = asyncHandler(async (req, res) => {

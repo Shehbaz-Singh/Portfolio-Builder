@@ -12,6 +12,7 @@ import { PublishPanel } from './PublishPanel';
 import { LoadFailed, Loading } from './screens';
 import { AboutStep } from './steps/AboutStep';
 import { BasicsStep } from './steps/BasicsStep';
+import { CustomSectionsStep } from './steps/CustomSectionsStep';
 import { EducationStep } from './steps/EducationStep';
 import { ImportBanner, ImportStep } from './steps/ImportStep';
 import { ExperienceStep } from './steps/ExperienceStep';
@@ -34,6 +35,7 @@ const STEPS: Step[] = [
   { id: 'experience', label: 'Experience', Component: ExperienceStep },
   { id: 'projects', label: 'Projects', Component: ProjectsStep },
   { id: 'education', label: 'Education', Component: EducationStep },
+  { id: 'custom', label: 'Custom sections', Component: CustomSectionsStep },
   { id: 'sections', label: 'Sections', Component: SectionsStep },
 ];
 

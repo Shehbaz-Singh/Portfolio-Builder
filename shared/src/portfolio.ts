@@ -14,7 +14,7 @@ const optionalText = (max: number) =>
 
 // Only http(s): z.string().url() also accepts "javascript:..." which is an XSS risk once
 // the value is rendered as a link on the public page.
-const httpUrl = z
+export const httpUrl = z
   .string()
   .trim()
   .max(2048)

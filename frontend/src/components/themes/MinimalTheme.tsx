@@ -1,5 +1,13 @@
 import type { ReactElement, ReactNode } from 'react';
-import { SECTION_LABELS, type PublicProfile, type SectionKey } from '@portfolio/shared';
+import {
+  SECTION_LABELS,
+  customIdOf,
+  isCustomKey,
+  type PublicCustomItem,
+  type PublicCustomSection,
+  type PublicProfile,
+  type SectionKey,
+} from '@portfolio/shared';
 import { SITE_URL } from '@/lib/config';
 import { formatMonthYear, initials, linkTarget, safeHttpUrl } from '@/lib/format';
 import { ShareButton } from '../ShareButton';
@@ -257,7 +265,56 @@ function EducationSection({ profile, title }: SectionProps) {
   );
 }
 
-// Which component draws which section. A new kind of section (testimonials, custom sections) is
+// A section the owner made up (Certifications, Awards, ...): one generic list. Everything in it is
+// plain text; the link is the only thing that is not, and it is checked to be http(s).
+function CustomItemView({ item }: { item: PublicCustomItem }) {
+  const href = safeHttpUrl(item.url);
+  return (
+    <li>
+      <h3 className="font-semibold">{item.title}</h3>
+      {item.subtitle && <p className={muted}>{item.subtitle}</p>}
+      {item.startDate && (
+        <p className="mt-0.5 text-sm text-muted">
+          <time dateTime={item.startDate}>{formatMonthYear(item.startDate)}</time>
+          {item.endDate && (
+            <>
+              {' – '}
+              <time dateTime={item.endDate}>{formatMonthYear(item.endDate)}</time>
+            </>
+          )}
+        </p>
+      )}
+      {item.description && <p className="mt-2 whitespace-pre-line text-ink">{item.description}</p>}
+      {href && (
+        <p className="mt-2">
+          <a
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={`text-sm font-medium text-accent underline-offset-2 hover:underline ${focusRing}`}
+          >
+            View
+            <span className="sr-only"> {item.title} (opens in a new tab)</span>
+          </a>
+        </p>
+      )}
+    </li>
+  );
+}
+
+function CustomSectionView({ section }: { section: PublicCustomSection }) {
+  return (
+    <Section id={`custom-${section.id}`} title={section.title}>
+      <ul className="space-y-6">
+        {section.items.map((item) => (
+          <CustomItemView key={item.id} item={item} />
+        ))}
+      </ul>
+    </Section>
+  );
+}
+
+// Which component draws which built-in section. A new kind of section (testimonials, custom sections) is
 // a new key in the shared list plus an entry here; the page itself does not change.
 const SECTION_COMPONENTS: Record<SectionKey, (props: SectionProps) => ReactElement | null> = {
   about: AboutSection,
@@ -275,6 +332,10 @@ export default function MinimalTheme({ profile }: ThemeProps) {
 
         {/* The order, visibility and headings come from the profile's section config. */}
         {profile.sections.map(({ key, title }) => {
+          if (isCustomKey(key)) {
+            const section = profile.customSections.find((s) => s.id === customIdOf(key));
+            return section ? <CustomSectionView key={key} section={section} /> : null;
+          }
           if (!Object.hasOwn(SECTION_COMPONENTS, key)) return null; // not a section this theme knows
           const Component = SECTION_COMPONENTS[key as SectionKey];
           return (

@@ -42,12 +42,13 @@ model Profile {
   // The default must match defaultSectionConfig(); existing rows get it when the column is added.
   sectionConfig Json    @default("[{\"key\":\"about\",\"visible\":true},{\"key\":\"skills\",\"visible\":true},{\"key\":\"experience\",\"visible\":true},{\"key\":\"projects\",\"visible\":true},{\"key\":\"education\",\"visible\":true}]")
 
-  user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  links      Link[]
-  skills     Skill[]
-  experience Experience[]
-  projects   Project[]
-  education  Education[]
+  user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  links          Link[]
+  skills         Skill[]
+  experience     Experience[]
+  projects       Project[]
+  education      Education[]
+  customSections CustomSection[]
 }
 
 model Link {
@@ -115,4 +116,36 @@ model Education {
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@index([profileId])
+}
+
+// A section the user made up (Certifications, Awards, ...). Its place on the page is held in
+// Profile.sectionConfig under the key "custom:<id>"; `order` and `visible` mirror that entry
+// and are kept in step with it by the service, so they can be read without parsing the JSON.
+model CustomSection {
+  id        String  @id @default(cuid())
+  profileId String
+  title     String
+  order     Int     @default(0)
+  visible   Boolean @default(true)
+
+  profile Profile             @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  items   CustomSectionItem[]
+
+  @@index([profileId])
+}
+
+model CustomSectionItem {
+  id          String    @id @default(cuid())
+  sectionId   String
+  title       String
+  subtitle    String?
+  startDate   DateTime?
+  endDate     DateTime?
+  url         String?
+  description String?
+  order       Int       @default(0)
+
+  section CustomSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
+
+  @@index([sectionId])
 }

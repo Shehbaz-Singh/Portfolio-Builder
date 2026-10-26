@@ -1,10 +1,24 @@
 import { Router } from 'express';
 import {
+  customItemInputSchema,
+  customSectionInputSchema,
   profileUpdateSchema,
   publishSchema,
   reorderSchema,
   sectionsUpdateSchema,
 } from '@portfolio/shared';
+import {
+  createCustomItem,
+  createCustomSection,
+  deleteCustomItem,
+  deleteCustomSection,
+  getCustomItem,
+  listCustomItems,
+  listCustomSections,
+  reorderCustomItems,
+  updateCustomItem,
+  updateCustomSection,
+} from '../controllers/custom-section.controller';
 import {
   deleteMyAvatar,
   getMyProfile,
@@ -50,6 +64,39 @@ profileRouter.post('/me/resume', resumeLimiter, resumeUpload, parseMyResume);
 // /me/:section like the others, so "sections" is not read as a section name.
 profileRouter.get('/me/sections', getMySections);
 profileRouter.put('/me/sections', validateBody(sectionsUpdateSchema), updateMySections);
+
+// Sections the user made up, and their items. Also declared before /me/:section. The items'
+// reorder route comes before /items/:itemId so "reorder" is not read as an item id.
+profileRouter.get('/me/custom-sections', listCustomSections);
+profileRouter.post(
+  '/me/custom-sections',
+  validateBody(customSectionInputSchema),
+  createCustomSection,
+);
+profileRouter.put(
+  '/me/custom-sections/:id',
+  validateBody(customSectionInputSchema),
+  updateCustomSection,
+);
+profileRouter.delete('/me/custom-sections/:id', deleteCustomSection);
+profileRouter.get('/me/custom-sections/:id/items', listCustomItems);
+profileRouter.post(
+  '/me/custom-sections/:id/items',
+  validateBody(customItemInputSchema),
+  createCustomItem,
+);
+profileRouter.patch(
+  '/me/custom-sections/:id/items/reorder',
+  validateBody(reorderSchema),
+  reorderCustomItems,
+);
+profileRouter.get('/me/custom-sections/:id/items/:itemId', getCustomItem);
+profileRouter.put(
+  '/me/custom-sections/:id/items/:itemId',
+  validateBody(customItemInputSchema),
+  updateCustomItem,
+);
+profileRouter.delete('/me/custom-sections/:id/items/:itemId', deleteCustomItem);
 
 // :section is one of experience | education | projects | skills | links
 profileRouter.patch('/me/:section/reorder', validateBody(reorderSchema), reorderSection);

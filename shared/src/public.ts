@@ -2,9 +2,13 @@ import { z } from 'zod';
 import { linkTypeSchema, profileSchema } from './portfolio';
 import {
   SECTION_KEYS,
+  customIdOf,
   defaultSectionConfig,
+  isCustomKey,
   publicSectionSchema,
   sectionConfigSchema,
+  type PublicSection,
+  type SectionConfig,
 } from './section-config';
 
 // The body of GET /public/:slug. Dates are ISO strings because they have been through JSON.
@@ -53,6 +57,30 @@ export const publicEducationSchema = z.object({
   order: z.number(),
 });
 
+// A section the user created. Dates are ISO strings, all optional.
+export const publicCustomItemSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  subtitle: z.string().nullable(),
+  startDate: isoDate.nullable(),
+  endDate: isoDate.nullable(),
+  url: z.string().nullable(),
+  description: z.string().nullable(),
+  order: z.number(),
+});
+
+export const publicCustomSectionSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  items: z.array(publicCustomItemSchema),
+});
+
+// In the editor a custom section also carries its place in the page layout.
+export const myCustomSectionSchema = publicCustomSectionSchema.extend({
+  visible: z.boolean(),
+  order: z.number(),
+});
+
 // The four ordered lists are identical in both views.
 const sectionLists = {
   skills: z.array(publicSkillSchema),
@@ -65,6 +93,8 @@ const sectionLists = {
 // working against an API that predates it. The content of a hidden section is left out by the API.
 export const publicProfileSchema = profileSchema.omit({ id: true, published: true }).extend({
   sections: z.array(publicSectionSchema).default(() => SECTION_KEYS.map((key) => ({ key }))),
+  // The visible custom sections that have items, in page order. Each has an entry in `sections`.
+  customSections: z.array(publicCustomSectionSchema).default([]),
   links: z.array(publicLinkSchema),
   ...sectionLists,
 });
@@ -74,10 +104,14 @@ export const publicProfileSchema = profileSchema.omit({ id: true, published: tru
 export const myProfileSchema = profileSchema.extend({
   // All sections, hidden ones included, in page order (GET/PUT /profile/me/sections).
   sectionConfig: sectionConfigSchema.default(defaultSectionConfig),
+  customSections: z.array(myCustomSectionSchema).default([]),
   links: z.array(publicLinkSchema.extend({ visible: z.boolean() })),
   ...sectionLists,
 });
 
+export type PublicCustomItem = z.infer<typeof publicCustomItemSchema>;
+export type PublicCustomSection = z.infer<typeof publicCustomSectionSchema>;
+export type MyCustomSection = z.infer<typeof myCustomSectionSchema>;
 export type PublicLink = z.infer<typeof publicLinkSchema>;
 export type PublicSkill = z.infer<typeof publicSkillSchema>;
 export type PublicExperience = z.infer<typeof publicExperienceSchema>;
@@ -86,3 +120,29 @@ export type PublicEducation = z.infer<typeof publicEducationSchema>;
 export type PublicProfile = z.infer<typeof publicProfileSchema>;
 export type MyProfile = z.infer<typeof myProfileSchema>;
 export type MyLink = MyProfile['links'][number];
+
+// What the page shows, from the section config: the visible sections in order, plus the custom
+// sections they refer to. A custom section with no items is left out (a built-in one stays in the
+// list and draws nothing when it is empty). Used by the public API and by the editor's preview, so
+// they cannot disagree.
+export function publicLayout<T extends { id: string; items: readonly unknown[] }>(
+  config: SectionConfig,
+  customSections: readonly T[],
+): { sections: PublicSection[]; customSections: T[] } {
+  const byId = new Map(customSections.map((section) => [section.id, section]));
+  const sections: PublicSection[] = [];
+  const custom: T[] = [];
+
+  for (const { key, visible, title } of config) {
+    if (!visible) continue;
+    if (isCustomKey(key)) {
+      const section = byId.get(customIdOf(key));
+      if (!section || section.items.length === 0) continue;
+      sections.push({ key });
+      custom.push(section);
+    } else {
+      sections.push({ key, ...(title && { title }) });
+    }
+  }
+  return { sections, customSections: custom };
+}

@@ -14,6 +14,7 @@ Fill in your details once and get a clean, shareable portfolio page at your own 
 - Drag to reorder links, skills, experience, projects and education. Keyboard reordering works too.
 - Choose your own page address, pick a theme and an accent color (with a warning when it is hard to read).
 - Choose which sections your page shows, drag them into the order you want and rename their headings. Hiding a section keeps what you wrote in it.
+- Add your own sections (Certifications, Awards, Publications, Volunteering or anything else), each with its own list of items, and place them in the same order as the built-in ones.
 - Publish or unpublish with one switch. You get the public link with copy and open buttons, and a warning if your name or About section is still empty. Unpublishing takes the page down immediately.
 - Change your password or delete your account from the settings page. Deleting removes the portfolio and photo for good.
 

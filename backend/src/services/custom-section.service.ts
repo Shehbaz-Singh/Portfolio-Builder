@@ -1,0 +1,206 @@
+import {
+  MAX_CUSTOM_ITEMS,
+  MAX_CUSTOM_SECTIONS,
+  type CustomItemInput,
+  type CustomSectionInput,
+} from '@portfolio/shared';
+import type { Prisma } from '../generated/prisma/client';
+import { AppError } from '../lib/errors';
+import { prisma } from '../lib/prisma';
+import { isRecordNotFound } from '../lib/prisma-errors';
+import { customItems } from '../lib/selects';
+import { saveSectionConfig } from './section-layout.service';
+
+// User-made sections and their items. Ownership: a section is always looked up by
+// (id, profileId), and an item by (id, sectionId) only after that. A record that belongs to
+// someone else therefore looks exactly like one that does not exist (404).
+
+const sectionSelect = {
+  id: true,
+  title: true,
+  visible: true,
+  order: true,
+  items: customItems,
+} satisfies Prisma.CustomSectionSelect;
+
+const sectionNotFound = () => AppError.notFound('Custom section not found');
+const itemNotFound = () => AppError.notFound('Item not found');
+
+type Db = Prisma.TransactionClient | typeof prisma;
+
+async function assertOwnSection(db: Db, profileId: string, id: string) {
+  const section = await db.customSection.findFirst({
+    where: { id, profileId },
+    select: { id: true },
+  });
+  if (!section) throw sectionNotFound();
+}
+
+// Requests that queue behind a lock wait for it instead of failing after Prisma's 2 s default.
+const WAIT = { maxWait: 10_000, timeout: 15_000 };
+
+// Serialises writers of one profile, so two requests at once cannot both pass a limit check.
+const lockProfile = (tx: Prisma.TransactionClient, profileId: string) =>
+  tx.$queryRaw`SELECT 1 FROM "Profile" WHERE "id" = ${profileId} FOR UPDATE`;
+
+// Checks the section is the caller's and locks it in one query, so items added to it at the
+// same time are counted one after another.
+async function lockOwnSection(tx: Prisma.TransactionClient, profileId: string, id: string) {
+  const rows = await tx.$queryRaw<
+    unknown[]
+  >`SELECT 1 FROM "CustomSection" WHERE "id" = ${id} AND "profileId" = ${profileId} FOR UPDATE`;
+  if (rows.length === 0) throw sectionNotFound();
+}
+
+// ---- sections
+
+export const listSections = (profileId: string) =>
+  prisma.customSection.findMany({
+    where: { profileId },
+    select: sectionSelect,
+    orderBy: [{ order: 'asc' }, { id: 'asc' }],
+  });
+
+// Also adds the section to the end of the page layout (the section config).
+export function createSection(profileId: string, input: CustomSectionInput) {
+  return prisma.$transaction(async (tx) => {
+    await lockProfile(tx, profileId);
+    const count = await tx.customSection.count({ where: { profileId } });
+    if (count >= MAX_CUSTOM_SECTIONS) {
+      throw AppError.conflict(
+        'LIMIT_REACHED',
+        `You can have at most ${MAX_CUSTOM_SECTIONS} custom sections`,
+      );
+    }
+    const created = await tx.customSection.create({
+      data: { profileId, title: input.title, order: count },
+      select: { id: true },
+    });
+    const sections = await saveSectionConfig(tx, profileId);
+    const section = await tx.customSection.findUniqueOrThrow({
+      where: { id: created.id },
+      select: sectionSelect,
+    });
+    return { section, sections };
+  }, WAIT);
+}
+
+export async function updateSection(profileId: string, id: string, input: CustomSectionInput) {
+  try {
+    return await prisma.customSection.update({
+      where: { id, profileId },
+      data: { title: input.title },
+      select: sectionSelect,
+    });
+  } catch (err) {
+    if (isRecordNotFound(err)) throw sectionNotFound();
+    throw err;
+  }
+}
+
+// Deletes the section and its items (cascade), and removes it from the page layout.
+export function deleteSection(profileId: string, id: string) {
+  return prisma.$transaction(async (tx) => {
+    const { count } = await tx.customSection.deleteMany({ where: { id, profileId } });
+    if (count === 0) throw sectionNotFound();
+    return { sections: await saveSectionConfig(tx, profileId) };
+  }, WAIT);
+}
+
+// ---- items
+
+export async function listItems(profileId: string, sectionId: string) {
+  await assertOwnSection(prisma, profileId, sectionId);
+  return prisma.customSectionItem.findMany({ where: { sectionId }, ...customItems });
+}
+
+export async function getItem(profileId: string, sectionId: string, id: string) {
+  await assertOwnSection(prisma, profileId, sectionId);
+  const item = await prisma.customSectionItem.findFirst({
+    where: { id, sectionId },
+    omit: customItems.omit,
+  });
+  if (!item) throw itemNotFound();
+  return item;
+}
+
+export function createItem(profileId: string, sectionId: string, input: CustomItemInput) {
+  return prisma.$transaction(async (tx) => {
+    await lockOwnSection(tx, profileId, sectionId);
+
+    const { _count, _max } = await tx.customSectionItem.aggregate({
+      where: { sectionId },
+      _count: true,
+      _max: { order: true },
+    });
+    if (_count >= MAX_CUSTOM_ITEMS) {
+      throw AppError.conflict(
+        'LIMIT_REACHED',
+        `You can have at most ${MAX_CUSTOM_ITEMS} items in a section`,
+      );
+    }
+    return tx.customSectionItem.create({
+      data: { ...input, sectionId, order: (_max.order ?? -1) + 1 },
+      omit: customItems.omit,
+    });
+  }, WAIT);
+}
+
+export async function updateItem(
+  profileId: string,
+  sectionId: string,
+  id: string,
+  input: CustomItemInput,
+) {
+  await assertOwnSection(prisma, profileId, sectionId);
+  try {
+    return await prisma.customSectionItem.update({
+      where: { id, sectionId },
+      data: input,
+      omit: customItems.omit,
+    });
+  } catch (err) {
+    if (isRecordNotFound(err)) throw itemNotFound();
+    throw err;
+  }
+}
+
+export async function deleteItem(profileId: string, sectionId: string, id: string) {
+  await assertOwnSection(prisma, profileId, sectionId);
+  try {
+    await prisma.customSectionItem.delete({ where: { id, sectionId } });
+  } catch (err) {
+    if (isRecordNotFound(err)) throw itemNotFound();
+    throw err;
+  }
+}
+
+// `ids` is the new order. It must list every item in the section exactly once, which also
+// guarantees it can only contain this section's own items.
+export async function reorderItems(profileId: string, sectionId: string, ids: string[]) {
+  await assertOwnSection(prisma, profileId, sectionId);
+
+  const current = await prisma.customSectionItem.findMany({
+    where: { sectionId },
+    select: { id: true },
+  });
+  const currentIds = new Set(current.map((item) => item.id));
+  if (ids.length !== currentIds.size || !ids.every((id) => currentIds.has(id))) {
+    throw new AppError(
+      400,
+      'INVALID_REORDER',
+      'ids must list every item in the section exactly once',
+    );
+  }
+
+  await prisma.$transaction(
+    ids.map((id, order) =>
+      prisma.customSectionItem.update({
+        where: { id, sectionId },
+        data: { order },
+        select: { id: true },
+      }),
+    ),
+  );
+  return listItems(profileId, sectionId);
+}

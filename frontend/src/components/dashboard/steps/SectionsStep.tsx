@@ -4,7 +4,10 @@ import { useEffect, useMemo, useState } from 'react';
 import {
   SECTION_LABELS,
   SECTION_TITLE_MAX,
+  customIdOf,
   defaultSectionConfig,
+  isCustomKey,
+  type ConfigKey,
   type MyProfile,
   type SectionConfig,
   type SectionKey,
@@ -15,7 +18,7 @@ import { SortableList } from '../SortableList';
 import { errorText, useEditor, useReportDirty } from '../editor-context';
 
 // What the form edits. A title is plain text here: blank means "use the default heading".
-type Row = { key: SectionKey; visible: boolean; title: string };
+type Row = { key: ConfigKey; visible: boolean; title: string };
 
 const toRows = (config: SectionConfig): Row[] =>
   config.map(({ key, visible, title }) => ({ key, visible, title: title ?? '' }));
@@ -37,7 +40,7 @@ const sameConfig = (a: SectionConfig, b: SectionConfig) =>
   );
 
 // A section that is switched on but has nothing in it is not shown; the row says so.
-const HAS_CONTENT: Record<SectionKey, (profile: MyProfile) => boolean> = {
+const BUILT_IN_HAS_CONTENT: Record<SectionKey, (profile: MyProfile) => boolean> = {
   about: (p) => !!p.about?.trim(),
   skills: (p) => p.skills.length > 0,
   experience: (p) => p.experience.length > 0,
@@ -45,10 +48,24 @@ const HAS_CONTENT: Record<SectionKey, (profile: MyProfile) => boolean> = {
   education: (p) => p.education.length > 0,
 };
 
+// A custom section is looked up by id; one that no longer exists has nothing to show.
+const customSectionOf = (profile: MyProfile, key: ConfigKey) =>
+  isCustomKey(key) ? profile.customSections.find((s) => s.id === customIdOf(key)) : undefined;
+
+const labelOf = (profile: MyProfile, key: ConfigKey) =>
+  isCustomKey(key)
+    ? (customSectionOf(profile, key)?.title ?? 'Custom section')
+    : SECTION_LABELS[key];
+
+const hasContent = (profile: MyProfile, key: ConfigKey) =>
+  isCustomKey(key)
+    ? (customSectionOf(profile, key)?.items.length ?? 0) > 0
+    : BUILT_IN_HAS_CONTENT[key](profile);
+
 // Choose which sections the page shows, in what order, and under which heading. Only the layout
 // is saved here: hiding a section keeps its content. Changes show in the preview at once and are
 // saved with the button.
-export function SectionsStep() {
+export function SectionsStep({ goTo }: { goTo: (stepId: string) => void }) {
   const { profile, update, setDraft, notify } = useEditor();
   const [rows, setRows] = useState(() => toRows(profile.sectionConfig));
   const [saving, setSaving] = useState(false);
@@ -62,7 +79,7 @@ export function SectionsStep() {
     return () => setDraft(null);
   }, [config, setDraft]);
 
-  const patch = (key: SectionKey, change: Partial<Row>) =>
+  const patch = (key: ConfigKey, change: Partial<Row>) =>
     setRows((current) => current.map((row) => (row.key === key ? { ...row, ...change } : row)));
   const reorder = (ids: string[]) =>
     setRows((current) => ids.flatMap((id) => current.find((row) => row.key === id) ?? []));
@@ -98,9 +115,10 @@ export function SectionsStep() {
       <SortableList
         items={rows.map((row) => ({ ...row, id: row.key }))}
         onReorder={reorder}
-        label={(row) => SECTION_LABELS[row.key]}
+        label={(row) => labelOf(profile, row.key)}
         renderItem={(row, handle) => {
-          const label = SECTION_LABELS[row.key];
+          const label = labelOf(profile, row.key);
+          const custom = isCustomKey(row.key);
           const inputId = `section-title-${row.key}`;
           return (
             <div className="space-y-3 rounded-xl border border-line p-3">
@@ -116,20 +134,29 @@ export function SectionsStep() {
                   onClick={() => patch(row.key, { visible: !row.visible })}
                 />
               </div>
-              <div>
-                <label htmlFor={inputId} className="mb-1 block text-xs font-medium text-muted">
-                  Heading on your page
-                </label>
-                <input
-                  id={inputId}
-                  value={row.title}
-                  onChange={(e) => patch(row.key, { title: e.target.value })}
-                  placeholder={label}
-                  maxLength={SECTION_TITLE_MAX}
-                  className={inputClass}
-                />
-              </div>
-              {row.visible && !HAS_CONTENT[row.key](profile) && (
+              {custom ? (
+                <p className="flex flex-wrap items-center gap-2 text-sm text-muted">
+                  The heading is the section's own title.
+                  <Button variant="ghost" onClick={() => goTo('custom')}>
+                    Edit items and title
+                  </Button>
+                </p>
+              ) : (
+                <div>
+                  <label htmlFor={inputId} className="mb-1 block text-xs font-medium text-muted">
+                    Heading on your page
+                  </label>
+                  <input
+                    id={inputId}
+                    value={row.title}
+                    onChange={(e) => patch(row.key, { title: e.target.value })}
+                    placeholder={label}
+                    maxLength={SECTION_TITLE_MAX}
+                    className={inputClass}
+                  />
+                </div>
+              )}
+              {row.visible && !hasContent(profile, row.key) && (
                 <p className="text-sm text-muted">
                   Nothing here yet, so this section stays off your page until you add something.
                 </p>

@@ -11,11 +11,13 @@ import {
   type ReactNode,
 } from 'react';
 import {
-  visibleSections,
+  publicLayout,
+  type MyCustomSection,
   type MyProfile,
   type ParsedResume,
   type PublicProfile,
   type Section,
+  type SectionConfig,
 } from '@portfolio/shared';
 import { ApiError, api } from '@/lib/client-api';
 
@@ -190,8 +192,9 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
       ...profile,
       ...draft,
       links: profile.links.filter((link) => link.visible),
-      // The same visible-and-ordered list the public API returns, from the unsaved config too.
-      sections: visibleSections(draft?.sectionConfig ?? profile.sectionConfig),
+      // The same layout the public API returns (visible sections in order, custom sections with
+      // items), worked out from the unsaved config too.
+      ...publicLayout(draft?.sectionConfig ?? profile.sectionConfig, profile.customSections),
     }),
     [profile, draft],
   );
@@ -255,23 +258,21 @@ export function useReportDirty(isDirty: boolean) {
 }
 
 export type SectionItem<S extends Section> = MyProfile[S][number];
+export type CustomItem = MyCustomSection['items'][number];
 
-// Create, update, delete and reorder for one list. Each call hits the API first and only then
-// changes the screen; reorder is optimistic (see below) because it follows a drag.
-export function useSection<S extends Section>(section: S) {
-  const { profile, update, notify } = useEditor();
-  const items = profile[section] as SectionItem<S>[];
-  const base = `/profile/me/${section}`;
-
-  const replaceList = useCallback(
-    (change: (list: SectionItem<S>[]) => SectionItem<S>[]) =>
-      update((p) => ({ ...p, [section]: change(p[section] as SectionItem<S>[]) }) as MyProfile),
-    [section, update],
-  );
+// Create, update, delete and reorder for one list of items stored under `base`. Each call hits
+// the API first and only then changes the screen; reorder is optimistic (see below) because it
+// follows a drag. `replaceList` says where in the profile that list lives.
+function useListApi<T extends { id: string }>(
+  base: string,
+  items: T[],
+  replaceList: (change: (list: T[]) => T[]) => void,
+) {
+  const { notify } = useEditor();
 
   const create = useCallback(
     async (input: unknown) => {
-      const item = await api<SectionItem<S>>(base, { method: 'POST', body: input });
+      const item = await api<T>(base, { method: 'POST', body: input });
       replaceList((list) => [...list, item]);
     },
     [base, replaceList],
@@ -279,7 +280,7 @@ export function useSection<S extends Section>(section: S) {
 
   const updateItem = useCallback(
     async (id: string, input: unknown) => {
-      const item = await api<SectionItem<S>>(`${base}/${id}`, { method: 'PUT', body: input });
+      const item = await api<T>(`${base}/${id}`, { method: 'PUT', body: input });
       replaceList((list) => list.map((it) => (it.id === id ? item : it)));
     },
     [base, replaceList],
@@ -309,6 +310,86 @@ export function useSection<S extends Section>(section: S) {
   );
 
   return { items, create, updateItem, remove, reorder };
+}
+
+// One of the five built-in lists (experience, education, projects, skills, links).
+export function useSection<S extends Section>(section: S) {
+  const { profile, update } = useEditor();
+  const replaceList = useCallback(
+    (change: (list: SectionItem<S>[]) => SectionItem<S>[]) =>
+      update((p) => ({ ...p, [section]: change(p[section] as SectionItem<S>[]) }) as MyProfile),
+    [section, update],
+  );
+  return useListApi(`/profile/me/${section}`, profile[section] as SectionItem<S>[], replaceList);
+}
+
+// The items of one custom section.
+export function useCustomItems(sectionId: string) {
+  const { profile, update } = useEditor();
+  const items = profile.customSections.find((s) => s.id === sectionId)?.items ?? [];
+  const replaceList = useCallback(
+    (change: (list: CustomItem[]) => CustomItem[]) =>
+      update((p) => ({
+        ...p,
+        customSections: p.customSections.map((s) =>
+          s.id === sectionId ? { ...s, items: change(s.items) } : s,
+        ),
+      })),
+    [sectionId, update],
+  );
+  return useListApi(`/profile/me/custom-sections/${sectionId}/items`, items, replaceList);
+}
+
+// Creating and deleting a custom section also changes the page layout (it is added at the end /
+// removed), so the server sends the new layout back and it is stored with the profile.
+export function useCustomSections() {
+  const { profile, update } = useEditor();
+  const base = '/profile/me/custom-sections';
+
+  const create = useCallback(
+    async (title: string) => {
+      const { section, sections } = await api<{
+        section: MyCustomSection;
+        sections: SectionConfig;
+      }>(base, { method: 'POST', body: { title } });
+      update((p) => ({
+        ...p,
+        customSections: [...p.customSections, section],
+        sectionConfig: sections,
+      }));
+      return section;
+    },
+    [update],
+  );
+
+  const rename = useCallback(
+    async (id: string, title: string) => {
+      const saved = await api<MyCustomSection>(`${base}/${id}`, { method: 'PUT', body: { title } });
+      update((p) => ({
+        ...p,
+        customSections: p.customSections.map((s) =>
+          s.id === id ? { ...s, title: saved.title } : s,
+        ),
+      }));
+    },
+    [update],
+  );
+
+  const remove = useCallback(
+    async (id: string) => {
+      const { sections } = await api<{ sections: SectionConfig }>(`${base}/${id}`, {
+        method: 'DELETE',
+      });
+      update((p) => ({
+        ...p,
+        customSections: p.customSections.filter((s) => s.id !== id),
+        sectionConfig: sections,
+      }));
+    },
+    [update],
+  );
+
+  return { sections: profile.customSections, create, rename, remove };
 }
 
 // The suggestions waiting for one list, with ways to clear them.

@@ -12,6 +12,12 @@ export const publicProfileSelect = Object.fromEntries(
   Object.keys(publicProfileShape).map((key) => [key, true]),
 ) as { [K in keyof typeof publicProfileShape]: true } satisfies Prisma.ProfileSelect;
 
+// The items of a custom section in display order (the section id is already known).
+export const customItems = {
+  omit: { sectionId: true },
+  orderBy: [{ order: 'asc' }, { id: 'asc' }],
+} satisfies Prisma.CustomSectionItemFindManyArgs;
+
 // A section list in display order. profileId is dropped: the client already knows the profile.
 export const orderedList = {
   omit: { profileId: true },

@@ -18,39 +18,59 @@ import { SortableList } from './SortableList';
 type ListSection = Exclude<Section, 'skills'>;
 type Draft<S extends ListSection> = SuggestionMap[S];
 
-export interface ItemFormProps<S extends ListSection> {
-  item?: SectionItem<S>; // set when editing a saved item
-  draft?: Draft<S>; // set when reviewing a suggestion from a resume
+// T is a saved item and D what a suggestion looks like (nothing, for lists without suggestions).
+export interface FormProps<T, D = never> {
+  item?: T; // set when editing a saved item
+  draft?: D; // set when reviewing a suggestion from a resume
   onDone: () => void; // close the form (saved or cancelled)
   onSaved?: () => void; // called after a successful save, before onDone
 }
+export type ItemFormProps<S extends ListSection> = FormProps<SectionItem<S>, Draft<S>>;
 
-interface Props<S extends ListSection> {
-  section: S;
+interface ListApi<T> {
+  items: T[];
+  create: (input: unknown) => Promise<void>;
+  remove: (id: string) => Promise<void>;
+  reorder: (ids: string[]) => void | Promise<void>;
+}
+
+interface Suggestions<D> {
+  suggestions: { key: string; data: D }[];
+  dismiss: (key: string) => void;
+  dismissAll: () => void;
+}
+
+interface ListProps<T extends { id: string }, D> {
+  list: ListApi<T>;
+  suggestions?: Suggestions<D>;
   noun: string; // "job", used in messages
   addLabel: string;
   empty: string;
-  summary: (item: Draft<S>) => { title: string; subtitle?: string };
-  Form: ComponentType<ItemFormProps<S>>;
-  extra?: (item: SectionItem<S>) => ReactNode; // extra controls in a row (link visibility)
+  limit?: number; // most items allowed; the Add button is replaced by a note when it is reached
+  summary: (item: T | D) => { title: string; subtitle?: string };
+  Form: ComponentType<FormProps<T, D>>;
+  extra?: (item: T) => ReactNode; // extra controls in a row (link visibility)
 }
 
 const cardClass = 'rounded-xl border border-accent/50 p-4';
+const noSuggestions = { suggestions: [], dismiss: () => {}, dismissAll: () => {} };
 
 // One list in the editor: rows with Edit and Delete, an Add button, and drag-to-reorder.
 // Entries read from a resume appear above it as suggestions that can be edited and added, or
-// skipped. The create/edit form is passed in, so every section shares this shell.
-export function SectionManager<S extends ListSection>({
-  section,
+// skipped. The create/edit form is passed in, so every list shares this shell.
+export function ListManager<T extends { id: string }, D = never>({
+  list,
+  suggestions: suggestionApi = noSuggestions,
   noun,
   addLabel,
   empty,
+  limit,
   summary,
   Form,
   extra,
-}: Props<S>) {
-  const { items, create, remove, reorder } = useSection(section);
-  const { suggestions, dismiss, dismissAll } = useSuggestions(section);
+}: ListProps<T, D>) {
+  const { items, create, remove, reorder } = list;
+  const { suggestions, dismiss, dismissAll } = suggestionApi;
   const { notify } = useEditor();
   // An item id, "new", "s:<suggestion key>", or nothing. One form at a time keeps unsaved
   // edits from being lost.
@@ -58,8 +78,9 @@ export function SectionManager<S extends ListSection>({
   const [deleting, setDeleting] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
   const sortable = items.length > 1;
+  const full = limit !== undefined && items.length >= limit;
   const close = () => setEditing(null);
-  const summarize = (item: SectionItem<S> | Draft<S>) => summary(item as Draft<S>);
+  const summarize = (item: T | D) => summary(item);
 
   async function onDelete(id: string) {
     if (!window.confirm(`Delete this ${noun}? This cannot be undone.`)) return;
@@ -75,10 +96,10 @@ export function SectionManager<S extends ListSection>({
 
   // Adds suggestions as they are, one after another so their order is kept. Stops at the
   // first failure; whatever was added is already gone from the list.
-  async function addSuggestions(list: typeof suggestions) {
+  async function addSuggestions(chosen: typeof suggestions) {
     setAdding(true);
     try {
-      for (const suggestion of list) {
+      for (const suggestion of chosen) {
         await create(suggestion.data);
         dismiss(suggestion.key);
       }
@@ -89,7 +110,7 @@ export function SectionManager<S extends ListSection>({
     }
   }
 
-  function row(item: SectionItem<S>, handle?: ReactNode) {
+  function row(item: T, handle?: ReactNode) {
     if (editing === item.id) {
       return (
         <div className={cardClass}>
@@ -224,6 +245,10 @@ export function SectionManager<S extends ListSection>({
         <div className={cardClass}>
           <Form onDone={close} />
         </div>
+      ) : full ? (
+        <p className="text-sm text-muted">
+          You have reached the limit of {limit} {noun}s here. Delete one to add another.
+        </p>
       ) : (
         <Button variant="primary" disabled={editing !== null} onClick={() => setEditing('new')}>
           {addLabel}
@@ -231,4 +256,19 @@ export function SectionManager<S extends ListSection>({
       )}
     </div>
   );
+}
+
+type SectionManagerProps<S extends ListSection> = { section: S } & Omit<
+  ListProps<SectionItem<S>, Draft<S>>,
+  'list' | 'suggestions' | 'limit'
+>;
+
+// ListManager for one of the built-in lists: its items, plus any suggestions from a resume.
+export function SectionManager<S extends ListSection>({
+  section,
+  ...props
+}: SectionManagerProps<S>) {
+  const list = useSection(section);
+  const suggestions = useSuggestions(section);
+  return <ListManager list={list} suggestions={suggestions} {...props} />;
 }
