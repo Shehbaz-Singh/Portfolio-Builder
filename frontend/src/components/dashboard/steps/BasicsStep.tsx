@@ -17,8 +17,10 @@ import { ApiError, api } from '@/lib/client-api';
 import { schemaResolver } from '@/lib/form';
 import { initials } from '@/lib/format';
 import { CheckboxField, SelectField, TextField } from '../../form-fields';
-import { Button, SlowNotice } from '../../ui';
+import { DEFAULT_THEME, isKnownTheme } from '../../themes';
+import { Button, SlowNotice, Switch } from '../../ui';
 import { EditorForm } from '../EditorForm';
+import { ThemePicker } from '../ThemePicker';
 import { errorText, useEditor, useSection } from '../editor-context';
 import { saveProfile } from '../save-profile';
 import { SectionManager, type ItemFormProps } from '../SectionManager';
@@ -117,15 +119,22 @@ function AvatarUpload() {
 }
 
 const detailsSchema = profileUpdateSchema
-  .pick({ fullName: true, tagline: true, location: true })
+  .pick({ fullName: true, tagline: true, location: true, theme: true })
   .extend({ slug: slugSchema });
-type DetailsFields = { fullName: string; tagline: string; location: string; slug: string };
+type DetailsFields = {
+  fullName: string;
+  tagline: string;
+  location: string;
+  slug: string;
+  theme: string;
+};
 
 const toFields = (p: MyProfile): DetailsFields => ({
   fullName: p.fullName,
   tagline: p.tagline ?? '',
   location: p.location ?? '',
   slug: p.slug,
+  theme: isKnownTheme(p.theme) ? p.theme : DEFAULT_THEME,
 });
 
 function DetailsForm() {
@@ -143,6 +152,7 @@ function DetailsForm() {
         fullName: v.fullName ?? '',
         tagline: v.tagline || null,
         location: v.location || null,
+        theme: v.theme ?? DEFAULT_THEME,
       }),
     );
     return () => {
@@ -184,6 +194,7 @@ function DetailsForm() {
         spellCheck={false}
         hint={`Your page will be at ${window.location.host}/${slug || 'your-name'}`}
       />
+      <ThemePicker />
     </EditorForm>
   );
 }
@@ -258,23 +269,12 @@ function VisibilityToggle({ link }: { link: MyLink }) {
   }
 
   return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={link.visible}
-      aria-label={`Show ${LINK_LABELS[link.type]} on my portfolio`}
+    <Switch
+      checked={link.visible}
+      label={`Show ${LINK_LABELS[link.type]} on my portfolio`}
       disabled={pending}
       onClick={toggle}
-      className={`relative h-6 w-11 shrink-0 rounded-full transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:opacity-60 ${
-        link.visible ? 'bg-indigo-600 dark:bg-indigo-500' : 'bg-slate-300 dark:bg-slate-700'
-      }`}
-    >
-      <span
-        className={`absolute top-0.5 left-0.5 size-5 rounded-full bg-white transition-transform ${
-          link.visible ? 'translate-x-5' : ''
-        }`}
-      />
-    </button>
+    />
   );
 }
 

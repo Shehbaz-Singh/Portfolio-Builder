@@ -14,7 +14,9 @@ import type { MyProfile, PublicProfile, Section } from '@portfolio/shared';
 import { ApiError, api } from '@/lib/client-api';
 
 // Fields the live preview shows while they are still being typed (not yet saved).
-export type Draft = Partial<Pick<MyProfile, 'fullName' | 'tagline' | 'location' | 'about'>>;
+export type Draft = Partial<
+  Pick<MyProfile, 'fullName' | 'tagline' | 'location' | 'about' | 'theme'>
+>;
 type Notice = { kind: 'success' | 'error'; text: string };
 
 interface EditorContextValue {

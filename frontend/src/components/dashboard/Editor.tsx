@@ -2,11 +2,13 @@
 
 import { useState } from 'react';
 import type { MyProfile } from '@portfolio/shared';
-import { ApiError, api } from '@/lib/client-api';
-import { useLoad, useSlow } from '@/lib/hooks';
+import { api } from '@/lib/client-api';
+import { useLoad } from '@/lib/hooks';
 import { Button } from '../ui';
-import { EditorProvider, errorText, useEditor } from './editor-context';
+import { EditorProvider, useEditor } from './editor-context';
 import { Preview } from './Preview';
+import { PublishPanel } from './PublishPanel';
+import { LoadFailed, Loading } from './screens';
 import { AboutStep } from './steps/AboutStep';
 import { BasicsStep } from './steps/BasicsStep';
 import { EducationStep } from './steps/EducationStep';
@@ -25,107 +27,21 @@ const STEPS = [
 
 const loadProfile = (signal: AbortSignal) => api<MyProfile>('/profile/me', { signal });
 
-function Centered({ children }: { children: React.ReactNode }) {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center">
-      {children}
-    </main>
-  );
-}
-
-function Loading() {
-  const slow = useSlow(true);
-  return (
-    <Centered>
-      <div
-        aria-hidden="true"
-        className="size-8 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600 dark:border-slate-700 dark:border-t-indigo-400"
-      />
-      <p role="status" className="font-medium">
-        {slow ? 'Waking up the server…' : 'Loading your portfolio…'}
-      </p>
-      {slow && (
-        <p className="max-w-sm text-sm text-slate-600 dark:text-slate-400">
-          The server sleeps when nobody has used it for a while. This can take up to a minute the
-          first time, and then it is fast again.
-        </p>
-      )}
-    </Centered>
-  );
-}
-
-function LoadFailed({ error, retry }: { error: unknown; retry: () => void }) {
-  return (
-    <Centered>
-      <h1 className="text-2xl font-bold tracking-tight">We couldn&apos;t load your portfolio</h1>
-      <div className="max-w-sm text-slate-600 dark:text-slate-400">
-        <p>{error instanceof ApiError ? error.message : 'Something went wrong.'}</p>
-        <p>Everything you saved earlier is safe.</p>
-      </div>
-      <Button variant="primary" onClick={retry}>
-        Try again
-      </Button>
-    </Centered>
-  );
-}
-
 function Header() {
-  const { profile, update, notify, hasUnsaved } = useEditor();
-  const [publishing, setPublishing] = useState(false);
-
-  async function setPublished(published: boolean) {
-    setPublishing(true);
-    try {
-      const res = await api<{ published: boolean }>('/profile/me/publish', {
-        method: 'POST',
-        body: { published },
-      });
-      update((p) => ({ ...p, published: res.published }));
-      notify('success', res.published ? 'Your portfolio is live.' : 'Your portfolio is hidden.');
-    } catch (err) {
-      notify('error', errorText(err));
-    } finally {
-      setPublishing(false);
-    }
-  }
+  const { hasUnsaved } = useEditor();
+  const confirmLeave = () =>
+    !hasUnsaved() || window.confirm('You have unsaved changes. Leave without saving them?');
 
   async function logOut() {
-    if (hasUnsaved() && !window.confirm('You have unsaved changes. Log out anyway?')) return;
+    if (!confirmLeave()) return;
     await api('/auth/logout', { method: 'POST', redirectOn401: false }).catch(() => {});
     window.location.assign('/login'); // a full load, so no profile data lingers in memory
   }
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-800">
-      <div>
-        <h1 className="font-semibold">Your portfolio</h1>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
-          {profile.published ? (
-            <>
-              Live at{' '}
-              <a
-                href={`/${profile.slug}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-medium text-indigo-700 underline dark:text-indigo-400"
-              >
-                /{profile.slug}
-                <span className="sr-only"> (opens in a new tab)</span>
-              </a>
-            </>
-          ) : (
-            'Not published yet. Only you can see it.'
-          )}
-        </p>
-      </div>
+    <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-800">
+      <h1 className="font-semibold">Your portfolio</h1>
       <div className="flex gap-2">
-        <Button
-          variant={profile.published ? 'secondary' : 'primary'}
-          disabled={publishing}
-          onClick={() => setPublished(!profile.published)}
-        >
-          {publishing ? 'Working…' : profile.published ? 'Unpublish' : 'Publish'}
-        </Button>
         <Button variant="ghost" onClick={logOut}>
           Log out
         </Button>
@@ -155,6 +71,7 @@ function Workspace() {
   return (
     <div className="mx-auto max-w-7xl">
       <Header />
+      <PublishPanel onFix={goTo} />
       <div className="grid gap-6 p-4 lg:grid-cols-2">
         <div className={`min-w-0 ${showPreview ? 'hidden lg:block' : ''}`}>
           <nav aria-label="Editor steps" className="mb-6 flex gap-1 overflow-x-auto pb-1">
@@ -196,8 +113,10 @@ function Workspace() {
 export function Editor() {
   const { state, retry } = useLoad(loadProfile);
 
-  if (state.status === 'loading') return <Loading />;
-  if (state.status === 'error') return <LoadFailed error={state.error} retry={retry} />;
+  if (state.status === 'loading') return <Loading label="Loading your portfolio…" />;
+  if (state.status === 'error') {
+    return <LoadFailed title="We couldn't load your portfolio" error={state.error} retry={retry} />;
+  }
   return (
     <EditorProvider initial={state.data}>
       <Workspace />
