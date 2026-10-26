@@ -13,6 +13,12 @@ async function deleteQuietly(publicId: string) {
   }
 }
 
+// Removes the Cloudinary file behind an avatar URL, but only if it is one of this profile's own.
+export async function deleteAvatarImage(avatarUrl: string | null, profileId: string) {
+  const publicId = avatarUrl && avatarPublicId(avatarUrl, profileId);
+  if (publicId) await deleteQuietly(publicId);
+}
+
 export async function replaceAvatar(profileId: string, file: Buffer) {
   if (!detectImageType(file)) {
     throw new AppError(400, 'UNSUPPORTED_FILE_TYPE', 'Only JPG, PNG and WebP images are allowed');
@@ -40,8 +46,7 @@ export async function replaceAvatar(profileId: string, file: Buffer) {
   }
 
   // Only now that the new avatar is saved, remove the one it replaces.
-  const oldId = current.avatarUrl && avatarPublicId(current.avatarUrl, profileId);
-  if (oldId) await deleteQuietly(oldId);
+  await deleteAvatarImage(current.avatarUrl, profileId);
 
   return { avatarUrl: uploaded.url };
 }
@@ -58,6 +63,5 @@ export async function removeAvatar(profileId: string) {
 
   await prisma.profile.update({ where: { id: profileId }, data: { avatarUrl: null } });
 
-  const publicId = avatarPublicId(current.avatarUrl, profileId);
-  if (publicId) await deleteQuietly(publicId);
+  await deleteAvatarImage(current.avatarUrl, profileId);
 }

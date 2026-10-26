@@ -20,6 +20,7 @@ interface FormProps<TIn extends FieldValues, TOut> {
   // Error codes that belong to one field, for example { SLUG_TAKEN: 'slug' }.
   codeFields?: Record<string, string>;
   submitLabel: string;
+  danger?: boolean; // styles the submit button as a destructive action
   onCancel?: () => void;
   children: ReactNode;
 }
@@ -29,6 +30,7 @@ export function Form<TIn extends FieldValues, TOut>({
   onSubmit,
   codeFields,
   submitLabel,
+  danger,
   onCancel,
   children,
 }: FormProps<TIn, TOut>) {
@@ -47,7 +49,7 @@ export function Form<TIn extends FieldValues, TOut>({
         {children}
         <ErrorText>{errors.root?.server?.message}</ErrorText>
         <div className="flex flex-wrap items-center gap-3">
-          <Button type="submit" variant="primary" disabled={isSubmitting}>
+          <Button type="submit" variant={danger ? 'danger' : 'primary'} disabled={isSubmitting}>
             {isSubmitting ? 'Saving…' : submitLabel}
           </Button>
           {onCancel && (

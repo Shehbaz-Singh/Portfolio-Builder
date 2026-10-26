@@ -13,6 +13,7 @@ Fill in your details once and get a clean, shareable portfolio page at your own 
 - Drag to reorder links, skills, experience, projects and education. Keyboard reordering works too.
 - Choose your own page address and pick a theme.
 - Publish or unpublish with one switch. You get the public link with copy and open buttons, and a warning if your name or About section is still empty. Unpublishing takes the page down immediately.
+- Change your password or delete your account from the settings page. Deleting removes the portfolio and photo for good.
 
 **For the people visiting a portfolio**
 

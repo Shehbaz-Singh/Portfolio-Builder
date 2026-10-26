@@ -97,9 +97,12 @@ async function handle(req: NextRequest, { params }: Context) {
     return res;
   }
 
+  // Deleting the account takes the public page with it and ends the session.
+  const deletedAccount = req.method === 'DELETE' && route === 'auth/me' && upstream.ok;
+
   // Any successful profile write can change a public page or unpublish it. Drop the cached
   // copies now; { expire: 0 } means the next visitor gets fresh data, never a stale page.
-  if (!isRead && upstream.ok && path[0] === 'profile') {
+  if (!isRead && upstream.ok && (path[0] === 'profile' || deletedAccount)) {
     revalidateTag(PUBLIC_PROFILES_TAG, { expire: 0 });
   }
 
@@ -110,8 +113,9 @@ async function handle(req: NextRequest, { params }: Context) {
       'cache-control': 'no-store',
     },
   });
-  // An expired or revoked token: forget it, so the route guard stops treating us as signed in.
-  if (upstream.status === 401 && token) res.cookies.delete(SESSION_COOKIE);
+  // An expired or revoked token, or a deleted account: forget the cookie, so the route guard
+  // stops treating us as signed in.
+  if ((upstream.status === 401 && token) || deletedAccount) res.cookies.delete(SESSION_COOKIE);
   return res;
 }
 

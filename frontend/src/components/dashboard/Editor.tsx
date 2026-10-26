@@ -1,5 +1,6 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { MyProfile } from '@portfolio/shared';
 import { api } from '@/lib/client-api';
@@ -28,6 +29,7 @@ const STEPS = [
 const loadProfile = (signal: AbortSignal) => api<MyProfile>('/profile/me', { signal });
 
 function Header() {
+  const router = useRouter();
   const { hasUnsaved } = useEditor();
   const confirmLeave = () =>
     !hasUnsaved() || window.confirm('You have unsaved changes. Leave without saving them?');
@@ -42,6 +44,12 @@ function Header() {
     <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-800">
       <h1 className="font-semibold">Your portfolio</h1>
       <div className="flex gap-2">
+        <Button
+          variant="ghost"
+          onClick={() => confirmLeave() && router.push('/dashboard/settings')}
+        >
+          Settings
+        </Button>
         <Button variant="ghost" onClick={logOut}>
           Log out
         </Button>

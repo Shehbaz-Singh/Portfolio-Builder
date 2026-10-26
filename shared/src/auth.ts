@@ -25,6 +25,24 @@ export const loginSchema = z.object({
 });
 export type LoginInput = z.infer<typeof loginSchema>;
 
+// POST /auth/change-password
+export const changePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(1, 'Current password is required').max(1024),
+    newPassword: passwordSchema,
+  })
+  .refine((v) => v.currentPassword !== v.newPassword, {
+    message: 'Choose a password you have not used just now',
+    path: ['newPassword'],
+  });
+export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
+
+// DELETE /auth/me: the password is the confirmation, so a stolen session alone cannot do it.
+export const deleteAccountSchema = z.object({
+  password: z.string().min(1, 'Password is required').max(1024),
+});
+export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
+
 // ---- Responses ----
 
 export const authUserSchema = z.object({

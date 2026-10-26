@@ -1,4 +1,11 @@
-import type { AuthResponse, LoginInput, RegisterInput, SessionResponse } from '@portfolio/shared';
+import type {
+  AuthResponse,
+  ChangePasswordInput,
+  DeleteAccountInput,
+  LoginInput,
+  RegisterInput,
+  SessionResponse,
+} from '@portfolio/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { signToken } from '../lib/jwt';
@@ -6,6 +13,7 @@ import { hashPassword, verifyPassword } from '../lib/password';
 import { prisma } from '../lib/prisma';
 import { isUniqueViolation } from '../lib/prisma-errors';
 import { profileSelect } from '../lib/selects';
+import { deleteAvatarImage } from './avatar.service';
 import { generateUniqueSlug } from './slug.service';
 
 // Explicit selects mean passwordHash is never loaded unless login needs it, and the
@@ -79,4 +87,36 @@ export async function getSession(userId: string): Promise<SessionResponse> {
   const user = await prisma.user.findUnique({ where: { id: userId }, select: sessionSelect });
   if (!user) throw AppError.unauthorized('Account no longer exists', 'INVALID_TOKEN');
   return toSession(user);
+}
+
+// Changing or deleting an account needs the password again, even with a valid token. The error
+// is 403, not 401: the session is fine, and the frontend treats a 401 as "log in again".
+async function confirmPassword(userId: string, password: string) {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { passwordHash: true, profile: { select: { id: true, avatarUrl: true } } },
+  });
+  if (!user) throw AppError.unauthorized('Account no longer exists', 'INVALID_TOKEN');
+  if (!(await verifyPassword(password, user.passwordHash))) {
+    throw new AppError(403, 'INVALID_PASSWORD', 'Incorrect password');
+  }
+  return user;
+}
+
+// Tokens are not tied to the password, so other signed-in devices stay signed in until their
+// token expires. Doing better would need a token version on the user.
+export async function changePassword(userId: string, input: ChangePasswordInput) {
+  await confirmPassword(userId, input.currentPassword);
+  await prisma.user.update({
+    where: { id: userId },
+    data: { passwordHash: await hashPassword(input.newPassword) },
+  });
+}
+
+// The profile and everything under it go with the user (cascade). The photo is removed from
+// Cloudinary afterwards; a failure there only leaves an unused image behind.
+export async function deleteAccount(userId: string, { password }: DeleteAccountInput) {
+  const user = await confirmPassword(userId, password);
+  await prisma.user.delete({ where: { id: userId } });
+  if (user.profile) await deleteAvatarImage(user.profile.avatarUrl, user.profile.id);
 }
