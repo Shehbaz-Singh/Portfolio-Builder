@@ -16,6 +16,7 @@ import { EducationStep } from './steps/EducationStep';
 import { ImportBanner, ImportStep } from './steps/ImportStep';
 import { ExperienceStep } from './steps/ExperienceStep';
 import { ProjectsStep } from './steps/ProjectsStep';
+import { SectionsStep } from './steps/SectionsStep';
 import { SkillsStep } from './steps/SkillsStep';
 
 interface Step {
@@ -33,6 +34,7 @@ const STEPS: Step[] = [
   { id: 'experience', label: 'Experience', Component: ExperienceStep },
   { id: 'projects', label: 'Projects', Component: ProjectsStep },
   { id: 'education', label: 'Education', Component: EducationStep },
+  { id: 'sections', label: 'Sections', Component: SectionsStep },
 ];
 
 const loadProfile = (signal: AbortSignal) => api<MyProfile>('/profile/me', { signal });

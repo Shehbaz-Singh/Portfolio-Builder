@@ -1,4 +1,4 @@
-import type { ProfileUpdateInput, PublishInput } from '@portfolio/shared';
+import type { ProfileUpdateInput, PublishInput, SectionsUpdateInput } from '@portfolio/shared';
 import { asyncHandler } from '../lib/async-handler';
 import { AppError } from '../lib/errors';
 import { getProfileId } from '../middleware/auth';
@@ -13,6 +13,15 @@ export const getMyProfile = asyncHandler(async (req, res) => {
 
 export const updateMyProfile = asyncHandler(async (req, res) => {
   res.json(await profileService.updateProfile(getProfileId(req), req.body as ProfileUpdateInput));
+});
+
+export const getMySections = asyncHandler(async (req, res) => {
+  res.json({ sections: await profileService.getSections(getProfileId(req)) });
+});
+
+export const updateMySections = asyncHandler(async (req, res) => {
+  const { sections } = req.body as SectionsUpdateInput;
+  res.json({ sections: await profileService.updateSections(getProfileId(req), sections) });
 });
 
 export const deleteMyAvatar = asyncHandler(async (req, res) => {

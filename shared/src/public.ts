@@ -1,5 +1,11 @@
 import { z } from 'zod';
 import { linkTypeSchema, profileSchema } from './portfolio';
+import {
+  SECTION_KEYS,
+  defaultSectionConfig,
+  publicSectionSchema,
+  sectionConfigSchema,
+} from './section-config';
 
 // The body of GET /public/:slug. Dates are ISO strings because they have been through JSON.
 // The top-level fields come from profileSchema, so a new profile field only needs adding there.
@@ -55,7 +61,10 @@ const sectionLists = {
   education: z.array(publicEducationSchema),
 };
 
+// `sections` is the visible sections in page order. It defaults to everything so a page keeps
+// working against an API that predates it. The content of a hidden section is left out by the API.
 export const publicProfileSchema = profileSchema.omit({ id: true, published: true }).extend({
+  sections: z.array(publicSectionSchema).default(() => SECTION_KEYS.map((key) => ({ key }))),
   links: z.array(publicLinkSchema),
   ...sectionLists,
 });
@@ -63,6 +72,8 @@ export const publicProfileSchema = profileSchema.omit({ id: true, published: tru
 // The body of GET /profile/me: what the editor needs. Unlike the public view it keeps the
 // profile id and published flag, and hidden links (with their visible flag).
 export const myProfileSchema = profileSchema.extend({
+  // All sections, hidden ones included, in page order (GET/PUT /profile/me/sections).
+  sectionConfig: sectionConfigSchema.default(defaultSectionConfig),
   links: z.array(publicLinkSchema.extend({ visible: z.boolean() })),
   ...sectionLists,
 });

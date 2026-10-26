@@ -27,17 +27,20 @@ model User {
 }
 
 model Profile {
-  id          String  @id @default(cuid())
-  userId      String  @unique
-  slug        String  @unique
-  fullName    String
-  tagline     String?
-  about       String?
-  location    String?
-  avatarUrl   String?
-  theme       String  @default("minimal")
-  accentColor String  @default("#2563eb")
-  published   Boolean @default(false)
+  id            String  @id @default(cuid())
+  userId        String  @unique
+  slug          String  @unique
+  fullName      String
+  tagline       String?
+  about         String?
+  location      String?
+  avatarUrl     String?
+  theme         String  @default("minimal")
+  accentColor   String  @default("#2563eb")
+  published     Boolean @default(false)
+  // Order, visibility and headings of the page sections (see shared/src/section-config.ts).
+  // The default must match defaultSectionConfig(); existing rows get it when the column is added.
+  sectionConfig Json    @default("[{\"key\":\"about\",\"visible\":true},{\"key\":\"skills\",\"visible\":true},{\"key\":\"experience\",\"visible\":true},{\"key\":\"projects\",\"visible\":true},{\"key\":\"education\",\"visible\":true}]")
 
   user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   links      Link[]

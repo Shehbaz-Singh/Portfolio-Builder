@@ -1,11 +1,18 @@
 import { Router } from 'express';
-import { profileUpdateSchema, publishSchema, reorderSchema } from '@portfolio/shared';
+import {
+  profileUpdateSchema,
+  publishSchema,
+  reorderSchema,
+  sectionsUpdateSchema,
+} from '@portfolio/shared';
 import {
   deleteMyAvatar,
   getMyProfile,
+  getMySections,
   parseMyResume,
   publishMyProfile,
   updateMyProfile,
+  updateMySections,
   uploadMyAvatar,
 } from '../controllers/profile.controller';
 import {
@@ -38,6 +45,11 @@ profileRouter.post('/me/avatar', uploadLimiter, avatarUpload, uploadMyAvatar);
 profileRouter.delete('/me/avatar', deleteMyAvatar);
 // Reads a resume PDF and returns the parsed data. Declared before /me/:section like the others.
 profileRouter.post('/me/resume', resumeLimiter, resumeUpload, parseMyResume);
+
+// Layout of the page: which sections show, in what order, under what heading. Declared before
+// /me/:section like the others, so "sections" is not read as a section name.
+profileRouter.get('/me/sections', getMySections);
+profileRouter.put('/me/sections', validateBody(sectionsUpdateSchema), updateMySections);
 
 // :section is one of experience | education | projects | skills | links
 profileRouter.patch('/me/:section/reorder', validateBody(reorderSchema), reorderSection);

@@ -1,3 +1,4 @@
+import { normalizeSectionConfig, visibleSections } from '@portfolio/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
@@ -7,6 +8,7 @@ import { orderedList, publicProfileSelect } from '../lib/selects';
 // particular the User row is never touched: no account email, passwordHash or userId.
 const publicSelect = {
   ...publicProfileSelect,
+  sectionConfig: true,
   // Hidden links are filtered in the database. `visible` is dropped since it is always true.
   links: {
     where: { visible: true },
@@ -27,5 +29,19 @@ export async function getPublicProfile(slug: string) {
     select: publicSelect,
   });
   if (!profile) throw AppError.notFound('Profile not found');
-  return profile;
+
+  // `sections` lists what is shown, in order. The content of a hidden section is left out too:
+  // hiding is about privacy as much as layout, and the JSON is as public as the page.
+  const { sectionConfig, ...rest } = profile;
+  const sections = visibleSections(normalizeSectionConfig(sectionConfig));
+  const has = (key: string) => sections.some((section) => section.key === key);
+  return {
+    ...rest,
+    about: has('about') ? rest.about : null,
+    skills: has('skills') ? rest.skills : [],
+    experience: has('experience') ? rest.experience : [],
+    projects: has('projects') ? rest.projects : [],
+    education: has('education') ? rest.education : [],
+    sections,
+  };
 }

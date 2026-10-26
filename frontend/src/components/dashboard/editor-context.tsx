@@ -10,12 +10,21 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { MyProfile, ParsedResume, PublicProfile, Section } from '@portfolio/shared';
+import {
+  visibleSections,
+  type MyProfile,
+  type ParsedResume,
+  type PublicProfile,
+  type Section,
+} from '@portfolio/shared';
 import { ApiError, api } from '@/lib/client-api';
 
 // Fields the live preview shows while they are still being typed (not yet saved).
 export type Draft = Partial<
-  Pick<MyProfile, 'fullName' | 'tagline' | 'location' | 'about' | 'theme' | 'accentColor'>
+  Pick<
+    MyProfile,
+    'fullName' | 'tagline' | 'location' | 'about' | 'theme' | 'accentColor' | 'sectionConfig'
+  >
 >;
 type Notice = { kind: 'success' | 'error'; text: string };
 
@@ -177,7 +186,13 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
   }, []);
 
   const preview = useMemo<PublicProfile>(
-    () => ({ ...profile, ...draft, links: profile.links.filter((link) => link.visible) }),
+    () => ({
+      ...profile,
+      ...draft,
+      links: profile.links.filter((link) => link.visible),
+      // The same visible-and-ordered list the public API returns, from the unsaved config too.
+      sections: visibleSections(draft?.sectionConfig ?? profile.sectionConfig),
+    }),
     [profile, draft],
   );
 

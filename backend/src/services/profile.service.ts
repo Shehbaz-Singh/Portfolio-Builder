@@ -1,4 +1,8 @@
-import type { ProfileUpdateInput } from '@portfolio/shared';
+import {
+  normalizeSectionConfig,
+  type ProfileUpdateInput,
+  type SectionConfig,
+} from '@portfolio/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
@@ -9,6 +13,7 @@ import { assertSlugAvailable, slugTaken } from './slug.service';
 // The whole profile as the editor (and later the public page) needs it, in one query.
 const fullProfileSelect = {
   ...profileSelect,
+  sectionConfig: true,
   links: orderedList,
   skills: orderedList,
   experience: orderedList,
@@ -16,13 +21,40 @@ const fullProfileSelect = {
   education: orderedList,
 } satisfies Prisma.ProfileSelect;
 
+// The stored JSON is trusted only after it has been through normalizeSectionConfig, so the
+// client always gets a complete, valid list.
+const withSections = <T extends { sectionConfig: unknown }>(profile: T) => ({
+  ...profile,
+  sectionConfig: normalizeSectionConfig(profile.sectionConfig),
+});
+
 export async function getProfile(profileId: string) {
   const profile = await prisma.profile.findUnique({
     where: { id: profileId },
     select: fullProfileSelect,
   });
   if (!profile) throw AppError.notFound('Profile not found');
-  return profile;
+  return withSections(profile);
+}
+
+export async function getSections(profileId: string): Promise<SectionConfig> {
+  const profile = await prisma.profile.findUnique({
+    where: { id: profileId },
+    select: { sectionConfig: true },
+  });
+  if (!profile) throw AppError.notFound('Profile not found');
+  return normalizeSectionConfig(profile.sectionConfig);
+}
+
+// Stores the complete list: a section left out of the request is added back at the end, visible,
+// so the saved config always covers every known section.
+export async function updateSections(profileId: string, sections: SectionConfig) {
+  const saved = await prisma.profile.update({
+    where: { id: profileId },
+    data: { sectionConfig: normalizeSectionConfig(sections) },
+    select: { sectionConfig: true },
+  });
+  return normalizeSectionConfig(saved.sectionConfig);
 }
 
 export async function updateProfile(profileId: string, input: ProfileUpdateInput) {
@@ -30,11 +62,13 @@ export async function updateProfile(profileId: string, input: ProfileUpdateInput
   if (slug) await assertSlugAvailable(slug, profileId);
 
   try {
-    return await prisma.profile.update({
-      where: { id: profileId },
-      data: { ...fields, ...(slug && { slug }) },
-      select: fullProfileSelect,
-    });
+    return withSections(
+      await prisma.profile.update({
+        where: { id: profileId },
+        data: { ...fields, ...(slug && { slug }) },
+        select: fullProfileSelect,
+      }),
+    );
   } catch (err) {
     // Someone else claimed the slug between the check and the update.
     if (isUniqueViolation(err)) throw slugTaken();

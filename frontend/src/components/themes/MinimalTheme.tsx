@@ -1,5 +1,5 @@
-import type { ReactNode } from 'react';
-import type { PublicProfile } from '@portfolio/shared';
+import type { ReactElement, ReactNode } from 'react';
+import { SECTION_LABELS, type PublicProfile, type SectionKey } from '@portfolio/shared';
 import { SITE_URL } from '@/lib/config';
 import { formatMonthYear, initials, linkTarget, safeHttpUrl } from '@/lib/format';
 import { ShareButton } from '../ShareButton';
@@ -137,113 +137,154 @@ function TimelineItem({
   );
 }
 
-export default function MinimalTheme({ profile }: ThemeProps) {
-  const { about, skills, experience, projects, education } = profile;
+interface SectionProps {
+  profile: PublicProfile;
+  title: string; // the owner's heading, or the default one
+}
 
+// One component per kind of section. Each draws nothing when it has no content, so a section
+// that is switched on but empty leaves no heading behind.
+function AboutSection({ profile, title }: SectionProps) {
+  if (!profile.about) return null;
+  return (
+    <Section id="about" title={title}>
+      <p className="leading-relaxed whitespace-pre-line text-ink">{profile.about}</p>
+    </Section>
+  );
+}
+
+function SkillsSection({ profile, title }: SectionProps) {
+  if (profile.skills.length === 0) return null;
+  return (
+    <Section id="skills" title={title}>
+      <ul className="flex flex-wrap gap-2">
+        {profile.skills.map((skill) => (
+          <li key={skill.id} className={chip}>
+            {skill.name}
+          </li>
+        ))}
+      </ul>
+    </Section>
+  );
+}
+
+function ExperienceSection({ profile, title }: SectionProps) {
+  if (profile.experience.length === 0) return null;
+  return (
+    <Section id="experience" title={title}>
+      <ol className="border-s border-line">
+        {profile.experience.map((job) => (
+          <TimelineItem
+            key={job.id}
+            title={job.title}
+            subtitle={job.company}
+            start={job.startDate}
+            end={job.endDate}
+            description={job.description}
+          />
+        ))}
+      </ol>
+    </Section>
+  );
+}
+
+function ProjectsSection({ profile, title }: SectionProps) {
+  if (profile.projects.length === 0) return null;
+  return (
+    <Section id="projects" title={title}>
+      <ul className="grid gap-4 sm:grid-cols-2">
+        {profile.projects.map((project) => {
+          const href = safeHttpUrl(project.url);
+          return (
+            <li
+              key={project.id}
+              className="relative flex flex-col rounded-xl border border-line p-5 transition focus-within:border-accent hover:border-accent/50 hover:shadow-sm"
+            >
+              <h3 className="font-semibold">
+                {href ? (
+                  <a
+                    href={href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`after:absolute after:inset-0 after:rounded-xl ${focusRing}`}
+                  >
+                    {project.name}
+                    <span className="sr-only"> (opens in a new tab)</span>
+                  </a>
+                ) : (
+                  project.name
+                )}
+              </h3>
+              {project.description && (
+                <p className={`mt-2 text-sm whitespace-pre-line ${muted}`}>{project.description}</p>
+              )}
+              {project.techTags.length > 0 && (
+                <ul className="mt-4 flex flex-wrap gap-1.5">
+                  {project.techTags.map((tag) => (
+                    <li
+                      key={tag}
+                      className="rounded-md bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent"
+                    >
+                      {tag}
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </Section>
+  );
+}
+
+function EducationSection({ profile, title }: SectionProps) {
+  if (profile.education.length === 0) return null;
+  return (
+    <Section id="education" title={title}>
+      <ol className="border-s border-line">
+        {profile.education.map((item) => (
+          <TimelineItem
+            key={item.id}
+            title={item.degree}
+            subtitle={item.institution}
+            start={item.startDate}
+            end={item.endDate}
+          />
+        ))}
+      </ol>
+    </Section>
+  );
+}
+
+// Which component draws which section. A new kind of section (testimonials, custom sections) is
+// a new key in the shared list plus an entry here; the page itself does not change.
+const SECTION_COMPONENTS: Record<SectionKey, (props: SectionProps) => ReactElement | null> = {
+  about: AboutSection,
+  skills: SkillsSection,
+  experience: ExperienceSection,
+  projects: ProjectsSection,
+  education: EducationSection,
+};
+
+export default function MinimalTheme({ profile }: ThemeProps) {
   return (
     <ThemeWrapper profile={profile}>
       <main className="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-16">
         <Header profile={profile} />
 
-        {about && (
-          <Section id="about" title="About">
-            <p className="leading-relaxed whitespace-pre-line text-ink">{about}</p>
-          </Section>
-        )}
-
-        {skills.length > 0 && (
-          <Section id="skills" title="Skills">
-            <ul className="flex flex-wrap gap-2">
-              {skills.map((skill) => (
-                <li key={skill.id} className={chip}>
-                  {skill.name}
-                </li>
-              ))}
-            </ul>
-          </Section>
-        )}
-
-        {experience.length > 0 && (
-          <Section id="experience" title="Experience">
-            <ol className="border-s border-line">
-              {experience.map((job) => (
-                <TimelineItem
-                  key={job.id}
-                  title={job.title}
-                  subtitle={job.company}
-                  start={job.startDate}
-                  end={job.endDate}
-                  description={job.description}
-                />
-              ))}
-            </ol>
-          </Section>
-        )}
-
-        {projects.length > 0 && (
-          <Section id="projects" title="Projects">
-            <ul className="grid gap-4 sm:grid-cols-2">
-              {projects.map((project) => {
-                const href = safeHttpUrl(project.url);
-                return (
-                  <li
-                    key={project.id}
-                    className="relative flex flex-col rounded-xl border border-line p-5 transition focus-within:border-accent hover:border-accent/50 hover:shadow-sm"
-                  >
-                    <h3 className="font-semibold">
-                      {href ? (
-                        <a
-                          href={href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`after:absolute after:inset-0 after:rounded-xl ${focusRing}`}
-                        >
-                          {project.name}
-                          <span className="sr-only"> (opens in a new tab)</span>
-                        </a>
-                      ) : (
-                        project.name
-                      )}
-                    </h3>
-                    {project.description && (
-                      <p className={`mt-2 text-sm whitespace-pre-line ${muted}`}>
-                        {project.description}
-                      </p>
-                    )}
-                    {project.techTags.length > 0 && (
-                      <ul className="mt-4 flex flex-wrap gap-1.5">
-                        {project.techTags.map((tag) => (
-                          <li
-                            key={tag}
-                            className="rounded-md bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent"
-                          >
-                            {tag}
-                          </li>
-                        ))}
-                      </ul>
-                    )}
-                  </li>
-                );
-              })}
-            </ul>
-          </Section>
-        )}
-
-        {education.length > 0 && (
-          <Section id="education" title="Education">
-            <ol className="border-s border-line">
-              {education.map((item) => (
-                <TimelineItem
-                  key={item.id}
-                  title={item.degree}
-                  subtitle={item.institution}
-                  start={item.startDate}
-                  end={item.endDate}
-                />
-              ))}
-            </ol>
-          </Section>
-        )}
+        {/* The order, visibility and headings come from the profile's section config. */}
+        {profile.sections.map(({ key, title }) => {
+          if (!Object.hasOwn(SECTION_COMPONENTS, key)) return null; // not a section this theme knows
+          const Component = SECTION_COMPONENTS[key as SectionKey];
+          return (
+            <Component
+              key={key}
+              profile={profile}
+              title={title ?? SECTION_LABELS[key as SectionKey]}
+            />
+          );
+        })}
       </main>
     </ThemeWrapper>
   );
