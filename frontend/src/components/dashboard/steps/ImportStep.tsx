@@ -54,23 +54,20 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
         <h2 id="import-heading" className="text-lg font-semibold">
           Start from your resume
         </h2>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-1 text-sm text-muted">
           Upload a PDF and we fill in what we can find: your details, links, skills, jobs, education
           and projects. You review and fix everything first, and nothing is saved until you save it.
         </p>
       </div>
 
       {hasPendingImport && (
-        <p
-          role="status"
-          className="rounded-lg bg-indigo-50 px-3 py-2 text-sm text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200"
-        >
+        <p role="status" className="rounded-lg bg-accent-soft px-3 py-2 text-sm text-ink">
           You have a resume waiting for review. Go through the other steps, or upload a different
           one to replace it.
         </p>
       )}
 
-      <div className="space-y-3 rounded-2xl border border-dashed border-slate-300 p-6 text-center dark:border-slate-700">
+      <div className="space-y-3 rounded-2xl border border-dashed border-line p-6 text-center">
         <input
           ref={input}
           type="file"
@@ -86,19 +83,15 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
         <Button variant="primary" disabled={reading} onClick={() => input.current?.click()}>
           {reading ? 'Reading your resume…' : 'Choose a PDF'}
         </Button>
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+        <p className="text-xs text-muted">
           PDF with selectable text, up to 4.5 MB. Scanned images are not supported.
         </p>
-        {reading && (
-          <p className="text-sm text-slate-600 dark:text-slate-400">
-            This usually takes 10 to 20 seconds.
-          </p>
-        )}
+        {reading && <p className="text-sm text-muted">This usually takes 10 to 20 seconds.</p>}
         <SlowNotice pending={reading} />
         <ErrorText>{error}</ErrorText>
       </div>
 
-      <p className="text-xs text-slate-500 dark:text-slate-400">
+      <p className="text-xs text-muted">
         The PDF is not stored. Its text is sent to an AI service to be read, and only the result is
         kept in this page until you save it.
       </p>
@@ -119,7 +112,7 @@ export function ImportBanner() {
   return (
     <section
       aria-label="Resume import"
-      className="mx-4 mt-4 flex flex-wrap items-start justify-between gap-3 rounded-2xl bg-indigo-50 p-4 text-sm text-indigo-900 dark:bg-indigo-950 dark:text-indigo-200"
+      className="mx-4 mt-4 flex flex-wrap items-start justify-between gap-3 rounded-2xl bg-accent-soft p-4 text-sm text-ink"
     >
       <div className="max-w-2xl space-y-1">
         <p className="font-medium">Imported from your resume. Nothing is saved yet.</p>

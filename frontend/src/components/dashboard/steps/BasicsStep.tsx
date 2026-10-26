@@ -14,11 +14,13 @@ import {
   type MyProfile,
 } from '@portfolio/shared';
 import { ApiError, api } from '@/lib/client-api';
+import { normalizeHex } from '@/lib/color';
 import { schemaResolver } from '@/lib/form';
 import { initials } from '@/lib/format';
 import { CheckboxField, SelectField, TextField } from '../../form-fields';
 import { DEFAULT_THEME, isKnownTheme } from '../../themes';
 import { Button, SlowNotice, Switch } from '../../ui';
+import { AccentPicker } from '../AccentPicker';
 import { EditorForm } from '../EditorForm';
 import { ThemePicker } from '../ThemePicker';
 import { errorText, useEditor, useSection } from '../editor-context';
@@ -83,7 +85,7 @@ function AvatarUpload() {
       ) : (
         <div
           aria-hidden="true"
-          className="flex size-20 items-center justify-center rounded-full bg-indigo-100 text-2xl font-semibold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
+          className="flex size-20 items-center justify-center rounded-full bg-accent-soft text-2xl font-semibold text-accent"
         >
           {initials(profile.fullName)}
         </div>
@@ -111,7 +113,7 @@ function AvatarUpload() {
             </Button>
           )}
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400">JPG, PNG or WebP, up to 2 MB.</p>
+        <p className="text-xs text-muted">JPG, PNG or WebP, up to 2 MB.</p>
         <SlowNotice pending={uploading} />
       </div>
     </div>
@@ -119,7 +121,7 @@ function AvatarUpload() {
 }
 
 const detailsSchema = profileUpdateSchema
-  .pick({ fullName: true, tagline: true, location: true, theme: true })
+  .pick({ fullName: true, tagline: true, location: true, theme: true, accentColor: true })
   .extend({ slug: slugSchema });
 type DetailsFields = {
   fullName: string;
@@ -127,6 +129,7 @@ type DetailsFields = {
   location: string;
   slug: string;
   theme: string;
+  accentColor: string;
 };
 
 const toFields = (p: MyProfile): DetailsFields => ({
@@ -135,6 +138,7 @@ const toFields = (p: MyProfile): DetailsFields => ({
   location: p.location ?? '',
   slug: p.slug,
   theme: isKnownTheme(p.theme) ? p.theme : DEFAULT_THEME,
+  accentColor: p.accentColor,
 });
 
 function DetailsForm() {
@@ -147,20 +151,25 @@ function DetailsForm() {
 
   // Typing shows up in the preview straight away; saving makes it permanent.
   useEffect(() => {
-    const publish = (v: Partial<DetailsFields>) =>
+    // While a hex code is half typed the preview keeps the last complete one.
+    let accent = profile.accentColor;
+    const publish = (v: Partial<DetailsFields>) => {
+      accent = normalizeHex(v.accentColor) ?? accent;
       setDraft({
         fullName: v.fullName ?? '',
         tagline: v.tagline || null,
         location: v.location || null,
         theme: v.theme ?? DEFAULT_THEME,
+        accentColor: accent,
       });
+    };
     publish(form.getValues());
     const subscription = form.watch(publish);
     return () => {
       subscription.unsubscribe();
       setDraft(null);
     };
-  }, [form, setDraft]);
+  }, [form, setDraft, profile.accentColor]);
 
   // Details read from an uploaded resume arrive here as unsaved edits, to review and fix.
   useEffect(() => {
@@ -205,6 +214,7 @@ function DetailsForm() {
         hint={`Your page will be at ${window.location.host}/${slug || 'your-name'}`}
       />
       <ThemePicker />
+      <AccentPicker />
     </EditorForm>
   );
 }
@@ -316,7 +326,7 @@ export function BasicsStep() {
           <h2 id="links-heading" className="text-lg font-semibold">
             Links
           </h2>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
+          <p className="text-sm text-muted">
             Drag the grip to reorder. Use the switch to hide a link without deleting it.
           </p>
         </div>

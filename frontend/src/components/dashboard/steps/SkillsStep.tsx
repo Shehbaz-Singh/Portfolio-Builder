@@ -56,7 +56,7 @@ export function SkillsStep() {
         <h2 id="skills-heading" className="text-lg font-semibold">
           Skills
         </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
+        <p className="text-sm text-muted">
           Drag the grip to reorder, or focus it and use the arrow keys.
         </p>
       </div>
@@ -80,7 +80,7 @@ export function SkillsStep() {
       {suggestions.length > 0 && (
         <section
           aria-label="Skill suggestions from your resume"
-          className="space-y-3 rounded-2xl border border-dashed border-indigo-300 bg-indigo-50/50 p-3 dark:border-indigo-800 dark:bg-indigo-950/30"
+          className="space-y-3 rounded-2xl border border-dashed border-accent/50 bg-accent-soft p-3"
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-medium">From your resume ({suggestions.length})</p>
@@ -97,13 +97,13 @@ export function SkillsStep() {
             {suggestions.map((suggestion) => (
               <li
                 key={suggestion.key}
-                className="inline-flex items-center rounded-full border border-slate-300 bg-white text-sm dark:border-slate-700 dark:bg-slate-950"
+                className="inline-flex items-center rounded-full border border-line bg-page text-sm"
               >
                 <button
                   type="button"
                   aria-label={`Add ${suggestion.data}`}
                   disabled={adding}
-                  className="rounded-l-full py-1 pr-2 pl-3 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-indigo-600 disabled:opacity-60 dark:hover:bg-slate-800"
+                  className="rounded-l-full py-1 pr-2 pl-3 hover:bg-surface focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-60"
                   onClick={() => addSuggested([suggestion])}
                 >
                   + {suggestion.data}
@@ -112,7 +112,7 @@ export function SkillsStep() {
                   type="button"
                   aria-label={`Skip ${suggestion.data}`}
                   disabled={adding}
-                  className="rounded-r-full px-2 py-1 text-slate-500 hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-indigo-600 disabled:opacity-60 dark:hover:bg-slate-800"
+                  className="rounded-r-full px-2 py-1 text-muted hover:bg-surface focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-60"
                   onClick={() => dismiss(suggestion.key)}
                 >
                   ×
@@ -124,7 +124,7 @@ export function SkillsStep() {
       )}
 
       {items.length === 0 ? (
-        <p className="text-sm text-slate-600 dark:text-slate-400">No skills yet.</p>
+        <p className="text-sm text-muted">No skills yet.</p>
       ) : (
         <SortableList
           items={items}
@@ -132,13 +132,13 @@ export function SkillsStep() {
           onReorder={reorder}
           label={(skill) => skill.name}
           renderItem={(skill, handle) => (
-            <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 py-1 pr-1 pl-1.5 text-sm dark:bg-slate-800">
+            <span className="inline-flex items-center gap-1 rounded-full bg-surface py-1 pr-1 pl-1.5 text-sm">
               {handle}
               {skill.name}
               <button
                 type="button"
                 aria-label={`Remove ${skill.name}`}
-                className="rounded-full px-2 text-slate-500 hover:bg-slate-200 hover:text-red-700 focus-visible:outline-2 focus-visible:outline-indigo-600 dark:hover:bg-slate-700"
+                className="rounded-full px-2 text-muted hover:bg-line hover:text-red-700 focus-visible:outline-2 focus-visible:outline-accent"
                 onClick={() => remove(skill.id).catch((err) => notify('error', errorText(err)))}
               >
                 ×

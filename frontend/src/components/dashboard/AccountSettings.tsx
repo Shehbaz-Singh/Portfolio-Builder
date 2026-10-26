@@ -73,10 +73,10 @@ function ChangePassword() {
           autoComplete="new-password"
         />
       </Form>
-      <p role="status" className="text-sm font-medium text-green-700 dark:text-green-400">
+      <p role="status" className="text-sm font-medium text-green-700">
         {changed ? 'Your password has been changed.' : ''}
       </p>
-      <p className="text-xs text-slate-500 dark:text-slate-400">
+      <p className="text-xs text-muted">
         Other devices you are logged in on stay logged in until their session expires.
       </p>
     </section>
@@ -98,17 +98,17 @@ function DeleteAccount() {
   return (
     <section
       aria-labelledby="delete-heading"
-      className="space-y-4 rounded-2xl border border-red-300 p-4 dark:border-red-900"
+      className="space-y-4 rounded-2xl border border-red-300 p-4"
     >
-      <h2 id="delete-heading" className="text-lg font-semibold text-red-700 dark:text-red-400">
+      <h2 id="delete-heading" className="text-lg font-semibold text-red-700">
         Delete account
       </h2>
-      <p className="text-sm text-slate-700 dark:text-slate-300">
+      <p className="text-sm text-ink">
         This permanently deletes your account, your portfolio and your photo, and your page address
         stops working. It cannot be undone.
       </p>
       {confirming ? (
-        <div className="space-y-4 rounded-lg bg-red-50 p-4 dark:bg-red-950">
+        <div className="space-y-4 rounded-lg bg-red-50 p-4">
           <p className="text-sm font-medium">Enter your password to confirm.</p>
           <Form
             form={form}
@@ -149,14 +149,11 @@ export function AccountSettings() {
   return (
     <main className="mx-auto max-w-xl space-y-10 px-4 py-8">
       <div>
-        <Link
-          href="/dashboard"
-          className="text-sm font-medium text-indigo-700 underline dark:text-indigo-400"
-        >
+        <Link href="/dashboard" className="text-sm font-medium text-accent underline">
           ← Back to editor
         </Link>
         <h1 className="mt-4 text-2xl font-bold tracking-tight">Account settings</h1>
-        <p className="mt-1 text-sm text-slate-600 dark:text-slate-400">
+        <p className="mt-1 text-sm text-muted">
           Signed in as <span className="font-medium">{state.data.user.email}</span>
         </p>
       </div>

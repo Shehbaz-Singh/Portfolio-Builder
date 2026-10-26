@@ -53,6 +53,16 @@ export const slugSchema = z
 
 export const themeSchema = z.string().trim().min(1).max(50);
 
+export const DEFAULT_ACCENT = '#2563eb';
+
+// Exactly #RRGGBB (no shorthand, no alpha, no names): the value is placed in a CSS variable on
+// the public page, so nothing else may get through. Stored lowercase.
+export const accentColorSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^#[0-9a-f]{6}$/, 'Use a hex color like #2563eb');
+
 export const linkTypeSchema = z.enum(['linkedin', 'github', 'email', 'phone', 'website', 'other']);
 export type LinkType = z.infer<typeof linkTypeSchema>;
 
@@ -64,6 +74,7 @@ export const profileInputSchema = z.object({
   location: optionalText(100),
   avatarUrl: httpUrl.nullish().transform((v) => v ?? null),
   theme: themeSchema.default('minimal'),
+  accentColor: accentColorSchema.default(DEFAULT_ACCENT),
   published: z.boolean().default(false),
 });
 export type ProfileInput = z.infer<typeof profileInputSchema>;

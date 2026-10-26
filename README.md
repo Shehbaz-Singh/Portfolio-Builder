@@ -12,13 +12,13 @@ Fill in your details once and get a clean, shareable portfolio page at your own 
 - Add links (LinkedIn, GitHub, email, phone, website) and hide any of them with a switch without deleting it.
 - Upload a profile photo; it is cropped to a square automatically.
 - Drag to reorder links, skills, experience, projects and education. Keyboard reordering works too.
-- Choose your own page address and pick a theme.
+- Choose your own page address, pick a theme and an accent color (with a warning when it is hard to read).
 - Publish or unpublish with one switch. You get the public link with copy and open buttons, and a warning if your name or About section is still empty. Unpublishing takes the page down immediately.
 - Change your password or delete your account from the settings page. Deleting removes the portfolio and photo for good.
 
 **For the people visiting a portfolio**
 
-- A fast, readable page that works on phones and follows the visitor's light or dark setting.
+- A fast, readable page that works on phones, with a Share button (system share sheet, or copy link, LinkedIn, X, WhatsApp and email).
 - Proper link previews when the page is shared, with a generated social image showing the name, tagline and photo.
 - Unpublished or missing pages look identical, so nobody can tell which names are taken.
 

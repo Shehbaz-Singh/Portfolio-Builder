@@ -1,23 +1,20 @@
 import type { ReactNode } from 'react';
 import type { PublicProfile } from '@portfolio/shared';
+import { SITE_URL } from '@/lib/config';
 import { formatMonthYear, initials, linkTarget, safeHttpUrl } from '@/lib/format';
+import { ShareButton } from '../ShareButton';
+import { ThemeWrapper } from './ThemeWrapper';
 import type { ThemeProps } from './types';
 
-// Light and dark follow the visitor's system setting (Tailwind's default `dark:` variant).
-
-const chip =
-  'rounded-full bg-slate-100 px-3 py-1 text-sm text-slate-700 dark:bg-slate-800 dark:text-slate-200';
-const muted = 'text-slate-600 dark:text-slate-400';
+const chip = 'rounded-full bg-surface px-3 py-1 text-sm text-ink';
+const muted = 'text-muted';
 const focusRing =
-  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:focus-visible:outline-indigo-400';
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
 
 function Section({ id, title, children }: { id: string; title: string; children: ReactNode }) {
   return (
     <section aria-labelledby={id} className="mt-12">
-      <h2
-        id={id}
-        className="mb-5 text-sm font-semibold tracking-wider text-slate-500 uppercase dark:text-slate-400"
-      >
+      <h2 id={id} className="mb-5 text-sm font-semibold tracking-wider text-muted uppercase">
         {title}
       </h2>
       {children}
@@ -31,22 +28,20 @@ function Avatar({ profile }: { profile: PublicProfile }) {
 
   if (src) {
     return (
-      // A plain <img>: avatars come from Cloudinary (already 400px) or any host the user chose,
-      // which next/image could not allow-list.
       <img
         src={src}
         alt={`Photo of ${profile.fullName}`}
         width={128}
         height={128}
         referrerPolicy="no-referrer"
-        className={`${size} object-cover shadow-md ring-4 ring-white dark:ring-slate-950`}
+        className={`${size} object-cover shadow-md ring-4 ring-page`}
       />
     );
   }
   return (
     <div
       aria-hidden="true"
-      className={`${size} flex items-center justify-center bg-indigo-100 text-3xl font-semibold text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300`}
+      className={`${size} flex items-center justify-center bg-accent text-3xl font-semibold text-on-accent`}
     >
       {initials(profile.fullName)}
     </div>
@@ -66,9 +61,7 @@ function Header({ profile }: { profile: PublicProfile }) {
         <h1 className="text-3xl font-bold tracking-tight break-words sm:text-4xl">
           {profile.fullName}
         </h1>
-        {profile.tagline && (
-          <p className="mt-2 text-lg text-slate-700 dark:text-slate-300">{profile.tagline}</p>
-        )}
+        {profile.tagline && <p className="mt-2 text-lg text-ink">{profile.tagline}</p>}
         {profile.location && (
           <p
             className={`mt-2 flex items-center justify-center gap-1.5 text-sm sm:justify-start ${muted}`}
@@ -88,22 +81,26 @@ function Header({ profile }: { profile: PublicProfile }) {
             <span>{profile.location}</span>
           </p>
         )}
-        {links.length > 0 && (
-          <ul className="mt-5 flex flex-wrap justify-center gap-2 sm:justify-start">
-            {links.map((link) => (
-              <li key={link.id}>
-                <a
-                  href={link.href}
-                  {...(link.external && { target: '_blank', rel: 'noopener noreferrer' })}
-                  className={`inline-flex items-center rounded-full border border-slate-300 px-4 py-2 text-sm font-medium transition hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800 ${focusRing}`}
-                >
-                  {link.label}
-                  {link.external && <span className="sr-only"> (opens in a new tab)</span>}
-                </a>
-              </li>
-            ))}
-          </ul>
-        )}
+        <ul className="mt-5 flex flex-wrap justify-center gap-2 sm:justify-start">
+          {links.map((link) => (
+            <li key={link.id}>
+              <a
+                href={link.href}
+                {...(link.external && { target: '_blank', rel: 'noopener noreferrer' })}
+                className={`inline-flex items-center rounded-full border border-line px-4 py-2 text-sm font-medium transition hover:bg-surface ${focusRing}`}
+              >
+                {link.label}
+                {link.external && <span className="sr-only"> (opens in a new tab)</span>}
+              </a>
+            </li>
+          ))}
+          <li>
+            <ShareButton
+              url={`${SITE_URL}/${profile.slug}`}
+              title={`${profile.fullName}'s portfolio`}
+            />
+          </li>
+        </ul>
       </div>
     </header>
   );
@@ -126,18 +123,16 @@ function TimelineItem({
     <li className="relative pb-8 ps-6 last:pb-0">
       <span
         aria-hidden="true"
-        className="absolute start-0 top-2 size-3 -translate-x-1/2 rounded-full border-2 border-white bg-indigo-600 dark:border-slate-950 dark:bg-indigo-400"
+        className="absolute start-0 top-2 size-3 -translate-x-1/2 rounded-full border-2 border-page bg-accent"
       />
       <h3 className="font-semibold">{title}</h3>
       <p className={muted}>{subtitle}</p>
-      <p className="mt-0.5 text-sm text-slate-500 dark:text-slate-500">
+      <p className="mt-0.5 text-sm text-muted">
         <time dateTime={start}>{formatMonthYear(start)}</time>
         {' – '}
         {end ? <time dateTime={end}>{formatMonthYear(end)}</time> : 'Present'}
       </p>
-      {description && (
-        <p className="mt-2 whitespace-pre-line text-slate-700 dark:text-slate-300">{description}</p>
-      )}
+      {description && <p className="mt-2 whitespace-pre-line text-ink">{description}</p>}
     </li>
   );
 }
@@ -146,15 +141,13 @@ export default function MinimalTheme({ profile }: ThemeProps) {
   const { about, skills, experience, projects, education } = profile;
 
   return (
-    <div className="min-h-screen bg-white text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <ThemeWrapper profile={profile}>
       <main className="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-16">
         <Header profile={profile} />
 
         {about && (
           <Section id="about" title="About">
-            <p className="leading-relaxed whitespace-pre-line text-slate-700 dark:text-slate-300">
-              {about}
-            </p>
+            <p className="leading-relaxed whitespace-pre-line text-ink">{about}</p>
           </Section>
         )}
 
@@ -172,7 +165,7 @@ export default function MinimalTheme({ profile }: ThemeProps) {
 
         {experience.length > 0 && (
           <Section id="experience" title="Experience">
-            <ol className="border-s border-slate-200 dark:border-slate-800">
+            <ol className="border-s border-line">
               {experience.map((job) => (
                 <TimelineItem
                   key={job.id}
@@ -195,7 +188,7 @@ export default function MinimalTheme({ profile }: ThemeProps) {
                 return (
                   <li
                     key={project.id}
-                    className="relative flex flex-col rounded-xl border border-slate-200 p-5 transition focus-within:border-indigo-400 hover:border-indigo-300 hover:shadow-sm dark:border-slate-800 dark:focus-within:border-indigo-500 dark:hover:border-indigo-500/60"
+                    className="relative flex flex-col rounded-xl border border-line p-5 transition focus-within:border-accent hover:border-accent/50 hover:shadow-sm"
                   >
                     <h3 className="font-semibold">
                       {href ? (
@@ -222,7 +215,7 @@ export default function MinimalTheme({ profile }: ThemeProps) {
                         {project.techTags.map((tag) => (
                           <li
                             key={tag}
-                            className="rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300"
+                            className="rounded-md bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent"
                           >
                             {tag}
                           </li>
@@ -238,7 +231,7 @@ export default function MinimalTheme({ profile }: ThemeProps) {
 
         {education.length > 0 && (
           <Section id="education" title="Education">
-            <ol className="border-s border-slate-200 dark:border-slate-800">
+            <ol className="border-s border-line">
               {education.map((item) => (
                 <TimelineItem
                   key={item.id}
@@ -252,6 +245,6 @@ export default function MinimalTheme({ profile }: ThemeProps) {
           </Section>
         )}
       </main>
-    </div>
+    </ThemeWrapper>
   );
 }

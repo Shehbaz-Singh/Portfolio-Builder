@@ -27,16 +27,17 @@ model User {
 }
 
 model Profile {
-  id        String  @id @default(cuid())
-  userId    String  @unique
-  slug      String  @unique
-  fullName  String
-  tagline   String?
-  about     String?
-  location  String?
-  avatarUrl String?
-  theme     String  @default("minimal")
-  published Boolean @default(false)
+  id          String  @id @default(cuid())
+  userId      String  @unique
+  slug        String  @unique
+  fullName    String
+  tagline     String?
+  about       String?
+  location    String?
+  avatarUrl   String?
+  theme       String  @default("minimal")
+  accentColor String  @default("#2563eb")
+  published   Boolean @default(false)
 
   user       User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   links      Link[]

@@ -35,7 +35,7 @@ interface Props<S extends ListSection> {
   extra?: (item: SectionItem<S>) => ReactNode; // extra controls in a row (link visibility)
 }
 
-const cardClass = 'rounded-xl border border-indigo-300 p-4 dark:border-indigo-700';
+const cardClass = 'rounded-xl border border-accent/50 p-4';
 
 // One list in the editor: rows with Edit and Delete, an Add button, and drag-to-reorder.
 // Entries read from a resume appear above it as suggestions that can be edited and added, or
@@ -99,13 +99,11 @@ export function SectionManager<S extends ListSection>({
     }
     const { title, subtitle } = summarize(item);
     return (
-      <div className="flex items-center gap-2 rounded-xl border border-slate-200 p-3 dark:border-slate-800">
+      <div className="flex items-center gap-2 rounded-xl border border-line p-3">
         {handle}
         <div className="min-w-0 flex-1">
           <p className="truncate font-medium">{title}</p>
-          {subtitle && (
-            <p className="truncate text-sm text-slate-600 dark:text-slate-400">{subtitle}</p>
-          )}
+          {subtitle && <p className="truncate text-sm text-muted">{subtitle}</p>}
         </div>
         {extra?.(item)}
         <Button
@@ -133,7 +131,7 @@ export function SectionManager<S extends ListSection>({
       {suggestions.length > 0 && (
         <section
           aria-label={`${noun} suggestions from your resume`}
-          className="space-y-3 rounded-2xl border border-dashed border-indigo-300 bg-indigo-50/50 p-3 dark:border-indigo-800 dark:bg-indigo-950/30"
+          className="space-y-3 rounded-2xl border border-dashed border-accent/50 bg-accent-soft p-3"
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-medium">From your resume ({suggestions.length})</p>
@@ -167,15 +165,11 @@ export function SectionManager<S extends ListSection>({
               return (
                 <li
                   key={suggestion.key}
-                  className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white p-3 dark:border-slate-800 dark:bg-slate-950"
+                  className="flex items-center gap-2 rounded-xl border border-line bg-page p-3"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="truncate font-medium">{title}</p>
-                    {subtitle && (
-                      <p className="truncate text-sm text-slate-600 dark:text-slate-400">
-                        {subtitle}
-                      </p>
-                    )}
+                    {subtitle && <p className="truncate text-sm text-muted">{subtitle}</p>}
                   </div>
                   <Button
                     disabled={adding || editing !== null}
@@ -208,7 +202,7 @@ export function SectionManager<S extends ListSection>({
       )}
 
       {items.length === 0 && editing !== 'new' && suggestions.length === 0 && (
-        <p className="text-sm text-slate-600 dark:text-slate-400">{empty}</p>
+        <p className="text-sm text-muted">{empty}</p>
       )}
 
       {sortable ? (

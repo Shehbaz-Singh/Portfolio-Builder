@@ -60,7 +60,7 @@ function Row({
       type="button"
       ref={setActivatorNodeRef}
       aria-label={`Reorder ${label}`}
-      className="flex shrink-0 cursor-grab touch-none items-center justify-center rounded p-1 text-slate-400 hover:text-slate-700 focus-visible:outline-2 focus-visible:outline-indigo-600 active:cursor-grabbing dark:hover:text-slate-200"
+      className="flex shrink-0 cursor-grab touch-none items-center justify-center rounded p-1 text-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-accent active:cursor-grabbing"
       {...attributes}
       {...listeners}
     >

@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { api } from '@/lib/client-api';
+import { SITE_URL } from '@/lib/config';
+import { ShareButton } from '../ShareButton';
 import { Button, Switch } from '../ui';
 import { errorText, useEditor } from './editor-context';
 
@@ -25,7 +27,7 @@ export function PublishPanel({ onFix }: { onFix: (step: Step) => void }) {
   const [copied, setCopied] = useState(false);
 
   const missing = REQUIRED.filter((field) => field.isEmpty(profile));
-  const url = `${window.location.origin}/${profile.slug}`;
+  const url = `${SITE_URL}/${profile.slug}`; // the canonical address, not whatever host this tab is on
 
   async function setPublished(published: boolean) {
     setWarning(false);
@@ -64,7 +66,7 @@ export function PublishPanel({ onFix }: { onFix: (step: Step) => void }) {
   return (
     <section
       aria-label="Publishing"
-      className="mx-4 mt-4 space-y-3 rounded-2xl border border-slate-200 p-4 dark:border-slate-800"
+      className="mx-4 mt-4 space-y-3 rounded-2xl border border-line p-4"
     >
       <div className="flex items-center gap-3">
         <Switch
@@ -75,7 +77,7 @@ export function PublishPanel({ onFix }: { onFix: (step: Step) => void }) {
         />
         <div>
           <p className="font-medium">{profile.published ? 'Published' : 'Not published'}</p>
-          <p className="text-sm text-slate-600 dark:text-slate-400">
+          <p className="text-sm text-muted">
             {profile.published
               ? 'Anyone with the link can see your portfolio.'
               : 'Only you can see it. Turn this on to make it public.'}
@@ -85,15 +87,16 @@ export function PublishPanel({ onFix }: { onFix: (step: Step) => void }) {
 
       {profile.published && (
         <div className="flex flex-wrap items-center gap-2">
-          <code className="min-w-0 flex-1 truncate rounded-lg bg-slate-100 px-3 py-2 text-sm dark:bg-slate-800">
+          <code className="min-w-0 flex-1 truncate rounded-lg bg-surface px-3 py-2 text-sm">
             {url}
           </code>
           <Button onClick={copy}>{copied ? 'Copied' : 'Copy link'}</Button>
+          <ShareButton url={url} title={`${profile.fullName}'s portfolio`} variant="outline" />
           <a
             href={`/${profile.slug}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium transition hover:bg-slate-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:border-slate-700 dark:hover:bg-slate-800"
+            className="inline-flex items-center justify-center rounded-lg border border-line px-4 py-2 text-sm font-medium transition hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             Open<span className="sr-only"> your portfolio in a new tab</span>
           </a>
@@ -101,10 +104,7 @@ export function PublishPanel({ onFix }: { onFix: (step: Step) => void }) {
       )}
 
       {warning && (
-        <div
-          role="alert"
-          className="space-y-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200"
-        >
+        <div role="alert" className="space-y-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
           <p>
             Your page is missing {missing.map((field) => field.label).join(' and ')}. Visitors will
             see an incomplete portfolio.

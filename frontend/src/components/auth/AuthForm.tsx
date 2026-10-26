@@ -53,10 +53,7 @@ export function AuthForm({ mode, expired = false }: { mode: Mode; expired?: bool
     <div>
       <h1 className="text-2xl font-bold tracking-tight">{text.title}</h1>
       {expired && (
-        <p
-          role="status"
-          className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200"
-        >
+        <p role="status" className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
           Your session has ended. Please log in again.
         </p>
       )}
@@ -95,12 +92,9 @@ export function AuthForm({ mode, expired = false }: { mode: Mode; expired?: bool
           </div>
         </Form>
       </div>
-      <p className="mt-6 text-sm text-slate-600 dark:text-slate-400">
+      <p className="mt-6 text-sm text-muted">
         {text.switchText}{' '}
-        <Link
-          href={text.switchLink.href}
-          className="font-medium text-indigo-700 underline dark:text-indigo-400"
-        >
+        <Link href={text.switchLink.href} className="font-medium text-accent underline">
           {text.switchLink.label}
         </Link>
       </p>

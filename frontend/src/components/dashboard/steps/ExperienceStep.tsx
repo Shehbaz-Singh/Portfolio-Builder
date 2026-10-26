@@ -50,7 +50,7 @@ export function ExperienceStep() {
         <h2 id="experience-heading" className="text-lg font-semibold">
           Experience
         </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
+        <p className="text-sm text-muted">
           Shown in this order on your page. Drag the grip to reorder.
         </p>
       </div>

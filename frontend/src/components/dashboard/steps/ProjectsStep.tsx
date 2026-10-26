@@ -67,7 +67,7 @@ export function ProjectsStep() {
         <h2 id="projects-heading" className="text-lg font-semibold">
           Projects
         </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
+        <p className="text-sm text-muted">
           Shown in this order on your page. Drag the grip to reorder.
         </p>
       </div>

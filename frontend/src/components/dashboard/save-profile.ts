@@ -4,9 +4,9 @@ import { api } from '@/lib/client-api';
 // PUT /profile/me replaces every field it is given and clears the ones it is not, so a
 // step that edits two fields must send the others back as they are.
 export function saveProfile(profile: MyProfile, changes: Partial<ProfileUpdateInput>) {
-  const { fullName, tagline, about, location, avatarUrl, theme } = profile;
+  const { fullName, tagline, about, location, avatarUrl, theme, accentColor } = profile;
   return api<MyProfile>('/profile/me', {
     method: 'PUT',
-    body: { fullName, tagline, about, location, avatarUrl, theme, ...changes },
+    body: { fullName, tagline, about, location, avatarUrl, theme, accentColor, ...changes },
   });
 }

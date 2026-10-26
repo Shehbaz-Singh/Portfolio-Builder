@@ -11,11 +11,8 @@ export function Preview() {
   const Theme = getTheme(preview.theme);
 
   return (
-    <section
-      aria-label="Live preview"
-      className="overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800"
-    >
-      <p className="border-b border-slate-200 bg-slate-50 px-4 py-2 text-xs font-medium text-slate-500 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-400">
+    <section aria-label="Live preview" className="overflow-hidden rounded-2xl border border-line">
+      <p className="border-b border-line bg-surface px-4 py-2 text-xs font-medium text-muted">
         Live preview
       </p>
       <div className="max-h-[calc(100vh-8rem)] overflow-y-auto">

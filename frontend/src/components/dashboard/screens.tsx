@@ -21,13 +21,13 @@ export function Loading({ label }: { label: string }) {
     <Centered>
       <div
         aria-hidden="true"
-        className="size-8 animate-spin rounded-full border-4 border-slate-200 border-t-indigo-600 dark:border-slate-700 dark:border-t-indigo-400"
+        className="size-8 animate-spin rounded-full border-4 border-line border-t-accent"
       />
       <p role="status" className="font-medium">
         {slow ? 'Waking up the server…' : label}
       </p>
       {slow && (
-        <p className="max-w-sm text-sm text-slate-600 dark:text-slate-400">
+        <p className="max-w-sm text-sm text-muted">
           The server sleeps when nobody has used it for a while. This can take up to a minute the
           first time, and then it is fast again.
         </p>
@@ -48,7 +48,7 @@ export function LoadFailed({
   return (
     <Centered>
       <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
-      <div className="max-w-sm text-slate-600 dark:text-slate-400">
+      <div className="max-w-sm text-muted">
         <p>{error instanceof ApiError ? error.message : 'Something went wrong.'}</p>
         <p>Everything you saved earlier is safe.</p>
       </div>

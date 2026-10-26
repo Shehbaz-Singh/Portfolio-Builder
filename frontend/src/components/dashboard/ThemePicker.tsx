@@ -15,19 +15,17 @@ export function ThemePicker() {
         {THEME_OPTIONS.map((theme) => (
           <label
             key={theme.id}
-            className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-300 p-3 has-checked:border-indigo-600 has-checked:bg-indigo-50 has-focus-visible:outline-2 has-focus-visible:outline-indigo-600 dark:border-slate-700 dark:has-checked:border-indigo-400 dark:has-checked:bg-indigo-950"
+            className="flex cursor-pointer items-start gap-3 rounded-xl border border-line p-3 has-checked:border-accent has-checked:bg-accent-soft has-focus-visible:outline-2 has-focus-visible:outline-accent"
           >
             <input
               type="radio"
               value={theme.id}
-              className="mt-1 accent-indigo-600"
+              className="mt-1 accent-accent"
               {...register('theme')}
             />
             <span>
               <span className="block text-sm font-medium">{theme.label}</span>
-              <span className="block text-xs text-slate-600 dark:text-slate-400">
-                {theme.description}
-              </span>
+              <span className="block text-xs text-muted">{theme.description}</span>
             </span>
           </label>
         ))}

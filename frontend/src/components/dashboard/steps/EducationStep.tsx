@@ -48,7 +48,7 @@ export function EducationStep() {
         <h2 id="education-heading" className="text-lg font-semibold">
           Education
         </h2>
-        <p className="text-sm text-slate-600 dark:text-slate-400">
+        <p className="text-sm text-muted">
           Shown in this order on your page. Drag the grip to reorder.
         </p>
       </div>

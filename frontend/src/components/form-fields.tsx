@@ -93,12 +93,12 @@ function Field({
       </label>
       {children}
       {hint && !error && (
-        <p id={`${id}-note`} className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+        <p id={`${id}-note`} className="mt-1 text-xs text-muted">
           {hint}
         </p>
       )}
       {error && (
-        <p id={`${id}-note`} role="alert" className="mt-1 text-sm text-red-700 dark:text-red-400">
+        <p id={`${id}-note`} role="alert" className="mt-1 text-sm text-red-700">
           {error}
         </p>
       )}
@@ -182,7 +182,7 @@ export function CheckboxField({
       <input
         id={id}
         type="checkbox"
-        className="size-4 rounded border-slate-300 accent-indigo-600"
+        className="size-4 rounded border-line accent-accent"
         {...input}
         {...register(name)}
       />

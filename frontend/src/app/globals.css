@@ -1,1 +1,33 @@
 @import 'tailwindcss';
+
+/* Colors are variables defined on a theme wrapper (.theme-root). A theme restyles the page by
+   defining the same variables on its own wrapper; the profile's accent is set inline on that
+   wrapper by the server (see accentVars in lib/color.ts), so there is no flash of other colors.
+   The app is light only for now: nothing follows the visitor's dark-mode setting. */
+.theme-root {
+  --bg: #ffffff; /* page background (also PAGE_BACKGROUND in lib/color.ts) */
+  --surface: #f1f5f9; /* chips, hovered controls, code */
+  --text: #0f172a;
+  --muted: #475569;
+  --border: #cbd5e1;
+  --accent: #2563eb;
+  --on-accent: #ffffff; /* text placed on the accent */
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--bg));
+  color-scheme: light;
+  background-color: var(--bg);
+  color: var(--text);
+}
+
+/* Utilities: bg-page, bg-surface, text-ink, text-muted, border-line, bg-accent, text-accent,
+   text-on-accent, bg-accent-soft. `inline` keeps them reading the variables of whichever wrapper
+   they are inside. */
+@theme inline {
+  --color-page: var(--bg);
+  --color-surface: var(--surface);
+  --color-ink: var(--text);
+  --color-muted: var(--muted);
+  --color-line: var(--border);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--on-accent);
+  --color-accent-soft: var(--accent-soft);
+}

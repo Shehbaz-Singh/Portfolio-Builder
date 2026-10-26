@@ -15,7 +15,7 @@ import { ApiError, api } from '@/lib/client-api';
 
 // Fields the live preview shows while they are still being typed (not yet saved).
 export type Draft = Partial<
-  Pick<MyProfile, 'fullName' | 'tagline' | 'location' | 'about' | 'theme'>
+  Pick<MyProfile, 'fullName' | 'tagline' | 'location' | 'about' | 'theme' | 'accentColor'>
 >;
 type Notice = { kind: 'success' | 'error'; text: string };
 
@@ -222,9 +222,7 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
         {notice && (
           <p
             className={`rounded-lg px-4 py-2 text-sm font-medium shadow-lg ${
-              notice.kind === 'success'
-                ? 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
-                : 'bg-red-700 text-white'
+              notice.kind === 'success' ? 'bg-ink text-page' : 'bg-red-700 text-white'
             }`}
           >
             {notice.text}

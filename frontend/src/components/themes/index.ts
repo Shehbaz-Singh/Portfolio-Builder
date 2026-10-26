@@ -11,7 +11,7 @@ interface ThemeEntry {
 const themes: Record<string, ThemeEntry> = {
   minimal: {
     label: 'Minimal',
-    description: "A clean single column. Follows the visitor's light or dark setting.",
+    description: 'A clean single column.',
     Component: MinimalTheme,
   },
 };

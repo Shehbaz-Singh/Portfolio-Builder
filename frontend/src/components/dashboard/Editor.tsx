@@ -50,7 +50,7 @@ function Header() {
   }
 
   return (
-    <header className="flex items-center justify-between gap-3 border-b border-slate-200 px-4 py-3 dark:border-slate-800">
+    <header className="flex items-center justify-between gap-3 border-b border-line px-4 py-3">
       <h1 className="font-semibold">Your portfolio</h1>
       <div className="flex gap-2">
         <Button
@@ -107,10 +107,8 @@ function Workspace() {
                 type="button"
                 aria-current={step.id === stepId ? 'step' : undefined}
                 onClick={() => goTo(step.id)}
-                className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-indigo-600 ${
-                  step.id === stepId
-                    ? 'bg-indigo-600 text-white dark:bg-indigo-500'
-                    : 'hover:bg-slate-100 dark:hover:bg-slate-800'
+                className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-accent ${
+                  step.id === stepId ? 'bg-accent text-on-accent' : 'hover:bg-surface'
                 }`}
               >
                 {i === 0 ? step.label : `${i}. ${step.label}`}
