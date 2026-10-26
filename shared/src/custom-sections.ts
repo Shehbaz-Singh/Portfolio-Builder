@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { httpUrl } from './portfolio';
+import { optionalBlock, optionalLine, requiredLine } from './text';
 
 // Sections the user creates (Certifications, Awards, Publications, Volunteering, ...): a title
 // and a list of items. Where they sit on the page is part of the section config
@@ -10,37 +11,6 @@ export const MAX_CUSTOM_ITEMS = 20; // per section
 export const CUSTOM_TITLE_MAX = 80;
 export const CUSTOM_SUBTITLE_MAX = 120;
 export const CUSTOM_DESCRIPTION_MAX = 1000;
-
-// ---- Plain text. Everything is stored and shown as text: markup is never interpreted (React
-// escapes it when rendering), and control characters (a NUL byte makes Postgres reject the row)
-// are removed here.
-const isControl = (char: string) => {
-  const code = char.charCodeAt(0);
-  return (code < 32 && code !== 9 && code !== 10 && code !== 13) || code === 127;
-};
-const withoutControls = (text: string) => [...text].filter((char) => !isControl(char)).join('');
-
-// One line: line breaks and runs of spaces become a single space.
-const oneLine = (text: string) => withoutControls(text).replace(/\s+/g, ' ').trim();
-// Several lines: line breaks are kept, Windows ones normalised.
-const block = (text: string) => withoutControls(text).replace(/\r\n?/g, '\n').trim();
-
-const requiredLine = (max: number) =>
-  z.string().transform(oneLine).pipe(z.string().min(1).max(max));
-
-const optionalLine = (max: number) =>
-  z
-    .string()
-    .nullish()
-    .transform((text) => (text ? oneLine(text) || null : null))
-    .pipe(z.string().max(max).nullable());
-
-const optionalBlock = (max: number) =>
-  z
-    .string()
-    .nullish()
-    .transform((text) => (text ? block(text) || null : null))
-    .pipe(z.string().max(max).nullable());
 
 const optionalDate = z.coerce
   .date()

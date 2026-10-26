@@ -1,0 +1,371 @@
+'use client';
+
+import { useRef, useState, type ReactNode } from 'react';
+import { useForm } from 'react-hook-form';
+import {
+  MAX_TESTIMONIALS,
+  TESTIMONIAL_COMPANY_MAX,
+  TESTIMONIAL_EMAIL_MAX,
+  TESTIMONIAL_MESSAGE_MAX,
+  TESTIMONIAL_NAME_MAX,
+  TESTIMONIAL_ROLE_MAX,
+  testimonialInputSchema,
+  type MyTestimonial,
+  type SectionConfig,
+  type TestimonialInput,
+} from '@portfolio/shared';
+import { api } from '@/lib/client-api';
+import { schemaResolver } from '@/lib/form';
+import { TextArea, TextField } from '../../form-fields';
+import { Button, Switch } from '../../ui';
+import { EditorForm } from '../EditorForm';
+import { ListManager, type FormProps } from '../SectionManager';
+import { errorText, useEditor, useTestimonials } from '../editor-context';
+
+type Fields = {
+  authorName: string;
+  authorRole: string;
+  authorCompany: string;
+  message: string;
+  contactEmail: string;
+};
+
+const detailOf = (item: MyTestimonial) =>
+  [item.authorRole, item.authorCompany].filter(Boolean).join(', ');
+
+// ---- the add and edit form (also used by the approved list's Add and Edit)
+
+function TestimonialForm({ item, onDone, onSaved }: FormProps<MyTestimonial>) {
+  const { create, updateItem } = useTestimonials();
+  const { notify } = useEditor();
+  const form = useForm<Fields, unknown, TestimonialInput>({
+    resolver: schemaResolver(testimonialInputSchema),
+    defaultValues: {
+      authorName: item?.authorName ?? '',
+      authorRole: item?.authorRole ?? '',
+      authorCompany: item?.authorCompany ?? '',
+      message: item?.message ?? '',
+      contactEmail: item?.contactEmail ?? '',
+    },
+  });
+
+  async function onSubmit(values: TestimonialInput) {
+    await (item ? updateItem(item.id, values) : create(values));
+    notify('success', item ? 'Testimonial saved.' : 'Testimonial added to your page.');
+    onSaved?.();
+    onDone();
+  }
+
+  return (
+    <EditorForm
+      form={form}
+      onSubmit={onSubmit}
+      submitLabel={item ? 'Save testimonial' : 'Add testimonial'}
+      onCancel={onDone}
+    >
+      <TextField name="authorName" label="Name" maxLength={TESTIMONIAL_NAME_MAX} required />
+      <div className="grid gap-4 sm:grid-cols-2">
+        <TextField name="authorRole" label="Role (optional)" maxLength={TESTIMONIAL_ROLE_MAX} />
+        <TextField
+          name="authorCompany"
+          label="Company (optional)"
+          maxLength={TESTIMONIAL_COMPANY_MAX}
+        />
+      </div>
+      <TextArea
+        name="message"
+        label="Testimonial"
+        rows={5}
+        maxLength={TESTIMONIAL_MESSAGE_MAX}
+        hint={`20 to ${TESTIMONIAL_MESSAGE_MAX} characters, plain text.${item ? '' : ' It is approved as soon as you add it.'}`}
+        required
+      />
+      <TextField
+        name="contactEmail"
+        label="Email (optional)"
+        type="email"
+        maxLength={TESTIMONIAL_EMAIL_MAX}
+        hint="For your records. It is never shown on your page."
+      />
+    </EditorForm>
+  );
+}
+
+// ---- pending and rejected: cards with approve / reject / delete
+
+// A titled list of testimonials awaiting a decision. After an action the card is gone, so focus
+// goes to the heading: the keyboard stays where the work is.
+function ReviewList({
+  id,
+  title,
+  items,
+  empty,
+  actions,
+}: {
+  id: string;
+  title: string;
+  items: MyTestimonial[];
+  empty?: string;
+  actions: (item: MyTestimonial, done: () => void) => ReactNode;
+}) {
+  const heading = useRef<HTMLHeadingElement>(null);
+  const done = () => heading.current?.focus();
+  return (
+    <section aria-labelledby={id} className="space-y-3">
+      <h3
+        id={id}
+        ref={heading}
+        tabIndex={-1}
+        className="flex items-center gap-2 text-base font-semibold focus:outline-none"
+      >
+        {title}
+        {items.length > 0 && (
+          <span className="rounded-full bg-ink px-2 py-0.5 text-xs font-medium text-page">
+            {items.length}
+          </span>
+        )}
+      </h3>
+      {items.length === 0 && empty && <p className="text-sm text-muted">{empty}</p>}
+      {items.length > 0 && (
+        <ul className="space-y-3">
+          {items.map((item) => (
+            <li key={item.id} className="space-y-3 rounded-xl border border-line p-4">
+              <blockquote className="whitespace-pre-line">{item.message}</blockquote>
+              <p className="text-sm">
+                <span className="font-medium">{item.authorName}</span>
+                {detailOf(item) && <span className="text-muted">, {detailOf(item)}</span>}
+              </p>
+              {item.contactEmail && (
+                <p className="text-sm text-muted">
+                  Email:{' '}
+                  <a href={`mailto:${item.contactEmail}`} className="text-accent-fg underline">
+                    {item.contactEmail}
+                  </a>
+                  . Only you can see it.
+                </p>
+              )}
+              <div className="flex flex-wrap gap-2">{actions(item, done)}</div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
+// ---- the step
+
+export function TestimonialsStep() {
+  const t = useTestimonials();
+  const { profile, update, notify } = useEditor();
+  const [busy, setBusy] = useState<string | null>(null);
+  const sectionShown =
+    profile.sectionConfig.find((section) => section.key === 'testimonials')?.visible ?? false;
+
+  // Runs one API call, disables its buttons meanwhile and says what happened.
+  async function run(
+    key: string,
+    action: () => Promise<void>,
+    success: string,
+    after?: () => void,
+  ) {
+    setBusy(key);
+    try {
+      await action();
+      notify('success', success);
+      after?.();
+    } catch (err) {
+      notify('error', errorText(err));
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  const toggleAccepting = () =>
+    run(
+      'accepting',
+      () => t.setAccepting(!t.accepting),
+      t.accepting ? 'No longer accepting testimonials.' : 'Now accepting testimonials.',
+    );
+
+  // Switches the page section on, the same as the switch in the Sections step.
+  const showSection = () =>
+    run(
+      'section',
+      async () => {
+        const sections = profile.sectionConfig.map((section) =>
+          section.key === 'testimonials' ? { ...section, visible: true } : section,
+        );
+        const saved = await api<{ sections: SectionConfig }>('/profile/me/sections', {
+          method: 'PUT',
+          body: { sections },
+        });
+        update((p) => ({ ...p, sectionConfig: saved.sections }));
+      },
+      'The Testimonials section is now shown on your page.',
+    );
+
+  const confirmDelete = (item: MyTestimonial, done: () => void) => {
+    if (!window.confirm(`Delete the testimonial from ${item.authorName}? This cannot be undone.`)) {
+      return;
+    }
+    void run(item.id, () => t.remove(item.id), 'Testimonial deleted.', done);
+  };
+
+  const approve = (item: MyTestimonial, done: () => void) =>
+    run(
+      item.id,
+      () => t.approve(item.id),
+      `Approved the testimonial from ${item.authorName}.`,
+      done,
+    );
+
+  const remaining = MAX_TESTIMONIALS - t.pending.length - t.rejected.length;
+
+  return (
+    <section aria-labelledby="testimonials-heading" className="space-y-6">
+      <div>
+        <h2 id="testimonials-heading" className="text-lg font-semibold">
+          Testimonials
+        </h2>
+        <p className="text-sm text-muted">
+          Show what people say about working with you. Visitors can send one from your page; it
+          stays hidden until you approve it. You can also add one yourself.
+        </p>
+      </div>
+
+      <div className="space-y-3 rounded-xl border border-line p-4">
+        <div className="flex items-center gap-3">
+          <div className="min-w-0 flex-1">
+            <p className="font-medium">Accept testimonials</p>
+            <p className="text-sm text-muted">
+              Adds a “Leave a testimonial” button to the Testimonials section of your page.
+            </p>
+          </div>
+          <span className="text-sm text-muted">{t.accepting ? 'On' : 'Off'}</span>
+          <Switch
+            checked={t.accepting}
+            label="Accept testimonials"
+            disabled={busy === 'accepting'}
+            onClick={toggleAccepting}
+          />
+        </div>
+        {!sectionShown && (
+          <p className="flex flex-wrap items-center gap-2 text-sm text-muted">
+            The Testimonials section is hidden, so nothing shows on your page yet.
+            <Button disabled={busy === 'section'} onClick={showSection}>
+              Show it on my page
+            </Button>
+          </p>
+        )}
+      </div>
+
+      <ReviewList
+        id="testimonials-pending"
+        title="Pending review"
+        items={t.pending}
+        empty="Nothing is waiting for review."
+        actions={(item, done) => (
+          <>
+            <Button
+              variant="primary"
+              disabled={busy === item.id}
+              onClick={() => approve(item, done)}
+              aria-label={`Approve the testimonial from ${item.authorName}`}
+            >
+              Approve
+            </Button>
+            <Button
+              disabled={busy === item.id}
+              onClick={() =>
+                run(
+                  item.id,
+                  () => t.reject(item.id),
+                  `Rejected the testimonial from ${item.authorName}.`,
+                  done,
+                )
+              }
+              aria-label={`Reject the testimonial from ${item.authorName}`}
+            >
+              Reject
+            </Button>
+            <Button
+              variant="danger"
+              disabled={busy === item.id}
+              onClick={() => confirmDelete(item, done)}
+              aria-label={`Delete the testimonial from ${item.authorName}`}
+            >
+              Delete
+            </Button>
+          </>
+        )}
+      />
+
+      <section aria-labelledby="testimonials-approved" className="space-y-3">
+        <div>
+          <h3 id="testimonials-approved" className="text-base font-semibold">
+            Approved
+          </h3>
+          <p className="text-sm text-muted">
+            These appear on your page, in this order. Drag to reorder.
+          </p>
+        </div>
+        <ListManager
+          list={{ items: t.approved, create: t.create, remove: t.remove, reorder: t.reorder }}
+          noun="testimonial"
+          addLabel="Add a testimonial"
+          empty="No approved testimonials yet. Approve one above, or add one yourself."
+          limit={remaining}
+          summary={(item) => ({
+            title: item.authorName,
+            subtitle: [detailOf(item), item.message].filter(Boolean).join(' · '),
+          })}
+          Form={TestimonialForm}
+          extra={(item) => (
+            <Button
+              variant="ghost"
+              disabled={busy === item.id}
+              onClick={() =>
+                run(
+                  item.id,
+                  () => t.reject(item.id),
+                  `Removed ${item.authorName}'s testimonial from your page.`,
+                )
+              }
+              aria-label={`Reject the testimonial from ${item.authorName}`}
+            >
+              Reject
+            </Button>
+          )}
+        />
+      </section>
+
+      {t.rejected.length > 0 && (
+        <ReviewList
+          id="testimonials-rejected"
+          title="Rejected"
+          items={t.rejected}
+          actions={(item, done) => (
+            <>
+              <Button
+                disabled={busy === item.id}
+                onClick={() => approve(item, done)}
+                aria-label={`Approve the testimonial from ${item.authorName}`}
+              >
+                Approve
+              </Button>
+              <Button
+                variant="danger"
+                disabled={busy === item.id}
+                onClick={() => confirmDelete(item, done)}
+                aria-label={`Delete the testimonial from ${item.authorName}`}
+              >
+                Delete
+              </Button>
+            </>
+          )}
+        />
+      )}
+    </section>
+  );
+}

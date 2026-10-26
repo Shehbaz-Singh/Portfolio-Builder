@@ -12,7 +12,8 @@ import { SESSION_COOKIE, sessionCookieOptions } from '@/lib/session';
 export const maxDuration = 60;
 const UPSTREAM_TIMEOUT_MS = 55_000;
 
-const FORWARDED_AREAS = new Set(['auth', 'profile']);
+// `public` is for visitors (leaving a testimonial); the API ignores any token on those routes.
+const FORWARDED_AREAS = new Set(['auth', 'profile', 'public']);
 // The API enforces the real per-route limits (2 MB avatar, 5 MB resume); this only stops the
 // proxy from buffering something absurd. Vercel itself rejects bodies over 4.5 MB.
 const MAX_BODY_BYTES = 5.5 * 1024 * 1024;

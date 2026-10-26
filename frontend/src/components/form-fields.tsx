@@ -21,6 +21,7 @@ interface FormProps<TIn extends FieldValues, TOut> {
   codeFields?: Record<string, string>;
   submitLabel: string;
   danger?: boolean; // styles the submit button as a destructive action
+  pendingLabel?: string; // the submit button while sending, "Saving…" by default
   onCancel?: () => void;
   children: ReactNode;
 }
@@ -31,6 +32,7 @@ export function Form<TIn extends FieldValues, TOut>({
   codeFields,
   submitLabel,
   danger,
+  pendingLabel = 'Saving…',
   onCancel,
   children,
 }: FormProps<TIn, TOut>) {
@@ -50,7 +52,7 @@ export function Form<TIn extends FieldValues, TOut>({
         <ErrorText>{errors.root?.server?.message}</ErrorText>
         <div className="flex flex-wrap items-center gap-3">
           <Button type="submit" variant={danger ? 'danger' : 'primary'} disabled={isSubmitting}>
-            {isSubmitting ? 'Saving…' : submitLabel}
+            {isSubmitting ? pendingLabel : submitLabel}
           </Button>
           {onCancel && (
             <Button onClick={onCancel} disabled={isSubmitting}>
@@ -101,7 +103,7 @@ function Field({
         </p>
       )}
       {error && (
-        <p id={`${id}-note`} role="alert" className="mt-1 text-sm text-red-700">
+        <p id={`${id}-note`} role="alert" className="mt-1 text-sm text-danger">
           {error}
         </p>
       )}

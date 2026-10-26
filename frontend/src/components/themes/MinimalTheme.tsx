@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { ShareButton } from '../ShareButton';
 import { buildBlocks, buildHeader, type Block, type HeaderModel } from './blocks';
+import { LeaveTestimonial } from './LeaveTestimonial';
 import { Avatar, DateRange, NewTabLink } from './parts';
 import { ThemeWrapper } from './ThemeWrapper';
 import type { ThemeProps } from './types';
@@ -175,6 +176,39 @@ function BlockView({ block }: { block: Block }) {
             </li>
           ))}
         </ul>
+      );
+    case 'testimonials':
+      return (
+        <>
+          {block.testimonials.length > 0 ? (
+            <ul className="grid gap-4 sm:grid-cols-2">
+              {block.testimonials.map((item) => (
+                <li key={item.id} className="min-w-0">
+                  <figure className="flex h-full flex-col rounded-xl border border-line p-5">
+                    <blockquote className="flex-1 leading-relaxed whitespace-pre-line text-ink">
+                      <span aria-hidden="true" className="text-2xl leading-none text-accent-fg">
+                        “
+                      </span>
+                      {item.message}
+                    </blockquote>
+                    <figcaption className="mt-4 text-sm">
+                      <span className="font-semibold">{item.name}</span>
+                      {item.detail && <span className="block text-muted">{item.detail}</span>}
+                    </figcaption>
+                  </figure>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-muted">No testimonials yet.</p>
+          )}
+          {block.submitTo && (
+            <LeaveTestimonial
+              slug={block.submitTo}
+              buttonClassName={`inline-flex items-center rounded-full border border-line px-4 py-2 text-sm font-medium transition hover:bg-surface ${focusRing}`}
+            />
+          )}
+        </>
       );
     case 'entries':
       return <EntryList block={block} />;

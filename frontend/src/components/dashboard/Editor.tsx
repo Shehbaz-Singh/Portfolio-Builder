@@ -19,6 +19,7 @@ import { ExperienceStep } from './steps/ExperienceStep';
 import { ProjectsStep } from './steps/ProjectsStep';
 import { SectionsStep } from './steps/SectionsStep';
 import { SkillsStep } from './steps/SkillsStep';
+import { TestimonialsStep } from './steps/TestimonialsStep';
 
 interface Step {
   id: string;
@@ -36,6 +37,7 @@ const STEPS: Step[] = [
   { id: 'projects', label: 'Projects', Component: ProjectsStep },
   { id: 'education', label: 'Education', Component: EducationStep },
   { id: 'custom', label: 'Custom sections', Component: CustomSectionsStep },
+  { id: 'testimonials', label: 'Testimonials', Component: TestimonialsStep },
   { id: 'sections', label: 'Sections', Component: SectionsStep },
 ];
 
@@ -81,6 +83,7 @@ const isBlank = (p: MyProfile) =>
 
 function Workspace() {
   const { hasUnsaved, profile } = useEditor();
+  const pendingTestimonials = profile.testimonials.filter((t) => t.status === 'pending').length;
   const [stepId, setStepId] = useState(() => (isBlank(profile) ? 'import' : 'basics'));
   // Below the lg breakpoint the form and the preview do not fit side by side.
   const [showPreview, setShowPreview] = useState(false);
@@ -117,6 +120,12 @@ function Workspace() {
                   }`}
                 >
                   {i === 0 ? step.label : `${i}. ${step.label}`}
+                  {step.id === 'testimonials' && pendingTestimonials > 0 && (
+                    <span className="ms-1.5 rounded-full bg-ink px-1.5 py-0.5 text-xs text-page">
+                      {pendingTestimonials}
+                      <span className="sr-only"> pending</span>
+                    </span>
+                  )}
                 </button>
               ))}
             </nav>

@@ -28,6 +28,7 @@ function limiter(options: {
   windowMs: number;
   limit: number;
   skipSuccessfulRequests?: boolean;
+  skipFailedRequests?: boolean;
   keyGenerator?: (req: Request) => string;
 }) {
   return rateLimit({
@@ -51,6 +52,14 @@ export const registerLimiter = limiter({ windowMs: 60 * 60 * 1000, limit: 10 });
 
 // Each upload costs Cloudinary storage and transformation quota.
 export const uploadLimiter = limiter({ windowMs: 60 * 60 * 1000, limit: 20 });
+
+// Visitors leaving a testimonial: 3 an hour from one address. Only accepted submissions count, so
+// fixing a typo and sending again is not punished.
+export const testimonialLimiter = limiter({
+  windowMs: 60 * 60 * 1000,
+  limit: 3,
+  skipFailedRequests: true,
+});
 
 // Every import is a paid or quota-limited call to an LLM, and the route sits behind login, so
 // the limit is per account (not per IP): one person cannot burn the quota, and people sharing

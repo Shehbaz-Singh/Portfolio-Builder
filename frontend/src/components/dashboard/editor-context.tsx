@@ -14,6 +14,7 @@ import {
   publicLayout,
   type MyCustomSection,
   type MyProfile,
+  type MyTestimonial,
   type ParsedResume,
   type PublicProfile,
   type Section,
@@ -195,6 +196,17 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
       // The same layout the public API returns (visible sections in order, custom sections with
       // items), worked out from the unsaved config too.
       ...publicLayout(draft?.sectionConfig ?? profile.sectionConfig, profile.customSections),
+      // Visitors see approved testimonials only, and never the email.
+      testimonials: profile.testimonials
+        .filter((item) => item.status === 'approved')
+        .map(({ id, authorName, authorRole, authorCompany, message, order }) => ({
+          id,
+          authorName,
+          authorRole,
+          authorCompany,
+          message,
+          order,
+        })),
     }),
     [profile, draft],
   );
@@ -295,10 +307,14 @@ function useListApi<T extends { id: string }>(
   );
 
   // Shows the new order at once and tells the server; if that fails, puts the old order back.
+  // `ids` may be only some of the items (the approved testimonials): the rest follow them.
   const reorder = useCallback(
     async (ids: string[]) => {
       const before = items;
-      replaceList((list) => ids.flatMap((id) => list.find((it) => it.id === id) ?? []));
+      replaceList((list) => [
+        ...ids.flatMap((id) => list.find((it) => it.id === id) ?? []),
+        ...list.filter((it) => !ids.includes(it.id)),
+      ]);
       try {
         await api(`${base}/reorder`, { method: 'PATCH', body: { ids } });
       } catch (err) {
@@ -390,6 +406,57 @@ export function useCustomSections() {
   );
 
   return { sections: profile.customSections, create, rename, remove };
+}
+
+// Testimonials: all of them, whatever their status. Adding one here makes it approved at once.
+// Approving, rejecting and the accept switch also change the saved profile.
+export function useTestimonials() {
+  const { profile, update } = useEditor();
+  const base = '/profile/me/testimonials';
+  const replaceList = useCallback(
+    (change: (list: MyTestimonial[]) => MyTestimonial[]) =>
+      update((p) => ({ ...p, testimonials: change(p.testimonials) })),
+    [update],
+  );
+  const list = useListApi(base, profile.testimonials, replaceList);
+
+  const setStatus = useCallback(
+    async (id: string, action: 'approve' | 'reject') => {
+      const saved = await api<MyTestimonial>(`${base}/${id}/${action}`, { method: 'POST' });
+      // Approving moves it to the end of the approved ones: take the new order from the server.
+      replaceList((items) =>
+        action === 'approve'
+          ? [...items.filter((it) => it.id !== id), saved]
+          : items.map((it) => (it.id === id ? saved : it)),
+      );
+    },
+    [replaceList],
+  );
+
+  const setAccepting = useCallback(
+    async (acceptTestimonials: boolean) => {
+      const saved = await api<{ acceptTestimonials: boolean }>(`${base}/settings`, {
+        method: 'PUT',
+        body: { acceptTestimonials },
+      });
+      update((p) => ({ ...p, acceptTestimonials: saved.acceptTestimonials }));
+    },
+    [update],
+  );
+
+  const approved = profile.testimonials.filter((item) => item.status === 'approved');
+  const pending = profile.testimonials.filter((item) => item.status === 'pending');
+  const rejected = profile.testimonials.filter((item) => item.status === 'rejected');
+  return {
+    ...list,
+    approved,
+    pending,
+    rejected,
+    accepting: profile.acceptTestimonials,
+    approve: (id: string) => setStatus(id, 'approve'),
+    reject: (id: string) => setStatus(id, 'reject'),
+    setAccepting,
+  };
 }
 
 // The suggestions waiting for one list, with ways to clear them.

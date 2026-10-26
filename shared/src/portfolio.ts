@@ -84,6 +84,8 @@ export const profileInputSchema = z.object({
   theme: themeSchema.default(DEFAULT_THEME),
   accentColor: accentColorSchema.default(DEFAULT_ACCENT),
   published: z.boolean().default(false),
+  // Whether visitors may submit testimonials (see testimonials.ts). Changed by its own endpoint.
+  acceptTestimonials: z.boolean().default(false),
 });
 export type ProfileInput = z.infer<typeof profileInputSchema>;
 
@@ -96,7 +98,7 @@ export type Profile = z.infer<typeof profileSchema>;
 
 // PUT /profile/me. Publishing has its own endpoint, and omitting the slug keeps the current one.
 export const profileUpdateSchema = profileInputSchema
-  .omit({ slug: true, published: true })
+  .omit({ slug: true, published: true, acceptTestimonials: true })
   .extend({ slug: slugSchema.optional() });
 export type ProfileUpdateInput = z.infer<typeof profileUpdateSchema>;
 

@@ -1,5 +1,6 @@
 import { ShareButton } from '../ShareButton';
 import { buildBlocks, buildHeader, type Block, type HeaderModel } from './blocks';
+import { LeaveTestimonial } from './LeaveTestimonial';
 import { Avatar, DateRange, NewTabLink } from './parts';
 import { ThemeWrapper } from './ThemeWrapper';
 import type { ThemeProps } from './types';
@@ -91,6 +92,36 @@ function BlockView({ block }: { block: Block }) {
             </li>
           ))}
         </ul>
+      );
+    case 'testimonials':
+      return (
+        <>
+          {block.testimonials.length > 0 ? (
+            <ul className="space-y-6">
+              {block.testimonials.map((item) => (
+                <li key={item.id} className="min-w-0">
+                  <figure className="border-s-2 border-line ps-5">
+                    <blockquote className="font-serif text-lg leading-relaxed whitespace-pre-line italic">
+                      “{item.message}”
+                    </blockquote>
+                    <figcaption className="mt-2 text-sm">
+                      <span className="font-serif font-bold">{item.name}</span>
+                      {item.detail && <span className="text-muted">, {item.detail}</span>}
+                    </figcaption>
+                  </figure>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-muted italic">No testimonials yet.</p>
+          )}
+          {block.submitTo && (
+            <LeaveTestimonial
+              slug={block.submitTo}
+              buttonClassName={`inline-block border border-ink px-4 py-1.5 font-serif text-sm tracking-wide uppercase transition hover:bg-surface ${focusRing}`}
+            />
+          )}
+        </>
       );
     case 'entries':
       return (

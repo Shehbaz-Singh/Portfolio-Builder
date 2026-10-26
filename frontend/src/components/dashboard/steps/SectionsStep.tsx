@@ -46,6 +46,7 @@ const BUILT_IN_HAS_CONTENT: Record<SectionKey, (profile: MyProfile) => boolean> 
   experience: (p) => p.experience.length > 0,
   projects: (p) => p.projects.length > 0,
   education: (p) => p.education.length > 0,
+  testimonials: (p) => p.acceptTestimonials || p.testimonials.some((t) => t.status === 'approved'),
 };
 
 // A custom section is looked up by id; one that no longer exists has nothing to show.

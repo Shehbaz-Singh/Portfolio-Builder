@@ -79,7 +79,7 @@ export function SlowNotice({ pending }: { pending: boolean }) {
 
 export function ErrorText({ children, id }: { children?: string; id?: string }) {
   return children ? (
-    <p id={id} role="alert" className="text-sm text-red-700">
+    <p id={id} role="alert" className="text-sm text-danger">
       {children}
     </p>
   ) : null;

@@ -9,6 +9,12 @@ datasource db {
   provider = "postgresql"
 }
 
+enum TestimonialStatus {
+  pending
+  approved
+  rejected
+}
+
 enum LinkType {
   linkedin
   github
@@ -27,20 +33,22 @@ model User {
 }
 
 model Profile {
-  id            String  @id @default(cuid())
-  userId        String  @unique
-  slug          String  @unique
-  fullName      String
-  tagline       String?
-  about         String?
-  location      String?
-  avatarUrl     String?
-  theme         String  @default("minimal")
-  accentColor   String  @default("#2563eb")
-  published     Boolean @default(false)
+  id                 String  @id @default(cuid())
+  userId             String  @unique
+  slug               String  @unique
+  fullName           String
+  tagline            String?
+  about              String?
+  location           String?
+  avatarUrl          String?
+  theme              String  @default("minimal")
+  accentColor        String  @default("#2563eb")
+  published          Boolean @default(false)
+  // Whether visitors may submit testimonials (POST /public/:slug/testimonials).
+  acceptTestimonials Boolean @default(false)
   // Order, visibility and headings of the page sections (see shared/src/section-config.ts).
   // The default must match defaultSectionConfig(); existing rows get it when the column is added.
-  sectionConfig Json    @default("[{\"key\":\"about\",\"visible\":true},{\"key\":\"skills\",\"visible\":true},{\"key\":\"experience\",\"visible\":true},{\"key\":\"projects\",\"visible\":true},{\"key\":\"education\",\"visible\":true}]")
+  sectionConfig      Json    @default("[{\"key\":\"about\",\"visible\":true},{\"key\":\"skills\",\"visible\":true},{\"key\":\"experience\",\"visible\":true},{\"key\":\"projects\",\"visible\":true},{\"key\":\"education\",\"visible\":true},{\"key\":\"testimonials\",\"visible\":false}]")
 
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   links          Link[]
@@ -49,6 +57,7 @@ model Profile {
   projects       Project[]
   education      Education[]
   customSections CustomSection[]
+  testimonials   Testimonial[]
 }
 
 model Link {
@@ -148,4 +157,24 @@ model CustomSectionItem {
   section CustomSection @relation(fields: [sectionId], references: [id], onDelete: Cascade)
 
   @@index([sectionId])
+}
+
+// A quote about the profile's owner, submitted by a visitor (pending until approved) or added by
+// the owner (approved at once). `contactEmail` is for the owner and is never sent to visitors.
+// `order` ranks the approved ones on the page.
+model Testimonial {
+  id            String            @id @default(cuid())
+  profileId     String
+  authorName    String
+  authorRole    String?
+  authorCompany String?
+  message       String
+  contactEmail  String?
+  status        TestimonialStatus @default(pending)
+  order         Int               @default(0)
+  createdAt     DateTime          @default(now())
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@index([profileId, status])
 }

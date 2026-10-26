@@ -6,10 +6,17 @@ import { MAX_CUSTOM_SECTIONS } from './custom-sections';
 //
 // Two kinds of key. The built-in sections have fixed keys. A section the user creates is
 // "custom:<id>" (see custom-sections.ts); it appears here when it is created and goes when it is
-// deleted. To add another built-in kind (testimonials, ...): append its key to SECTION_KEYS and
+// deleted. To add another built-in kind: append its key to SECTION_KEYS and
 // SECTION_LABELS, and register a component for it in the theme. Existing profiles pick the new
-// key up automatically (see normalizeSectionConfig), shown and placed after the others.
-export const SECTION_KEYS = ['about', 'skills', 'experience', 'projects', 'education'] as const;
+// key up automatically (see normalizeSectionConfig), placed after the others.
+export const SECTION_KEYS = [
+  'about',
+  'skills',
+  'experience',
+  'projects',
+  'education',
+  'testimonials',
+] as const;
 export const sectionKeySchema = z.enum(SECTION_KEYS);
 export type SectionKey = z.infer<typeof sectionKeySchema>;
 
@@ -20,7 +27,12 @@ export const SECTION_LABELS: Record<SectionKey, string> = {
   experience: 'Experience',
   projects: 'Projects',
   education: 'Education',
+  testimonials: 'Testimonials',
 };
+
+// Sections that start hidden: the owner switches them on (testimonials need an invitation first).
+const HIDDEN_BY_DEFAULT: readonly SectionKey[] = ['testimonials'];
+const visibleByDefault = (key: SectionKey) => !HIDDEN_BY_DEFAULT.includes(key);
 
 export const SECTION_TITLE_MAX = 40;
 
@@ -71,14 +83,15 @@ export const sectionConfigSchema = z
 export type SectionConfigItem = z.infer<typeof sectionConfigItemSchema>;
 export type SectionConfig = SectionConfigItem[];
 
-// Everything visible, in the built-in order. The database column defaults to the same list.
+// The built-in order, all visible except the ones hidden by default. The database column
+// defaults to the same list.
 export const defaultSectionConfig = (): SectionConfig =>
-  SECTION_KEYS.map((key) => ({ key, visible: true }));
+  SECTION_KEYS.map((key) => ({ key, visible: visibleByDefault(key) }));
 
 // Turns whatever is stored (or sent) into a complete, valid config. `customIds` are the ids of
 // the profile's own custom sections: an entry for any other id (deleted, or someone else's) is
 // dropped, and a custom section missing from the list is added at the end, visible. Bad or
-// repeated entries are dropped, and any built-in section that is missing is added too. So the
+// repeated entries are dropped, and any built-in section that is missing is added too (shown, unless it is hidden by default). So the
 // result always matches what exists, and a damaged value can never break the page.
 export function normalizeSectionConfig(
   raw: unknown,
@@ -103,7 +116,7 @@ export function normalizeSectionConfig(
   }
 
   for (const key of SECTION_KEYS) {
-    if (!seen.has(key)) items.push({ key, visible: true });
+    if (!seen.has(key)) items.push({ key, visible: visibleByDefault(key) });
   }
   for (const id of customIds) {
     if (!seen.has(customKey(id))) items.push({ key: customKey(id), visible: true });

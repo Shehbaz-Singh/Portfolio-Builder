@@ -32,6 +32,13 @@ interface ProjectEntry {
   tags: string[];
 }
 
+interface TestimonialEntry {
+  id: string;
+  name: string;
+  detail: string | null; // "Engineering Manager, Acme": whichever of role and company there is
+  message: string;
+}
+
 interface BlockBase {
   id: string; // unique on the page, for aria-labelledby and anchors
   title: string; // the owner's heading, or the default one
@@ -41,6 +48,12 @@ export type Block =
   | (BlockBase & { kind: 'about'; text: string })
   | (BlockBase & { kind: 'skills'; skills: { id: string; name: string }[] })
   | (BlockBase & { kind: 'projects'; projects: ProjectEntry[] })
+  | (BlockBase & {
+      kind: 'testimonials';
+      testimonials: TestimonialEntry[];
+      // Set when visitors may leave one: the slug the form posts to.
+      submitTo: string | null;
+    })
   | (BlockBase & {
       kind: 'entries';
       // experience and education show "Present" for an open end date; custom items show nothing
@@ -125,6 +138,22 @@ export function buildBlocks(profile: PublicProfile, idPrefix = ''): Block[] {
               description: project.description,
               tags: project.techTags,
             })),
+          });
+        }
+        break;
+      case 'testimonials':
+        // Shown when there is something to read, or when it invites visitors to write one.
+        if (profile.testimonials.length > 0 || profile.acceptTestimonials) {
+          blocks.push({
+            kind: 'testimonials',
+            ...base,
+            testimonials: profile.testimonials.map((item) => ({
+              id: item.id,
+              name: item.authorName,
+              detail: [item.authorRole, item.authorCompany].filter(Boolean).join(', ') || null,
+              message: item.message,
+            })),
+            submitTo: profile.acceptTestimonials ? profile.slug : null,
           });
         }
         break;

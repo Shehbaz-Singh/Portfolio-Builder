@@ -6,6 +6,7 @@ import {
 } from '@portfolio/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
+import { WAIT, lockProfile } from '../lib/locks';
 import { prisma } from '../lib/prisma';
 import { orNotFound } from '../lib/prisma-errors';
 import { customItems } from '../lib/selects';
@@ -35,13 +36,6 @@ async function assertOwnSection(db: Db, profileId: string, id: string) {
   });
   if (!section) throw sectionNotFound();
 }
-
-// Requests that queue behind a lock wait for it instead of failing after Prisma's 2 s default.
-const WAIT = { maxWait: 10_000, timeout: 15_000 };
-
-// Serialises writers of one profile, so two requests at once cannot both pass a limit check.
-const lockProfile = (tx: Prisma.TransactionClient, profileId: string) =>
-  tx.$queryRaw`SELECT 1 FROM "Profile" WHERE "id" = ${profileId} FOR UPDATE`;
 
 // Checks the section is the caller's and locks it in one query, so items added to it at the
 // same time are counted one after another.

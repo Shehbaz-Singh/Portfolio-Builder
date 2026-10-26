@@ -3,7 +3,7 @@ import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
 import { isUniqueViolation } from '../lib/prisma-errors';
-import { customItems, orderedList, profileSelect } from '../lib/selects';
+import { customItems, myTestimonials, orderedList, profileSelect } from '../lib/selects';
 import { withSections } from './section-layout.service';
 import { assertSlugAvailable, slugTaken } from './slug.service';
 
@@ -20,6 +20,7 @@ const fullProfileSelect = {
     select: { id: true, title: true, visible: true, order: true, items: customItems },
     orderBy: [{ order: 'asc' }, { id: 'asc' }],
   },
+  testimonials: myTestimonials,
 } satisfies Prisma.ProfileSelect;
 
 export async function getProfile(profileId: string) {

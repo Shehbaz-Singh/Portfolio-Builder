@@ -13,6 +13,7 @@
   --border: #cbd5e1;
   --accent: #2563eb;
   --on-accent: #ffffff; /* text placed on the accent */
+  --danger: #b91c1c; /* error text */
   --accent-fg: var(--accent); /* the accent as text on the page: set readable by accentVars */
   --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--bg));
   color-scheme: light;
@@ -32,6 +33,7 @@ button,
 /* The palettes of the themes. --bg and --text are also in lib/palettes.ts, which the accent
    color math uses; change them together. */
 .theme-dark {
+  --danger: #fca5a5;
   --bg: #0b1020;
   --surface: #161d33;
   --text: #e8ecf5;
@@ -57,7 +59,7 @@ button,
 }
 
 /* Utilities: bg-page, bg-surface, text-ink, text-muted, border-line, bg-accent, text-accent,
-   text-accent-fg, text-on-accent, bg-accent-soft. `inline` keeps them reading the variables of whichever wrapper
+   text-accent-fg, text-on-accent, bg-accent-soft, text-danger. `inline` keeps them reading the variables of whichever wrapper
    they are inside. */
 @theme inline {
   --color-page: var(--bg);
@@ -68,6 +70,7 @@ button,
   --color-accent: var(--accent);
   --color-accent-fg: var(--accent-fg);
   --color-on-accent: var(--on-accent);
+  --color-danger: var(--danger);
   --color-accent-soft: var(--accent-soft);
 }
 
@@ -100,6 +103,34 @@ main:focus {
 }
 .skip-link:focus {
   transform: none;
+}
+
+/* The endless strip of quotes on the login pages (components/auth/AppTestimonials.tsx). The list is
+   there twice, so moving it left by half its width loops without a jump. */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee 45s linear infinite;
+}
+.marquee-paused .marquee-track {
+  animation-play-state: paused;
+}
+/* With reduced motion the strip stands still: a row the reader scrolls themselves, once. */
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+  .marquee-view {
+    overflow-x: auto;
+  }
+  .marquee-copy {
+    display: none;
+  }
 }
 
 /* People who ask their system for less motion get none: no spinners turning, no sliding. */

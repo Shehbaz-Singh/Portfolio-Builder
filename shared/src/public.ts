@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { linkTypeSchema, profileSchema } from './portfolio';
+import { myTestimonialSchema, publicTestimonialSchema } from './testimonials';
 import {
   SECTION_KEYS,
   customIdOf,
@@ -95,6 +96,8 @@ export const publicProfileSchema = profileSchema.omit({ id: true, published: tru
   sections: z.array(publicSectionSchema).default(() => SECTION_KEYS.map((key) => ({ key }))),
   // The visible custom sections that have items, in page order. Each has an entry in `sections`.
   customSections: z.array(publicCustomSectionSchema).default([]),
+  // Approved testimonials only, in the owner's order.
+  testimonials: z.array(publicTestimonialSchema).default([]),
   links: z.array(publicLinkSchema),
   ...sectionLists,
 });
@@ -105,6 +108,8 @@ export const myProfileSchema = profileSchema.extend({
   // All sections, hidden ones included, in page order (GET/PUT /profile/me/sections).
   sectionConfig: sectionConfigSchema.default(defaultSectionConfig),
   customSections: z.array(myCustomSectionSchema).default([]),
+  // Every testimonial, pending and rejected included.
+  testimonials: z.array(myTestimonialSchema).default([]),
   links: z.array(publicLinkSchema.extend({ visible: z.boolean() })),
   ...sectionLists,
 });

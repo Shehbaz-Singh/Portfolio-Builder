@@ -1,5 +1,6 @@
 import { ShareButton } from '../ShareButton';
 import { buildBlocks, buildHeader, type Block, type HeaderModel } from './blocks';
+import { LeaveTestimonial } from './LeaveTestimonial';
 import { Avatar, DateRange, NewTabLink } from './parts';
 import { ThemeWrapper } from './ThemeWrapper';
 import type { ThemeProps } from './types';
@@ -116,6 +117,42 @@ function BlockView({ block }: { block: Block }) {
             </li>
           ))}
         </ul>
+      );
+    case 'testimonials':
+      return (
+        <>
+          {block.testimonials.length > 0 ? (
+            <ul className="grid gap-5 lg:grid-cols-2">
+              {block.testimonials.map((item) => (
+                <li key={item.id} className="min-w-0">
+                  <figure className="flex h-full flex-col rounded-2xl border-2 border-ink bg-page p-5 shadow-[5px_5px_0_0_var(--accent)]">
+                    <blockquote className="flex-1 text-lg leading-snug font-medium whitespace-pre-line">
+                      <span
+                        aria-hidden="true"
+                        className="block text-5xl leading-none font-black text-accent-fg"
+                      >
+                        “
+                      </span>
+                      {item.message}
+                    </blockquote>
+                    <figcaption className="mt-4">
+                      <span className="block font-black">{item.name}</span>
+                      {item.detail && <span className="font-medium text-muted">{item.detail}</span>}
+                    </figcaption>
+                  </figure>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-lg font-medium text-muted">No testimonials yet.</p>
+          )}
+          {block.submitTo && (
+            <LeaveTestimonial
+              slug={block.submitTo}
+              buttonClassName={`inline-flex items-center rounded-full border-2 border-ink px-5 py-2 font-bold transition hover:bg-ink hover:text-page ${focusRing}`}
+            />
+          )}
+        </>
       );
     case 'entries':
       return (

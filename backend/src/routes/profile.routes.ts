@@ -6,6 +6,8 @@ import {
   publishSchema,
   reorderSchema,
   sectionsUpdateSchema,
+  testimonialInputSchema,
+  testimonialSettingsSchema,
 } from '@portfolio/shared';
 import {
   createCustomItem,
@@ -37,6 +39,16 @@ import {
   reorderSection,
   updateSectionItem,
 } from '../controllers/section.controller';
+import {
+  approveTestimonial,
+  createTestimonial,
+  deleteTestimonial,
+  listTestimonials,
+  rejectTestimonial,
+  reorderTestimonials,
+  updateTestimonial,
+  updateTestimonialSettings,
+} from '../controllers/testimonial.controller';
 import { requireAuth } from '../middleware/auth';
 import { resumeLimiter, uploadLimiter } from '../middleware/rate-limit';
 import { avatarUpload, resumeUpload } from '../middleware/upload';
@@ -97,6 +109,21 @@ profileRouter.put(
   updateCustomItem,
 );
 profileRouter.delete('/me/custom-sections/:id/items/:itemId', deleteCustomItem);
+
+// Testimonials people left, and the ones added by hand. Declared before /me/:section like the
+// others; "settings" and "reorder" come before /:id so they are not read as an id.
+profileRouter.get('/me/testimonials', listTestimonials);
+profileRouter.post('/me/testimonials', validateBody(testimonialInputSchema), createTestimonial);
+profileRouter.put(
+  '/me/testimonials/settings',
+  validateBody(testimonialSettingsSchema),
+  updateTestimonialSettings,
+);
+profileRouter.patch('/me/testimonials/reorder', validateBody(reorderSchema), reorderTestimonials);
+profileRouter.put('/me/testimonials/:id', validateBody(testimonialInputSchema), updateTestimonial);
+profileRouter.post('/me/testimonials/:id/approve', approveTestimonial);
+profileRouter.post('/me/testimonials/:id/reject', rejectTestimonial);
+profileRouter.delete('/me/testimonials/:id', deleteTestimonial);
 
 // :section is one of experience | education | projects | skills | links
 profileRouter.patch('/me/:section/reorder', validateBody(reorderSchema), reorderSection);

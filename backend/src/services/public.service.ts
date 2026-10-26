@@ -2,7 +2,7 @@ import { normalizeSectionConfig, publicLayout } from '@portfolio/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
-import { customItems, orderedList, publicProfileSelect } from '../lib/selects';
+import { customItems, orderedList, publicProfileSelect, publicTestimonials } from '../lib/selects';
 
 // Built from an explicit select, so nothing outside this list can reach a visitor. In
 // particular the User row is never touched: no account email, passwordHash or userId.
@@ -24,6 +24,7 @@ const publicSelect = {
     select: { id: true, title: true, items: customItems },
     orderBy: [{ order: 'asc' }, { id: 'asc' }],
   },
+  testimonials: publicTestimonials,
 } satisfies Prisma.ProfileSelect;
 
 // An unpublished profile and a profile that does not exist both give the same 404, so
@@ -52,6 +53,7 @@ export async function getPublicProfile(slug: string) {
     experience: has('experience') ? rest.experience : [],
     projects: has('projects') ? rest.projects : [],
     education: has('education') ? rest.education : [],
+    testimonials: has('testimonials') ? rest.testimonials : [],
     sections,
     customSections,
   };

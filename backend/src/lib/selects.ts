@@ -18,6 +18,28 @@ export const customItems = {
   orderBy: [{ order: 'asc' }, { id: 'asc' }],
 } satisfies Prisma.CustomSectionItemFindManyArgs;
 
+// The owner's view of a testimonial: everything but the profile id, in display order. Pending ones
+// have the highest orders, so they come last, oldest first.
+export const myTestimonials = {
+  omit: { profileId: true },
+  orderBy: [{ order: 'asc' }, { createdAt: 'asc' }, { id: 'asc' }],
+} satisfies Prisma.TestimonialFindManyArgs;
+
+// A visitor's view: approved ones only, by an explicit list of fields, so the contact email and
+// status can never reach the public page.
+export const publicTestimonials = {
+  where: { status: 'approved' },
+  select: {
+    id: true,
+    authorName: true,
+    authorRole: true,
+    authorCompany: true,
+    message: true,
+    order: true,
+  },
+  orderBy: [{ order: 'asc' }, { id: 'asc' }],
+} satisfies Prisma.TestimonialFindManyArgs;
+
 // A section list in display order. profileId is dropped: the client already knows the profile.
 export const orderedList = {
   omit: { profileId: true },
