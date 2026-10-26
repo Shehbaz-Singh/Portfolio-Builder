@@ -1,21 +1,13 @@
-import type { ReactElement, ReactNode } from 'react';
-import {
-  SECTION_LABELS,
-  customIdOf,
-  isCustomKey,
-  type PublicCustomItem,
-  type PublicCustomSection,
-  type PublicProfile,
-  type SectionKey,
-} from '@portfolio/shared';
-import { SITE_URL } from '@/lib/config';
-import { formatMonthYear, initials, linkTarget, safeHttpUrl } from '@/lib/format';
+import type { ReactNode } from 'react';
 import { ShareButton } from '../ShareButton';
+import { buildBlocks, buildHeader, type Block, type HeaderModel } from './blocks';
+import { Avatar, DateRange, NewTabLink } from './parts';
 import { ThemeWrapper } from './ThemeWrapper';
 import type { ThemeProps } from './types';
 
+// A clean single column. Also the layout of the Dark theme, which only changes the palette.
+
 const chip = 'rounded-full bg-surface px-3 py-1 text-sm text-ink';
-const muted = 'text-muted';
 const focusRing =
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
 
@@ -30,50 +22,19 @@ function Section({ id, title, children }: { id: string; title: string; children:
   );
 }
 
-function Avatar({ profile }: { profile: PublicProfile }) {
-  const src = safeHttpUrl(profile.avatarUrl);
-  const size = 'size-28 shrink-0 rounded-full sm:size-32';
-
-  if (src) {
-    return (
-      <img
-        src={src}
-        alt={`Photo of ${profile.fullName}`}
-        width={128}
-        height={128}
-        referrerPolicy="no-referrer"
-        className={`${size} object-cover shadow-md ring-4 ring-page`}
-      />
-    );
-  }
-  return (
-    <div
-      aria-hidden="true"
-      className={`${size} flex items-center justify-center bg-accent text-3xl font-semibold text-on-accent`}
-    >
-      {initials(profile.fullName)}
-    </div>
-  );
-}
-
-function Header({ profile }: { profile: PublicProfile }) {
-  const links = profile.links.flatMap((link) => {
-    const target = linkTarget(link);
-    return target ? [{ id: link.id, ...target }] : [];
-  });
-
+function Header({ header }: { header: HeaderModel }) {
   return (
     <header className="flex flex-col items-center gap-6 text-center sm:flex-row sm:items-start sm:gap-8 sm:text-left">
-      <Avatar profile={profile} />
+      <Avatar
+        avatar={header.avatar}
+        className="size-28 shrink-0 rounded-full shadow-md ring-4 ring-page sm:size-32"
+        placeholderClassName="bg-accent text-3xl font-semibold text-on-accent"
+      />
       <div className="min-w-0">
-        <h1 className="text-3xl font-bold tracking-tight break-words sm:text-4xl">
-          {profile.fullName}
-        </h1>
-        {profile.tagline && <p className="mt-2 text-lg text-ink">{profile.tagline}</p>}
-        {profile.location && (
-          <p
-            className={`mt-2 flex items-center justify-center gap-1.5 text-sm sm:justify-start ${muted}`}
-          >
+        <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">{header.name}</h1>
+        {header.tagline && <p className="mt-2 text-lg text-ink">{header.tagline}</p>}
+        {header.location && (
+          <p className="mt-2 flex items-center justify-center gap-1.5 text-sm text-muted sm:justify-start">
             <svg
               aria-hidden="true"
               viewBox="0 0 20 20"
@@ -86,27 +47,31 @@ function Header({ profile }: { profile: PublicProfile }) {
                 clipRule="evenodd"
               />
             </svg>
-            <span>{profile.location}</span>
+            <span>{header.location}</span>
           </p>
         )}
         <ul className="mt-5 flex flex-wrap justify-center gap-2 sm:justify-start">
-          {links.map((link) => (
+          {header.links.map((link) => (
             <li key={link.id}>
-              <a
-                href={link.href}
-                {...(link.external && { target: '_blank', rel: 'noopener noreferrer' })}
-                className={`inline-flex items-center rounded-full border border-line px-4 py-2 text-sm font-medium transition hover:bg-surface ${focusRing}`}
-              >
-                {link.label}
-                {link.external && <span className="sr-only"> (opens in a new tab)</span>}
-              </a>
+              {link.external ? (
+                <NewTabLink
+                  href={link.href}
+                  className={`inline-flex items-center rounded-full border border-line px-4 py-2 text-sm font-medium transition hover:bg-surface ${focusRing}`}
+                >
+                  {link.label}
+                </NewTabLink>
+              ) : (
+                <a
+                  href={link.href}
+                  className={`inline-flex items-center rounded-full border border-line px-4 py-2 text-sm font-medium transition hover:bg-surface ${focusRing}`}
+                >
+                  {link.label}
+                </a>
+              )}
             </li>
           ))}
           <li>
-            <ShareButton
-              url={`${SITE_URL}/${profile.slug}`}
-              title={`${profile.fullName}'s portfolio`}
-            />
+            <ShareButton url={header.share.url} title={header.share.title} />
           </li>
         </ul>
       </div>
@@ -114,124 +79,93 @@ function Header({ profile }: { profile: PublicProfile }) {
   );
 }
 
-function TimelineItem({
-  title,
-  subtitle,
-  start,
-  end,
-  description,
-}: {
-  title: string;
-  subtitle: string;
-  start: string;
-  end: string | null;
-  description?: string;
-}) {
+// Jobs, degrees and the items of custom sections share one timeline-or-list look.
+function EntryList({ block }: { block: Extract<Block, { kind: 'entries' }> }) {
+  const timeline = block.variant !== 'custom';
   return (
-    <li className="relative pb-8 ps-6 last:pb-0">
-      <span
-        aria-hidden="true"
-        className="absolute start-0 top-2 size-3 -translate-x-1/2 rounded-full border-2 border-page bg-accent"
-      />
-      <h3 className="font-semibold">{title}</h3>
-      <p className={muted}>{subtitle}</p>
-      <p className="mt-0.5 text-sm text-muted">
-        <time dateTime={start}>{formatMonthYear(start)}</time>
-        {' – '}
-        {end ? <time dateTime={end}>{formatMonthYear(end)}</time> : 'Present'}
-      </p>
-      {description && <p className="mt-2 whitespace-pre-line text-ink">{description}</p>}
-    </li>
+    <ol className={timeline ? 'border-s border-line' : 'space-y-6'}>
+      {block.entries.map((entry) => (
+        <li key={entry.id} className={timeline ? 'relative pb-8 ps-6 last:pb-0' : undefined}>
+          {timeline && (
+            <span
+              aria-hidden="true"
+              className="absolute start-0 top-2 size-3 -translate-x-1/2 rounded-full border-2 border-page bg-accent"
+            />
+          )}
+          <h3 className="font-semibold">{entry.title}</h3>
+          {entry.subtitle && <p className="text-muted">{entry.subtitle}</p>}
+          {entry.start && (
+            <p className="mt-0.5 text-sm text-muted">
+              <DateRange
+                start={entry.start}
+                end={entry.end}
+                openEnded={block.variant !== 'custom'}
+              />
+            </p>
+          )}
+          {entry.description && (
+            <p className="mt-2 whitespace-pre-line text-ink">{entry.description}</p>
+          )}
+          {entry.href && (
+            <p className="mt-2">
+              <NewTabLink
+                href={entry.href}
+                context={entry.title}
+                className={`text-sm font-medium text-accent-fg underline-offset-2 hover:underline ${focusRing}`}
+              >
+                View
+              </NewTabLink>
+            </p>
+          )}
+        </li>
+      ))}
+    </ol>
   );
 }
 
-interface SectionProps {
-  profile: PublicProfile;
-  title: string; // the owner's heading, or the default one
-}
-
-// One component per kind of section. Each draws nothing when it has no content, so a section
-// that is switched on but empty leaves no heading behind.
-function AboutSection({ profile, title }: SectionProps) {
-  if (!profile.about) return null;
-  return (
-    <Section id="about" title={title}>
-      <p className="leading-relaxed whitespace-pre-line text-ink">{profile.about}</p>
-    </Section>
-  );
-}
-
-function SkillsSection({ profile, title }: SectionProps) {
-  if (profile.skills.length === 0) return null;
-  return (
-    <Section id="skills" title={title}>
-      <ul className="flex flex-wrap gap-2">
-        {profile.skills.map((skill) => (
-          <li key={skill.id} className={chip}>
-            {skill.name}
-          </li>
-        ))}
-      </ul>
-    </Section>
-  );
-}
-
-function ExperienceSection({ profile, title }: SectionProps) {
-  if (profile.experience.length === 0) return null;
-  return (
-    <Section id="experience" title={title}>
-      <ol className="border-s border-line">
-        {profile.experience.map((job) => (
-          <TimelineItem
-            key={job.id}
-            title={job.title}
-            subtitle={job.company}
-            start={job.startDate}
-            end={job.endDate}
-            description={job.description}
-          />
-        ))}
-      </ol>
-    </Section>
-  );
-}
-
-function ProjectsSection({ profile, title }: SectionProps) {
-  if (profile.projects.length === 0) return null;
-  return (
-    <Section id="projects" title={title}>
-      <ul className="grid gap-4 sm:grid-cols-2">
-        {profile.projects.map((project) => {
-          const href = safeHttpUrl(project.url);
-          return (
+function BlockView({ block }: { block: Block }) {
+  switch (block.kind) {
+    case 'about':
+      return <p className="leading-relaxed whitespace-pre-line text-ink">{block.text}</p>;
+    case 'skills':
+      return (
+        <ul className="flex flex-wrap gap-2">
+          {block.skills.map((skill) => (
+            <li key={skill.id} className={`${chip}`}>
+              {skill.name}
+            </li>
+          ))}
+        </ul>
+      );
+    case 'projects':
+      return (
+        <ul className="grid gap-4 sm:grid-cols-2">
+          {block.projects.map((project) => (
             <li
               key={project.id}
-              className="relative flex flex-col rounded-xl border border-line p-5 transition focus-within:border-accent hover:border-accent/50 hover:shadow-sm"
+              className="relative flex min-w-0 flex-col rounded-xl border border-line p-5 transition focus-within:border-accent hover:border-accent/50 hover:shadow-sm"
             >
               <h3 className="font-semibold">
-                {href ? (
-                  <a
-                    href={href}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                {project.href ? (
+                  <NewTabLink
+                    href={project.href}
                     className={`after:absolute after:inset-0 after:rounded-xl ${focusRing}`}
                   >
                     {project.name}
-                    <span className="sr-only"> (opens in a new tab)</span>
-                  </a>
+                  </NewTabLink>
                 ) : (
                   project.name
                 )}
               </h3>
               {project.description && (
-                <p className={`mt-2 text-sm whitespace-pre-line ${muted}`}>{project.description}</p>
+                <p className="mt-2 text-sm whitespace-pre-line text-muted">{project.description}</p>
               )}
-              {project.techTags.length > 0 && (
+              {project.tags.length > 0 && (
                 <ul className="mt-4 flex flex-wrap gap-1.5">
-                  {project.techTags.map((tag) => (
+                  {project.tags.map((tag) => (
                     <li
                       key={tag}
-                      className="rounded-md bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent"
+                      className="rounded-md bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent-fg"
                     >
                       {tag}
                     </li>
@@ -239,114 +173,34 @@ function ProjectsSection({ profile, title }: SectionProps) {
                 </ul>
               )}
             </li>
-          );
-        })}
-      </ul>
-    </Section>
-  );
+          ))}
+        </ul>
+      );
+    case 'entries':
+      return <EntryList block={block} />;
+  }
 }
 
-function EducationSection({ profile, title }: SectionProps) {
-  if (profile.education.length === 0) return null;
+// The layout, with the palette class a theme wants: none for Minimal, "theme-dark" for Dark.
+export function MinimalLayout({
+  profile,
+  idPrefix,
+  themeClass = '',
+}: ThemeProps & { themeClass?: string }) {
   return (
-    <Section id="education" title={title}>
-      <ol className="border-s border-line">
-        {profile.education.map((item) => (
-          <TimelineItem
-            key={item.id}
-            title={item.degree}
-            subtitle={item.institution}
-            start={item.startDate}
-            end={item.endDate}
-          />
-        ))}
-      </ol>
-    </Section>
-  );
-}
-
-// A section the owner made up (Certifications, Awards, ...): one generic list. Everything in it is
-// plain text; the link is the only thing that is not, and it is checked to be http(s).
-function CustomItemView({ item }: { item: PublicCustomItem }) {
-  const href = safeHttpUrl(item.url);
-  return (
-    <li>
-      <h3 className="font-semibold">{item.title}</h3>
-      {item.subtitle && <p className={muted}>{item.subtitle}</p>}
-      {item.startDate && (
-        <p className="mt-0.5 text-sm text-muted">
-          <time dateTime={item.startDate}>{formatMonthYear(item.startDate)}</time>
-          {item.endDate && (
-            <>
-              {' – '}
-              <time dateTime={item.endDate}>{formatMonthYear(item.endDate)}</time>
-            </>
-          )}
-        </p>
-      )}
-      {item.description && <p className="mt-2 whitespace-pre-line text-ink">{item.description}</p>}
-      {href && (
-        <p className="mt-2">
-          <a
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`text-sm font-medium text-accent underline-offset-2 hover:underline ${focusRing}`}
-          >
-            View
-            <span className="sr-only"> {item.title} (opens in a new tab)</span>
-          </a>
-        </p>
-      )}
-    </li>
-  );
-}
-
-function CustomSectionView({ section }: { section: PublicCustomSection }) {
-  return (
-    <Section id={`custom-${section.id}`} title={section.title}>
-      <ul className="space-y-6">
-        {section.items.map((item) => (
-          <CustomItemView key={item.id} item={item} />
-        ))}
-      </ul>
-    </Section>
-  );
-}
-
-// Which component draws which built-in section. A new kind of section (testimonials, custom sections) is
-// a new key in the shared list plus an entry here; the page itself does not change.
-const SECTION_COMPONENTS: Record<SectionKey, (props: SectionProps) => ReactElement | null> = {
-  about: AboutSection,
-  skills: SkillsSection,
-  experience: ExperienceSection,
-  projects: ProjectsSection,
-  education: EducationSection,
-};
-
-export default function MinimalTheme({ profile }: ThemeProps) {
-  return (
-    <ThemeWrapper profile={profile}>
+    <ThemeWrapper profile={profile} className={themeClass}>
       <main className="mx-auto max-w-3xl px-5 py-12 sm:px-8 sm:py-16">
-        <Header profile={profile} />
-
-        {/* The order, visibility and headings come from the profile's section config. */}
-        {profile.sections.map(({ key, title }) => {
-          if (isCustomKey(key)) {
-            const section = profile.customSections.find((s) => s.id === customIdOf(key));
-            return section ? <CustomSectionView key={key} section={section} /> : null;
-          }
-          if (!Object.hasOwn(SECTION_COMPONENTS, key)) return null; // not a section this theme knows
-          const Component = SECTION_COMPONENTS[key as SectionKey];
-          return (
-            <Component
-              key={key}
-              profile={profile}
-              title={title ?? SECTION_LABELS[key as SectionKey]}
-            />
-          );
-        })}
+        <Header header={buildHeader(profile)} />
+        {buildBlocks(profile, idPrefix).map((block) => (
+          <Section key={block.id} id={block.id} title={block.title}>
+            <BlockView block={block} />
+          </Section>
+        ))}
       </main>
     </ThemeWrapper>
   );
+}
+
+export default function MinimalTheme(props: ThemeProps) {
+  return <MinimalLayout {...props} />;
 }

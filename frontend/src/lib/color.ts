@@ -1,8 +1,5 @@
 import { DEFAULT_ACCENT, accentColorSchema } from '@portfolio/shared';
 
-// The page background of the built-in theme (the --bg value in globals.css). Accent colors are
-// checked against it. A theme with another background would pass its own value instead.
-export const PAGE_BACKGROUND = '#ffffff';
 export const MIN_CONTRAST = 4.5; // WCAG AA for normal text
 
 // Offered as one-click choices. All of them are readable on a white page.
@@ -41,6 +38,25 @@ export function contrastRatio(a: string, b: string): number {
 // Black or white, whichever reads better on this color (for text placed on the accent).
 export const readableTextOn = (hex: string) =>
   contrastRatio(hex, '#000000') >= contrastRatio(hex, '#ffffff') ? '#000000' : '#ffffff';
+
+// How the accent reads as text on a theme's background. Light themes use it as it is. Dark
+// themes lighten it by mixing in 40% white, which is what `--accent-fg` does in globals.css.
+function mixWithWhite(hex: string, share: number): string {
+  const channel = (start: number) =>
+    Math.round(parseInt(hex.slice(start, start + 2), 16) * (1 - share) + 255 * share)
+      .toString(16)
+      .padStart(2, '0');
+  return `#${channel(1)}${channel(3)}${channel(5)}`;
+}
+
+export const accentAsText = (hex: string, scheme: 'light' | 'dark') =>
+  scheme === 'dark' ? mixWithWhite(hex, 0.4) : hex;
+
+// Contrast of the accent, used as text, against a theme's page background.
+export const accentContrast = (
+  hex: string,
+  theme: { background: string; scheme: 'light' | 'dark' },
+) => contrastRatio(accentAsText(hex, theme.scheme), theme.background);
 
 // The variables a theme wrapper sets for the accent. An invalid value falls back to the default
 // instead of reaching the page.

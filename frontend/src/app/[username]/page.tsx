@@ -1,8 +1,8 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
-import { getTheme } from '@/components/themes';
 import { getPublicProfile } from '@/lib/api';
 import { truncate } from '@/lib/format';
+import { getTheme } from '@/lib/themes';
 
 type Props = { params: Promise<{ username: string }> };
 
@@ -31,6 +31,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+// The browser's own chrome (address bar on a phone, form controls, scrollbars) follows the
+// profile's theme, so a dark theme is dark all the way to the edge.
+export async function generateViewport({ params }: Props): Promise<Viewport> {
+  const { username } = await params;
+  const profile = await getPublicProfile(username);
+  if (!profile) return {};
+  const { scheme, background } = getTheme(profile.theme);
+  return { colorScheme: scheme, themeColor: background };
+}
+
 export default async function ProfilePage({ params }: Props) {
   const { username } = await params;
   const profile = await getPublicProfile(username);
@@ -39,6 +49,6 @@ export default async function ProfilePage({ params }: Props) {
   // /JANE-DOE and /jane-doe are the same profile: keep one canonical URL.
   if (profile.slug !== username) permanentRedirect(`/${profile.slug}`);
 
-  const Theme = getTheme(profile.theme);
+  const { Component: Theme } = getTheme(profile.theme);
   return <Theme profile={profile} />;
 }

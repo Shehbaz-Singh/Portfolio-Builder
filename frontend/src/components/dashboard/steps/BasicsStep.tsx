@@ -16,9 +16,10 @@ import {
 import { ApiError, api } from '@/lib/client-api';
 import { normalizeHex } from '@/lib/color';
 import { schemaResolver } from '@/lib/form';
+import { DEFAULT_THEME, getTheme } from '@/lib/themes';
 import { initials } from '@/lib/format';
 import { CheckboxField, SelectField, TextField } from '../../form-fields';
-import { DEFAULT_THEME, isKnownTheme } from '../../themes';
+
 import { Button, SlowNotice, Switch } from '../../ui';
 import { AccentPicker } from '../AccentPicker';
 import { EditorForm } from '../EditorForm';
@@ -137,7 +138,7 @@ const toFields = (p: MyProfile): DetailsFields => ({
   tagline: p.tagline ?? '',
   location: p.location ?? '',
   slug: p.slug,
-  theme: isKnownTheme(p.theme) ? p.theme : DEFAULT_THEME,
+  theme: getTheme(p.theme).key,
   accentColor: p.accentColor,
 });
 

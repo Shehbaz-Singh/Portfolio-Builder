@@ -51,7 +51,15 @@ export const slugSchema = z
   .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use lowercase letters, numbers and single hyphens')
   .refine((s) => !isReservedSlug(s), 'This slug is reserved');
 
-export const themeSchema = z.string().trim().min(1).max(50);
+// The themes a profile may choose. The frontend's theme registry has an entry for each key (its
+// type is a Record over this list), so adding a theme means adding the key here and the entry
+// there. Only these keys are accepted when saving.
+export const THEME_KEYS = ['minimal', 'dark', 'creative', 'classic'] as const;
+export const themeSchema = z.enum(THEME_KEYS);
+export type ThemeKey = z.infer<typeof themeSchema>;
+export const DEFAULT_THEME: ThemeKey = 'minimal';
+export const isThemeKey = (value: string): value is ThemeKey =>
+  (THEME_KEYS as readonly string[]).includes(value);
 
 export const DEFAULT_ACCENT = '#2563eb';
 
@@ -73,7 +81,7 @@ export const profileInputSchema = z.object({
   about: optionalText(5000),
   location: optionalText(100),
   avatarUrl: httpUrl.nullish().transform((v) => v ?? null),
-  theme: themeSchema.default('minimal'),
+  theme: themeSchema.default(DEFAULT_THEME),
   accentColor: accentColorSchema.default(DEFAULT_ACCENT),
   published: z.boolean().default(false),
 });
@@ -81,7 +89,9 @@ export type ProfileInput = z.infer<typeof profileInputSchema>;
 
 // A stored profile: the same fields as the input, plus its id. Deriving it here means adding
 // a profile field is a one-place change (the backend's Prisma select reads these keys too).
-export const profileSchema = profileInputSchema.extend({ id: z.string() });
+// `theme` is a plain string when read: the whitelist applies to what is saved, and a stored value
+// that is no longer offered must not break the page (the frontend falls back to the default).
+export const profileSchema = profileInputSchema.extend({ id: z.string(), theme: z.string() });
 export type Profile = z.infer<typeof profileSchema>;
 
 // PUT /profile/me. Publishing has its own endpoint, and omitting the slug keeps the current one.

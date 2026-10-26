@@ -1,6 +1,6 @@
 'use client';
 
-import { getTheme } from '../themes';
+import { getTheme } from '@/lib/themes';
 import { useEditor } from './editor-context';
 
 // The real theme component fed with the profile being edited, so what you see is what the
@@ -8,7 +8,7 @@ import { useEditor } from './editor-context';
 // desktop layout, and `inert` stops its links from being clickable or focusable.
 export function Preview() {
   const { preview } = useEditor();
-  const Theme = getTheme(preview.theme);
+  const { Component: Theme } = getTheme(preview.theme);
 
   return (
     <section aria-label="Live preview" className="overflow-hidden rounded-2xl border border-line">

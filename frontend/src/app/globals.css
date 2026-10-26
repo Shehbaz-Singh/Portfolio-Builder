@@ -1,9 +1,10 @@
 @import 'tailwindcss';
 
 /* Colors are variables defined on a theme wrapper (.theme-root). A theme restyles the page by
-   defining the same variables on its own wrapper; the profile's accent is set inline on that
-   wrapper by the server (see accentVars in lib/color.ts), so there is no flash of other colors.
-   The app is light only for now: nothing follows the visitor's dark-mode setting. */
+   defining the same variables on its own wrapper class (.theme-dark, ...); the profile's accent is
+   set inline on that wrapper by the server (see accentVars in lib/color.ts), so there is no flash
+   of other colors. Which palette applies is the profile's theme setting: nothing follows the
+   visitor's system light or dark mode. The editor and the account pages are always light. */
 .theme-root {
   --bg: #ffffff; /* page background (also PAGE_BACKGROUND in lib/color.ts) */
   --surface: #f1f5f9; /* chips, hovered controls, code */
@@ -12,14 +13,47 @@
   --border: #cbd5e1;
   --accent: #2563eb;
   --on-accent: #ffffff; /* text placed on the accent */
+  --accent-fg: var(--accent); /* the accent as text on the page background (links, tags) */
   --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--bg));
   color-scheme: light;
+  /* Text the owner typed can be one very long word (a URL, a pasted string). Let it break rather
+     than push the page wider than the screen. */
+  overflow-wrap: anywhere;
   background-color: var(--bg);
   color: var(--text);
 }
 
+/* The palettes of the themes. Each background here is also the theme's `background` in
+   lib/themes.ts, which the accent picker checks contrast against. */
+.theme-dark {
+  --bg: #0b1020;
+  --surface: #161d33;
+  --text: #e8ecf5;
+  --muted: #a3adc2;
+  --border: #2b3452;
+  /* A dark accent would be hard to read as text on this background, so it is lightened. */
+  --accent-fg: color-mix(in srgb, var(--accent) 60%, white);
+  color-scheme: dark;
+}
+
+.theme-classic {
+  --bg: #fdfcf8;
+  --surface: #f3f0e8;
+  --text: #1c1917;
+  --muted: #57534e;
+  --border: #d6d0c4;
+}
+
+.theme-creative {
+  --bg: #ffffff;
+  --surface: #f4f4f5;
+  --text: #09090b;
+  --muted: #52525b;
+  --border: #d4d4d8;
+}
+
 /* Utilities: bg-page, bg-surface, text-ink, text-muted, border-line, bg-accent, text-accent,
-   text-on-accent, bg-accent-soft. `inline` keeps them reading the variables of whichever wrapper
+   text-accent-fg, text-on-accent, bg-accent-soft. `inline` keeps them reading the variables of whichever wrapper
    they are inside. */
 @theme inline {
   --color-page: var(--bg);
@@ -28,6 +62,7 @@
   --color-muted: var(--muted);
   --color-line: var(--border);
   --color-accent: var(--accent);
+  --color-accent-fg: var(--accent-fg);
   --color-on-accent: var(--on-accent);
   --color-accent-soft: var(--accent-soft);
 }

@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useId, useRef, useState, useSyncExternalStore } from 'react';
+import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 interface Props {
   url: string; // the canonical profile URL
   title: string;
-  // pill: filled with the accent color (public page); outline: a plain button (dashboard)
-  variant?: 'pill' | 'outline';
+  // pill: filled with the accent color (public page); outline: a plain button (dashboard);
+  // inverse: for use on an accent-colored background, where an accent button would vanish
+  variant?: 'pill' | 'outline' | 'inverse';
 }
 
 const noSubscription = () => () => {};
@@ -23,6 +24,9 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
   const native = useSyncExternalStore(noSubscription, hasWebShare, () => false);
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState('');
+  // The menu hangs from the button's left edge; near the right edge of a small screen it is
+  // flipped to hang from the right edge instead, so it never runs off the screen.
+  const [alignEnd, setAlignEnd] = useState(false);
   const root = useRef<HTMLDivElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
   const menu = useRef<HTMLUListElement>(null);
@@ -30,6 +34,12 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
   const menuId = useId();
 
   useEffect(() => () => clearTimeout(timer.current), []);
+
+  useLayoutEffect(() => {
+    if (!open) return setAlignEnd(false);
+    const box = menu.current?.getBoundingClientRect();
+    if (box && box.right > document.documentElement.clientWidth - 8) setAlignEnd(true);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -99,10 +109,13 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
     { label: 'Email', href: `mailto:?subject=${t}&body=${u}`, external: false },
   ];
 
-  const look =
-    variant === 'pill'
-      ? 'rounded-full bg-accent px-4 py-2 text-on-accent hover:bg-accent/90'
-      : 'rounded-lg border border-line px-4 py-2 hover:bg-surface';
+  const look = {
+    pill: 'rounded-full bg-accent px-4 py-2 text-on-accent hover:bg-accent/90 focus-visible:outline-accent',
+    outline:
+      'rounded-lg border border-line px-4 py-2 hover:bg-surface focus-visible:outline-accent',
+    inverse:
+      'rounded-full bg-on-accent px-4 py-2 text-accent hover:opacity-90 focus-visible:outline-on-accent',
+  }[variant];
 
   return (
     <div ref={root} className="relative inline-block">
@@ -112,7 +125,7 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
         onClick={onTrigger}
         aria-expanded={native ? undefined : open}
         aria-controls={native ? undefined : menuId}
-        className={`inline-flex items-center gap-2 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${look}`}
+        className={`inline-flex items-center gap-2 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 ${look}`}
       >
         <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className="size-4">
           <path d="M13 4.5a2.5 2.5 0 1 1 .7 1.74L7.9 9.2a2.5 2.5 0 0 1 0 1.6l5.8 2.96a2.5 2.5 0 1 1-.7 1.38l-5.8-2.97a2.5 2.5 0 1 1 0-4.34l5.8-2.97A2.5 2.5 0 0 1 13 4.5Z" />
@@ -125,7 +138,7 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
           ref={menu}
           id={menuId}
           onKeyDown={onMenuKey}
-          className="absolute start-0 top-full z-20 mt-2 w-48 rounded-xl border border-line bg-page p-1 text-ink shadow-lg"
+          className={`absolute top-full z-20 mt-2 w-48 rounded-xl border border-line bg-page p-1 text-ink shadow-lg ${alignEnd ? 'end-0' : 'start-0'}`}
         >
           <li>
             <button type="button" onClick={copy} className={itemClass}>
