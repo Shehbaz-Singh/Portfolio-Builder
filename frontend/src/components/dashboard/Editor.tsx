@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState } from 'react';
+import { useState, type ComponentType } from 'react';
 import type { MyProfile } from '@portfolio/shared';
 import { api } from '@/lib/client-api';
 import { useLoad } from '@/lib/hooks';
@@ -13,11 +13,20 @@ import { LoadFailed, Loading } from './screens';
 import { AboutStep } from './steps/AboutStep';
 import { BasicsStep } from './steps/BasicsStep';
 import { EducationStep } from './steps/EducationStep';
+import { ImportBanner, ImportStep } from './steps/ImportStep';
 import { ExperienceStep } from './steps/ExperienceStep';
 import { ProjectsStep } from './steps/ProjectsStep';
 import { SkillsStep } from './steps/SkillsStep';
 
-const STEPS = [
+interface Step {
+  id: string;
+  label: string;
+  Component: ComponentType<{ goTo: (stepId: string) => void }>;
+}
+
+// "Import resume" comes first but is not numbered: it is an optional shortcut, not a step.
+const STEPS: Step[] = [
+  { id: 'import', label: 'Import resume', Component: ImportStep },
   { id: 'basics', label: 'Basics', Component: BasicsStep },
   { id: 'about', label: 'About', Component: AboutStep },
   { id: 'skills', label: 'Skills', Component: SkillsStep },
@@ -58,9 +67,17 @@ function Header() {
   );
 }
 
+// A brand-new profile has only a name. Those people start on the resume import.
+const isBlank = (p: MyProfile) =>
+  !p.about &&
+  !p.tagline &&
+  !p.location &&
+  !p.avatarUrl &&
+  [p.links, p.skills, p.experience, p.projects, p.education].every((list) => list.length === 0);
+
 function Workspace() {
-  const { hasUnsaved } = useEditor();
-  const [stepId, setStepId] = useState(STEPS[0].id);
+  const { hasUnsaved, profile } = useEditor();
+  const [stepId, setStepId] = useState(() => (isBlank(profile) ? 'import' : 'basics'));
   // Below the lg breakpoint the form and the preview do not fit side by side.
   const [showPreview, setShowPreview] = useState(false);
   const { Component } = STEPS.find((s) => s.id === stepId) ?? STEPS[0];
@@ -80,9 +97,10 @@ function Workspace() {
     <div className="mx-auto max-w-7xl">
       <Header />
       <PublishPanel onFix={goTo} />
+      <ImportBanner />
       <div className="grid gap-6 p-4 lg:grid-cols-2">
         <div className={`min-w-0 ${showPreview ? 'hidden lg:block' : ''}`}>
-          <nav aria-label="Editor steps" className="mb-6 flex gap-1 overflow-x-auto pb-1">
+          <nav aria-label="Editor steps" className="mb-6 flex flex-wrap gap-1">
             {STEPS.map((step, i) => (
               <button
                 key={step.id}
@@ -95,11 +113,11 @@ function Workspace() {
                     : 'hover:bg-slate-100 dark:hover:bg-slate-800'
                 }`}
               >
-                {i + 1}. {step.label}
+                {i === 0 ? step.label : `${i}. ${step.label}`}
               </button>
             ))}
           </nav>
-          <Component />
+          <Component goTo={goTo} />
         </div>
 
         <div

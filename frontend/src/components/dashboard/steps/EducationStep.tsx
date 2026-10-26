@@ -12,21 +12,23 @@ import { SectionManager, type ItemFormProps } from '../SectionManager';
 
 type Fields = DateRangeValues & { degree: string; institution: string };
 
-function EducationForm({ item, onDone }: ItemFormProps<'education'>) {
+function EducationForm({ item, draft, onDone, onSaved }: ItemFormProps<'education'>) {
   const { create, updateItem } = useSection('education');
+  const source = item ?? draft; // a saved item, or a suggestion from a resume
   const form = useForm<Fields, unknown, EducationInput>({
     resolver: schemaResolver(educationInputSchema),
     defaultValues: {
-      degree: item?.degree ?? '',
-      institution: item?.institution ?? '',
-      startDate: toMonth(item?.startDate),
-      endDate: toMonth(item?.endDate),
-      current: item ? !item.endDate : false,
+      degree: source?.degree ?? '',
+      institution: source?.institution ?? '',
+      startDate: toMonth(source?.startDate),
+      endDate: toMonth(source?.endDate),
+      current: source ? !source.endDate : false,
     },
   });
 
   async function onSubmit(values: EducationInput) {
     await (item ? updateItem(item.id, values) : create(values));
+    onSaved?.();
     onDone();
   }
 

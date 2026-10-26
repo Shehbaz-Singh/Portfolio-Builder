@@ -12,22 +12,24 @@ import { SectionManager, type ItemFormProps } from '../SectionManager';
 
 type Fields = DateRangeValues & { title: string; company: string; description: string };
 
-function ExperienceForm({ item, onDone }: ItemFormProps<'experience'>) {
+function ExperienceForm({ item, draft, onDone, onSaved }: ItemFormProps<'experience'>) {
   const { create, updateItem } = useSection('experience');
+  const source = item ?? draft; // a saved item, or a suggestion from a resume
   const form = useForm<Fields, unknown, ExperienceInput>({
     resolver: schemaResolver(experienceInputSchema),
     defaultValues: {
-      title: item?.title ?? '',
-      company: item?.company ?? '',
-      startDate: toMonth(item?.startDate),
-      endDate: toMonth(item?.endDate),
-      current: item ? !item.endDate : false,
-      description: item?.description ?? '',
+      title: source?.title ?? '',
+      company: source?.company ?? '',
+      startDate: toMonth(source?.startDate),
+      endDate: toMonth(source?.endDate),
+      current: source ? !source.endDate : false,
+      description: source?.description ?? '',
     },
   });
 
   async function onSubmit(values: ExperienceInput) {
     await (item ? updateItem(item.id, values) : create(values));
+    onSaved?.();
     onDone();
   }
 

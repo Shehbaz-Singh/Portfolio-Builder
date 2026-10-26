@@ -16,23 +16,25 @@ const splitTags = (text: string) =>
     .map((tag) => tag.trim())
     .filter(Boolean);
 
-function ProjectForm({ item, onDone }: ItemFormProps<'projects'>) {
+function ProjectForm({ item, draft, onDone, onSaved }: ItemFormProps<'projects'>) {
   const { create, updateItem } = useSection('projects');
+  const source = item ?? draft; // a saved item, or a suggestion from a resume
   const form = useForm<Fields, unknown, ProjectInput>({
     resolver: schemaResolver(projectInputSchema, (v: Fields) => ({
       ...v,
       techTags: splitTags(v.techTags),
     })),
     defaultValues: {
-      name: item?.name ?? '',
-      url: item?.url ?? '',
-      description: item?.description ?? '',
-      techTags: item?.techTags.join(', ') ?? '',
+      name: source?.name ?? '',
+      url: source?.url ?? '',
+      description: source?.description ?? '',
+      techTags: source?.techTags.join(', ') ?? '',
     },
   });
 
   async function onSubmit(values: ProjectInput) {
     await (item ? updateItem(item.id, values) : create(values));
+    onSaved?.();
     onDone();
   }
 

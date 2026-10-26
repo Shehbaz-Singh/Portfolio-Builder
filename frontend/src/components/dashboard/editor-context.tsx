@@ -10,7 +10,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { MyProfile, PublicProfile, Section } from '@portfolio/shared';
+import type { MyProfile, ParsedResume, PublicProfile, Section } from '@portfolio/shared';
 import { ApiError, api } from '@/lib/client-api';
 
 // Fields the live preview shows while they are still being typed (not yet saved).
@@ -18,6 +18,40 @@ export type Draft = Partial<
   Pick<MyProfile, 'fullName' | 'tagline' | 'location' | 'about' | 'theme'>
 >;
 type Notice = { kind: 'success' | 'error'; text: string };
+
+// ---- Resume import. Nothing from a resume is saved until the person saves it. The profile
+// fields are put into the Basics and About forms (unsaved); each list entry becomes a
+// suggestion they can edit and add, or skip.
+export interface SuggestionMap {
+  links: ParsedResume['links'][number];
+  skills: string;
+  experience: ParsedResume['experience'][number];
+  projects: ParsedResume['projects'][number];
+  education: ParsedResume['education'][number];
+}
+export type SuggestionSection = keyof SuggestionMap;
+export type Suggestion<K extends SuggestionSection> = { key: string; data: SuggestionMap[K] };
+type Suggestions = { [K in SuggestionSection]: Suggestion<K>[] };
+// Only the fields the resume actually had (never null), so each is a plain string.
+export type ImportedFields = Partial<Record<'fullName' | 'tagline' | 'location' | 'about', string>>;
+interface Imported {
+  fields: ImportedFields; // waiting to be put into a form (taken once)
+  suggestions: Suggestions;
+  skipped: number; // entries the server could not read
+}
+
+const SUGGESTION_SECTIONS: SuggestionSection[] = [
+  'links',
+  'skills',
+  'experience',
+  'projects',
+  'education',
+];
+const pendingCount = (imported: Imported | null) =>
+  imported
+    ? Object.keys(imported.fields).length +
+      SUGGESTION_SECTIONS.reduce((n, k) => n + imported.suggestions[k].length, 0)
+    : 0;
 
 interface EditorContextValue {
   profile: MyProfile; // what is saved on the server
@@ -27,6 +61,13 @@ interface EditorContextValue {
   notify: (kind: Notice['kind'], text: string) => void;
   markDirty: () => () => void;
   hasUnsaved: () => boolean;
+  imported: Imported | null;
+  hasPendingImport: boolean;
+  applyImport: (resume: ParsedResume, skipped: number) => void;
+  // Hands the imported values for these fields to a form, once.
+  takeFields: (keys: (keyof ImportedFields)[]) => ImportedFields;
+  dismissSuggestions: (section: SuggestionSection, keys: string[]) => void;
+  discardImport: () => void;
 }
 
 const EditorContext = createContext<EditorContextValue | null>(null);
@@ -46,6 +87,13 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
   const [notice, setNotice] = useState<Notice | null>(null);
   const noticeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const dirtyForms = useRef(0);
+  // The ref is read synchronously (a form takes its fields on mount); the state drives rendering.
+  const [imported, setImportedState] = useState<Imported | null>(null);
+  const importedRef = useRef<Imported | null>(null);
+  const setImported = useCallback((next: Imported | null) => {
+    importedRef.current = next;
+    setImportedState(next);
+  }, []);
 
   const notify = useCallback((kind: Notice['kind'], text: string) => {
     clearTimeout(noticeTimer.current);
@@ -62,9 +110,67 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
   }, []);
   const hasUnsaved = useCallback(() => dirtyForms.current > 0, []);
 
+  const applyImport = useCallback(
+    (resume: ParsedResume, skipped: number) => {
+      const fields: ImportedFields = {
+        ...(resume.fullName && { fullName: resume.fullName }),
+        ...(resume.tagline && { tagline: resume.tagline }),
+        ...(resume.location && { location: resume.location }),
+        ...(resume.about && { about: resume.about }),
+      };
+      const wrap = <K extends SuggestionSection>(list: SuggestionMap[K][]): Suggestion<K>[] =>
+        list.map((data) => ({ key: crypto.randomUUID(), data }));
+      setImported({
+        fields,
+        skipped,
+        suggestions: {
+          links: wrap<'links'>(resume.links),
+          skills: wrap<'skills'>(resume.skills),
+          experience: wrap<'experience'>(resume.experience),
+          projects: wrap<'projects'>(resume.projects),
+          education: wrap<'education'>(resume.education),
+        },
+      });
+    },
+    [setImported],
+  );
+
+  const takeFields = useCallback(
+    (keys: (keyof ImportedFields)[]) => {
+      const current = importedRef.current;
+      const taken: ImportedFields = {};
+      if (!current) return taken;
+      const rest = { ...current.fields };
+      for (const key of keys) {
+        if (rest[key] !== undefined) {
+          taken[key] = rest[key];
+          delete rest[key];
+        }
+      }
+      if (Object.keys(taken).length > 0) setImported({ ...current, fields: rest });
+      return taken;
+    },
+    [setImported],
+  );
+
+  const dismissSuggestions = useCallback(
+    (section: SuggestionSection, keys: string[]) => {
+      const current = importedRef.current;
+      if (!current) return;
+      const remaining = (current.suggestions[section] as { key: string }[]).filter(
+        (item) => !keys.includes(item.key),
+      );
+      setImported({ ...current, suggestions: { ...current.suggestions, [section]: remaining } });
+    },
+    [setImported],
+  );
+
+  const discardImport = useCallback(() => setImported(null), [setImported]);
+
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => {
-      if (dirtyForms.current > 0) e.preventDefault();
+      // Also guards a parsed resume that has not been reviewed yet: it is not stored anywhere.
+      if (dirtyForms.current > 0 || pendingCount(importedRef.current) > 0) e.preventDefault();
     };
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
@@ -76,8 +182,33 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
   );
 
   const value = useMemo(
-    () => ({ profile, preview, update: setProfile, setDraft, notify, markDirty, hasUnsaved }),
-    [profile, preview, notify, markDirty, hasUnsaved],
+    () => ({
+      profile,
+      preview,
+      update: setProfile,
+      setDraft,
+      notify,
+      markDirty,
+      hasUnsaved,
+      imported,
+      hasPendingImport: pendingCount(imported) > 0,
+      applyImport,
+      takeFields,
+      dismissSuggestions,
+      discardImport,
+    }),
+    [
+      profile,
+      preview,
+      notify,
+      markDirty,
+      hasUnsaved,
+      imported,
+      applyImport,
+      takeFields,
+      dismissSuggestions,
+      discardImport,
+    ],
   );
 
   return (
@@ -165,4 +296,19 @@ export function useSection<S extends Section>(section: S) {
   );
 
   return { items, create, updateItem, remove, reorder };
+}
+
+// The suggestions waiting for one list, with ways to clear them.
+export function useSuggestions<K extends SuggestionSection>(section: K) {
+  const { imported, dismissSuggestions } = useEditor();
+  const suggestions = (imported?.suggestions[section] ?? []) as Suggestion<K>[];
+  return {
+    suggestions,
+    dismiss: (key: string) => dismissSuggestions(section, [key]),
+    dismissAll: () =>
+      dismissSuggestions(
+        section,
+        suggestions.map((x) => x.key),
+      ),
+  };
 }

@@ -138,7 +138,7 @@ const toFields = (p: MyProfile): DetailsFields => ({
 });
 
 function DetailsForm() {
-  const { profile, update, setDraft, notify } = useEditor();
+  const { profile, update, setDraft, notify, takeFields } = useEditor();
   const form = useForm<DetailsFields, unknown, z.output<typeof detailsSchema>>({
     resolver: schemaResolver(detailsSchema),
     defaultValues: toFields(profile),
@@ -147,19 +147,29 @@ function DetailsForm() {
 
   // Typing shows up in the preview straight away; saving makes it permanent.
   useEffect(() => {
-    const subscription = form.watch((v) =>
+    const publish = (v: Partial<DetailsFields>) =>
       setDraft({
         fullName: v.fullName ?? '',
         tagline: v.tagline || null,
         location: v.location || null,
         theme: v.theme ?? DEFAULT_THEME,
-      }),
-    );
+      });
+    publish(form.getValues());
+    const subscription = form.watch(publish);
     return () => {
       subscription.unsubscribe();
       setDraft(null);
     };
   }, [form, setDraft]);
+
+  // Details read from an uploaded resume arrive here as unsaved edits, to review and fix.
+  useEffect(() => {
+    const imported = takeFields(['fullName', 'tagline', 'location']);
+    for (const key of ['fullName', 'tagline', 'location'] as const) {
+      const value = imported[key];
+      if (value) form.setValue(key, value, { shouldDirty: true });
+    }
+  }, [form, takeFields]);
 
   async function onSubmit(values: z.output<typeof detailsSchema>) {
     // The slug is only sent when it changed, so saving never re-checks an unchanged slug.
@@ -221,18 +231,24 @@ const TYPE_OPTIONS = linkTypeSchema.options.map((value) => ({ value, label: LINK
 
 type LinkFields = { type: LinkType; url: string; visible: boolean };
 
-function LinkForm({ item, onDone }: ItemFormProps<'links'>) {
+function LinkForm({ item, draft, onDone, onSaved }: ItemFormProps<'links'>) {
   const { create, updateItem } = useSection('links');
+  const source = item ?? draft; // a saved link, or a suggestion from a resume
   const form = useForm<LinkFields, unknown, LinkInput>({
     resolver: schemaResolver(linkInputSchema),
-    defaultValues: item
-      ? { type: item.type, url: item.url, visible: item.visible }
+    defaultValues: source
+      ? {
+          type: source.type,
+          url: source.url,
+          visible: (source as { visible?: boolean }).visible ?? true,
+        }
       : { type: 'linkedin', url: '', visible: true },
   });
   const type = useWatch({ control: form.control, name: 'type' });
 
   async function onSubmit(values: LinkInput) {
     await (item ? updateItem(item.id, values) : create(values));
+    onSaved?.();
     onDone();
   }
 

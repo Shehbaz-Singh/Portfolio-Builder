@@ -14,19 +14,27 @@ const schema = profileUpdateSchema.pick({ about: true });
 type Fields = { about: string };
 
 export function AboutStep() {
-  const { profile, update, setDraft, notify } = useEditor();
+  const { profile, update, setDraft, notify, takeFields } = useEditor();
   const form = useForm<Fields, unknown, z.output<typeof schema>>({
     resolver: schemaResolver(schema),
     defaultValues: { about: profile.about ?? '' },
   });
 
   useEffect(() => {
-    const subscription = form.watch((v) => setDraft({ about: v.about || null }));
+    const publish = (v: Partial<Fields>) => setDraft({ about: v.about || null });
+    publish(form.getValues());
+    const subscription = form.watch(publish);
     return () => {
       subscription.unsubscribe();
       setDraft(null);
     };
   }, [form, setDraft]);
+
+  // The summary read from an uploaded resume arrives as an unsaved edit, to review and fix.
+  useEffect(() => {
+    const { about } = takeFields(['about']);
+    if (about) form.setValue('about', about, { shouldDirty: true });
+  }, [form, takeFields]);
 
   async function onSubmit(values: z.output<typeof schema>) {
     const saved = await saveProfile(profile, values);

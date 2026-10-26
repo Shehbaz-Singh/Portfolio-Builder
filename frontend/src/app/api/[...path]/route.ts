@@ -13,7 +13,9 @@ export const maxDuration = 60;
 const UPSTREAM_TIMEOUT_MS = 55_000;
 
 const FORWARDED_AREAS = new Set(['auth', 'profile']);
-const MAX_BODY_BYTES = 3 * 1024 * 1024; // the avatar limit is 2 MB, plus multipart overhead
+// The API enforces the real per-route limits (2 MB avatar, 5 MB resume); this only stops the
+// proxy from buffering something absurd. Vercel itself rejects bodies over 4.5 MB.
+const MAX_BODY_BYTES = 5.5 * 1024 * 1024;
 
 const fail = (status: number, code: string, message: string) =>
   NextResponse.json({ error: { code, message } }, { status });
