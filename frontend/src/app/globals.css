@@ -260,3 +260,42 @@ main:focus {
     scroll-behavior: auto !important;
   }
 }
+
+/* The dashboard's page scrollbar: a slim one instead of the wide default. */
+html:has(.dashboard-root) {
+  scrollbar-width: thin;
+}
+
+/* Page and dialog transitions: short and gentle, and only for people who have not asked their
+   system for less motion. */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+}
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.98);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .page-enter {
+    animation: page-in 0.2s ease-out both;
+  }
+  dialog[open] {
+    animation: pop-in 0.18s ease-out both;
+  }
+  dialog[open]::backdrop {
+    animation: fade-in 0.18s ease-out both;
+  }
+  [role='status'] > .toast {
+    animation: pop-in 0.18s ease-out both;
+  }
+}

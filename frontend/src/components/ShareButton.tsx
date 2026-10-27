@@ -1,5 +1,6 @@
 'use client';
 
+import { Share2 } from 'lucide-react';
 import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
 
 interface Props {
@@ -126,9 +127,7 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
         aria-controls={native ? undefined : menuId}
         className={`inline-flex items-center gap-2 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 ${look}`}
       >
-        <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className="size-4">
-          <path d="M13 4.5a2.5 2.5 0 1 1 .7 1.74L7.9 9.2a2.5 2.5 0 0 1 0 1.6l5.8 2.96a2.5 2.5 0 1 1-.7 1.38l-5.8-2.97a2.5 2.5 0 1 1 0-4.34l5.8-2.97A2.5 2.5 0 0 1 13 4.5Z" />
-        </svg>
+        <Share2 aria-hidden="true" className="size-4" />
         Share
       </button>
 

@@ -22,7 +22,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const url = `/${profile.slug}`; // resolved against metadataBase in the root layout
 
   return {
-    title,
+    title: { absolute: title },
     description,
     alternates: { canonical: url },
     // og:image comes from ./opengraph-image.tsx automatically.

@@ -20,6 +20,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { ChevronDown, ChevronLeft, ChevronRight, ChevronUp, GripVertical } from 'lucide-react';
 
 interface Props<T extends { id: string }> {
   items: T[];
@@ -56,18 +57,11 @@ function Row({
 }) {
   // Dragging is not possible for everyone, so every row also has plain buttons (one click each).
   const [before, after] = layout === 'wrap' ? ['earlier', 'later'] : ['up', 'down'];
-  const arrow = (flip: boolean) => (
-    <svg
-      aria-hidden="true"
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      className={`size-3.5 ${layout === 'wrap' ? '-rotate-90' : ''} ${flip ? 'rotate-180' : ''}`}
-    >
-      <path d="m5 12 5-5 5 5" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
+  const arrow = (later: boolean) => {
+    const Icon =
+      layout === 'wrap' ? (later ? ChevronRight : ChevronLeft) : later ? ChevronDown : ChevronUp;
+    return <Icon aria-hidden="true" className="size-4" />;
+  };
   const {
     attributes,
     listeners,
@@ -89,9 +83,7 @@ function Row({
         {...attributes}
         {...listeners}
       >
-        <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className="size-5">
-          <path d="M7 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm-1.5 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM16 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm-1.5 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM16 16a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
-        </svg>
+        <GripVertical aria-hidden="true" className="size-5" />
       </button>
       <button
         type="button"

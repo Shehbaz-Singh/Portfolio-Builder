@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { SectionsStep } from '@/components/dashboard/steps/SectionsStep';
 
-export const metadata: Metadata = { title: 'Sections | Portfolio Generator' };
+export const metadata: Metadata = { title: 'Sections' };
 
 export default function Page() {
   return (

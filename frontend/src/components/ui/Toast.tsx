@@ -23,7 +23,7 @@ export function ToastRegion({
         <p
           key={toast.id}
           className={cx(
-            'pointer-events-auto flex max-w-md items-start gap-3 rounded-control py-2 ps-4 pe-2 text-sm font-medium shadow-overlay',
+            'toast pointer-events-auto flex max-w-md items-start gap-3 rounded-control py-2 ps-4 pe-2 text-sm font-medium shadow-overlay',
             toast.kind === 'success' ? 'bg-ink text-page' : 'bg-danger text-page',
           )}
         >

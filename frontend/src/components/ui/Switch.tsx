@@ -20,7 +20,7 @@ export function Switch({
       disabled={disabled}
       onClick={onClick}
       className={cx(
-        'relative h-6 w-11 shrink-0 rounded-full transition disabled:opacity-60',
+        'relative h-6 w-11 shrink-0 rounded-full transition hover:opacity-90 active:opacity-75 disabled:opacity-60',
         checked ? 'bg-accent' : 'bg-line',
       )}
     >

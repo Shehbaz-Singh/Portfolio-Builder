@@ -9,7 +9,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-inter', display: 'sw
 export const metadata: Metadata = {
   // Base for the absolute URLs in Open Graph and canonical tags.
   metadataBase: new URL(SITE_URL),
-  title: 'Portfolio Generator',
+  title: { default: 'Portfolio Generator', template: '%s | Portfolio Generator' },
   description: 'Build and publish your portfolio page.',
 };
 

@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { ThemesPage } from '@/components/dashboard/ThemesPage';
 
-export const metadata: Metadata = { title: 'Themes | Portfolio Generator' };
+export const metadata: Metadata = { title: 'Themes' };
 
 export default function Page() {
   return (

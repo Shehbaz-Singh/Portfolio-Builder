@@ -4,7 +4,7 @@ import { cx } from './cx';
 const tones = {
   neutral: 'bg-surface text-ink',
   solid: 'bg-ink text-page', // a count that must stand out, such as pending items
-  accent: 'bg-accent-soft text-accent-fg',
+  accent: 'bg-accent-soft text-ink',
   warning: 'bg-warning-bg text-warning-fg',
   danger: 'bg-danger-bg text-danger',
 };

@@ -7,10 +7,10 @@ const base =
   'inline-flex items-center justify-center gap-2 rounded-control font-medium transition disabled:cursor-not-allowed disabled:opacity-60';
 
 const variants = {
-  primary: 'bg-accent text-on-accent hover:bg-accent/90',
-  secondary: 'border border-line hover:bg-surface',
-  ghost: 'hover:bg-surface',
-  danger: 'border border-danger-border text-danger hover:bg-danger-bg',
+  primary: 'bg-accent text-on-accent hover:bg-accent/90 active:bg-accent/75',
+  secondary: 'border border-line hover:bg-surface active:bg-line',
+  ghost: 'hover:bg-surface active:bg-line',
+  danger: 'border border-danger-border text-danger hover:bg-danger-bg active:bg-danger-border',
 };
 
 // Both sizes keep the target at least 24 by 24 px.

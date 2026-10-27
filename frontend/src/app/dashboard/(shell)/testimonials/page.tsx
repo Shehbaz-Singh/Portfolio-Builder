@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { TestimonialsStep } from '@/components/dashboard/steps/TestimonialsStep';
 
-export const metadata: Metadata = { title: 'Testimonials | Portfolio Generator' };
+export const metadata: Metadata = { title: 'Testimonials' };
 
 export default function Page() {
   return (

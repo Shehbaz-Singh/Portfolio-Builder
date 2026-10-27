@@ -76,7 +76,7 @@ export function Preview() {
               onClick={() => setDeviceId(id)}
               className={cx(
                 'inline-flex items-center gap-1.5 rounded-control px-2 py-1 text-xs font-medium',
-                id === deviceId ? 'bg-accent text-on-accent' : 'hover:bg-page',
+                id === deviceId ? 'bg-accent text-on-accent' : 'hover:bg-page active:bg-line',
               )}
             >
               <Icon aria-hidden="true" className="size-4" />

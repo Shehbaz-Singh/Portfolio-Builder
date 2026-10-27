@@ -69,8 +69,8 @@ function NavLinks({ layout }: { layout: 'side' | 'bottom' }) {
                   ? 'gap-3 px-3 py-2'
                   : 'min-h-14 flex-col justify-center gap-0.5 px-0.5 text-[0.6875rem]',
                 current
-                  ? 'bg-accent-soft text-accent-fg'
-                  : 'text-muted hover:bg-surface hover:text-ink',
+                  ? 'bg-accent-soft font-semibold text-ink'
+                  : 'text-muted hover:bg-surface hover:text-ink active:bg-line',
               )}
             >
               <span className="relative">

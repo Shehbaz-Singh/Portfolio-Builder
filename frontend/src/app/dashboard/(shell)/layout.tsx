@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { DashboardShell } from '@/components/dashboard/DashboardShell';
 
 export const metadata: Metadata = {
-  title: 'Dashboard | Portfolio Generator',
+  title: 'Dashboard',
   robots: { index: false },
 };
 

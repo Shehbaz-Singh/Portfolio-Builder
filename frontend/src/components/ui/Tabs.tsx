@@ -75,7 +75,7 @@ export function Tabs({
               onClick={() => onChange(tab.id)}
               className={cx(
                 'inline-flex shrink-0 items-center gap-1.5 rounded-control px-3 py-2 text-sm font-medium',
-                selected ? 'bg-accent text-on-accent' : 'hover:bg-surface',
+                selected ? 'bg-accent text-on-accent' : 'hover:bg-surface active:bg-line',
               )}
             >
               {tab.label}

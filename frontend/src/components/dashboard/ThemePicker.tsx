@@ -32,7 +32,7 @@ export function ThemePicker() {
                 <theme.Component profile={preview} idPrefix={`pick-${theme.key}-`} />
               </div>
             </div>
-            <span className="px-1 pb-1">
+            <span className="relative bg-page px-1 pb-1">
               <span className="block text-sm font-medium">{theme.name}</span>
               <span className="block text-xs text-muted">{theme.description}</span>
             </span>
