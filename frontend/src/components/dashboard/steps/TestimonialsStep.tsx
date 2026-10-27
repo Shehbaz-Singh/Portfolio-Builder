@@ -1,5 +1,6 @@
 'use client';
 
+import { MessageSquareQuote } from 'lucide-react';
 import { useRef, useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import {
@@ -63,12 +64,24 @@ function TestimonialForm({ item, onDone, onSaved }: FormProps<MyTestimonial>) {
       submitLabel={item ? 'Save testimonial' : 'Add testimonial'}
       onCancel={onDone}
     >
-      <TextField name="authorName" label="Name" maxLength={TESTIMONIAL_NAME_MAX} required />
+      <TextField
+        name="authorName"
+        label="Name"
+        placeholder="e.g. Marcus Lee"
+        maxLength={TESTIMONIAL_NAME_MAX}
+        required
+      />
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField name="authorRole" label="Role (optional)" maxLength={TESTIMONIAL_ROLE_MAX} />
+        <TextField
+          name="authorRole"
+          label="Role (optional)"
+          placeholder="e.g. Engineering Manager"
+          maxLength={TESTIMONIAL_ROLE_MAX}
+        />
         <TextField
           name="authorCompany"
           label="Company (optional)"
+          placeholder="e.g. Northwind"
           maxLength={TESTIMONIAL_COMPANY_MAX}
         />
       </div>
@@ -77,7 +90,7 @@ function TestimonialForm({ item, onDone, onSaved }: FormProps<MyTestimonial>) {
         label="Testimonial"
         rows={5}
         maxLength={TESTIMONIAL_MESSAGE_MAX}
-        hint={`20 to ${TESTIMONIAL_MESSAGE_MAX} characters, plain text.${item ? '' : ' It is approved as soon as you add it.'}`}
+        hint={`Use their own words, from 20 to ${TESTIMONIAL_MESSAGE_MAX} characters.${item ? '' : ' It goes on your page as soon as you add it.'}`}
         required
       />
       <TextField
@@ -264,7 +277,7 @@ export function TestimonialsStep() {
         id="testimonials-pending"
         title="Pending review"
         items={t.pending}
-        empty="Nothing is waiting for review."
+        empty="You're all caught up. New testimonials from visitors will wait here for your OK."
         actions={(item, done) => (
           <>
             <Button
@@ -314,7 +327,8 @@ export function TestimonialsStep() {
           list={{ items: t.approved, create: t.create, remove: t.remove, reorder: t.reorder }}
           noun="testimonial"
           addLabel="Add a testimonial"
-          empty="No approved testimonials yet. Approve one above, or add one yourself."
+          icon={MessageSquareQuote}
+          empty="Nothing here yet. Approve one from the list above, or add a kind word someone shared with you."
           limit={remaining}
           summary={(item) => ({
             title: item.authorName,

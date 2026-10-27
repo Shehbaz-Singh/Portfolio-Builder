@@ -11,7 +11,16 @@ import {
   type HeaderModel,
 } from './blocks';
 import { LeaveTestimonial } from './LeaveTestimonial';
-import { Avatar, DateRange, EmptyPage, HeaderLink, InitialsBadge, NewTabLink } from './parts';
+import {
+  Avatar,
+  DateRange,
+  EmptyPage,
+  HeaderLink,
+  InitialsBadge,
+  NewTabLink,
+  RoleList,
+  TotalExperience,
+} from './parts';
 import { Reveal } from './Reveal';
 import { ThemeWrapper } from './ThemeWrapper';
 import type { ThemeProps } from './types';
@@ -253,47 +262,63 @@ function BlockView({ block }: { block: Block }) {
       );
     case 'entries':
       return (
-        <ol className="space-y-5">
-          {block.entries.map((entry, i) => (
-            <li
-              key={entry.id}
-              className={`${card} min-w-0 border-s-[10px] p-6 sm:p-7 ${EDGES[i % EDGES.length]}`}
-            >
-              {entry.start && (
-                <p
-                  className={`mb-3 inline-block rounded-full px-3 py-0.5 text-sm font-bold tabular-nums ${TINTS[i % TINTS.length]}`}
-                >
-                  <DateRange
-                    start={entry.start}
-                    end={entry.end}
-                    openEnded={block.variant !== 'custom'}
-                  />
-                </p>
-              )}
-              <h3 className={`${display} text-xl leading-snug font-semibold sm:text-2xl`}>
-                {entry.title}
-              </h3>
-              {entry.subtitle && (
-                <p className="mt-0.5 font-semibold text-muted">{entry.subtitle}</p>
-              )}
-              {entry.description && (
-                <p className="mt-3 leading-relaxed whitespace-pre-line">{entry.description}</p>
-              )}
-              {entry.href && (
-                <p className="mt-4">
-                  <NewTabLink
-                    href={entry.href}
-                    context={entry.title}
-                    className={`inline-flex items-center gap-1 text-sm font-bold underline underline-offset-4 hover:no-underline ${focusRing}`}
+        <>
+          <TotalExperience
+            total={block.total}
+            className="mb-5 inline-block rounded-full bg-accent-soft px-4 py-1 text-sm font-semibold"
+          />
+          <ol className="space-y-5">
+            {block.entries.map((entry, i) => (
+              <li
+                key={entry.id}
+                className={`${card} min-w-0 border-s-[10px] p-6 sm:p-7 ${EDGES[i % EDGES.length]}`}
+              >
+                {entry.start && (
+                  <p
+                    className={`mb-3 inline-block rounded-full px-3 py-0.5 text-sm font-bold tabular-nums ${TINTS[i % TINTS.length]}`}
                   >
-                    View
-                    <ArrowUpRight aria-hidden="true" className="size-4" />
-                  </NewTabLink>
-                </p>
-              )}
-            </li>
-          ))}
-        </ol>
+                    <DateRange
+                      start={entry.start}
+                      end={entry.end}
+                      openEnded={block.variant !== 'custom'}
+                      duration={entry.duration}
+                    />
+                  </p>
+                )}
+                <h3 className={`${display} text-xl leading-snug font-semibold sm:text-2xl`}>
+                  {entry.title}
+                </h3>
+                {entry.subtitle && (
+                  <p className="mt-0.5 font-semibold text-muted">{entry.subtitle}</p>
+                )}
+                {entry.roles && (
+                  <RoleList
+                    roles={entry.roles}
+                    className="mt-4 space-y-4 border-s-2 border-line ps-4"
+                    titleClassName={`${display} text-lg font-semibold`}
+                    datesClassName="text-sm font-semibold text-muted tabular-nums"
+                    descriptionClassName="mt-1 leading-relaxed"
+                  />
+                )}
+                {entry.description && (
+                  <p className="mt-3 leading-relaxed whitespace-pre-line">{entry.description}</p>
+                )}
+                {entry.href && (
+                  <p className="mt-4">
+                    <NewTabLink
+                      href={entry.href}
+                      context={entry.title}
+                      className={`inline-flex items-center gap-1 text-sm font-bold underline underline-offset-4 hover:no-underline ${focusRing}`}
+                    >
+                      View
+                      <ArrowUpRight aria-hidden="true" className="size-4" />
+                    </NewTabLink>
+                  </p>
+                )}
+              </li>
+            ))}
+          </ol>
+        </>
       );
   }
 }

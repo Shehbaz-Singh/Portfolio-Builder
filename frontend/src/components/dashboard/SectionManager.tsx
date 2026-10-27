@@ -3,6 +3,7 @@
 import { useEffect, useId, useRef, useState, type ComponentType, type ReactNode } from 'react';
 import { ChevronDown, Trash2, Undo2 } from 'lucide-react';
 import type { Section } from '@portfolio/shared';
+import type { LucideIcon } from 'lucide-react';
 import { Button, Card, EmptyState } from '../ui';
 import { cx } from '../ui/cx';
 import {
@@ -48,7 +49,8 @@ interface ListProps<T extends { id: string }, D> {
   suggestions?: Suggestions<D>;
   noun: string; // "job", used in messages
   addLabel: string;
-  empty: string;
+  empty: string; // what the empty list says: what is missing and why it is worth adding
+  icon?: LucideIcon; // drawn above it
   limit?: number; // most items allowed; the Add button is replaced by a note when it is reached
   summary: (item: T | D) => { title: string; subtitle?: string };
   Form: ComponentType<FormProps<T, D>>;
@@ -71,6 +73,7 @@ export function ListManager<T extends { id: string }, D = never>({
   noun,
   addLabel,
   empty,
+  icon,
   limit,
   summary,
   Form,
@@ -310,6 +313,7 @@ export function ListManager<T extends { id: string }, D = never>({
       {showEmpty && (
         <Card dashed padding="lg" className="text-center">
           <EmptyState
+            icon={icon}
             action={
               <Button variant="primary" onClick={() => setEditing('new')}>
                 Add your first {noun}
@@ -342,7 +346,8 @@ export function ListManager<T extends { id: string }, D = never>({
         </Card>
       ) : showEmpty ? null : full ? (
         <p className="text-sm text-muted">
-          You have reached the limit of {limit} {noun}s here. Delete one to add another.
+          That's the most {noun}s you can have here ({limit}). Delete one if you'd like to add
+          another.
         </p>
       ) : (
         <Button variant="primary" disabled={editing !== null} onClick={() => setEditing('new')}>

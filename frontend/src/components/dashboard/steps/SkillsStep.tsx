@@ -1,5 +1,6 @@
 'use client';
 
+import { Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { skillInputSchema, type SkillInput } from '@portfolio/shared';
@@ -66,7 +67,7 @@ export function SkillsStep() {
       <form onSubmit={add} noValidate className="flex gap-2">
         <Input
           aria-label="New skill"
-          placeholder="Add a skill, e.g. TypeScript"
+          placeholder="e.g. Figma, TypeScript, Public speaking"
           autoComplete="off"
           aria-invalid={errors.name ? true : undefined}
           aria-describedby={skillError ? 'skill-error' : undefined}
@@ -130,7 +131,12 @@ export function SkillsStep() {
       )}
 
       {items.length === 0 ? (
-        <EmptyState>No skills yet.</EmptyState>
+        <Card dashed padding="lg" className="text-center">
+          <EmptyState icon={Sparkles}>
+            Nothing here yet. Type a skill above and press Add. A handful of your strongest beats a
+            long list.
+          </EmptyState>
+        </Card>
       ) : (
         <SortableList
           items={items}

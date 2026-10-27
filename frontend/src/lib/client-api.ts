@@ -40,17 +40,36 @@ async function attempt(path: string, options: Options): Promise<Response | ApiEr
     });
   } catch (err) {
     if (options.signal?.aborted) throw err;
-    return new ApiError(0, 'NETWORK', "Couldn't reach the server. Check your connection.");
+    return new ApiError(
+      0,
+      'NETWORK',
+      "We couldn't reach the server. Check your internet connection and try again.",
+    );
   }
 }
+
+// Messages that say what happened and what to do next, for the errors people can actually run into.
+// Anything not listed keeps the server's own wording (validation errors name the field).
+const FRIENDLY: Record<string, string> = {
+  INVALID_CREDENTIALS:
+    "That email and password don't match. Check them and try again, or create an account if you're new.",
+  RATE_LIMITED: "You've tried that a few times in a row. Wait a few minutes, then try again.",
+  INVALID_PASSWORD: "That isn't your current password. Check it and try again.",
+  UPLOAD_FAILED: "We couldn't save that image. Try again, or pick a different one.",
+  NOTHING_FOUND:
+    "We couldn't find resume details in that file. Try a PDF with selectable text, or fill in your details by hand.",
+};
+
+const GENERIC =
+  'Something went wrong on our side. Your work so far is safe. Please try again in a moment.';
 
 async function toError(res: Response): Promise<ApiError> {
   const parsed = apiErrorSchema.safeParse(await res.json().catch(() => null));
   if (parsed.success) {
     const { code, message, details } = parsed.data.error;
-    return new ApiError(res.status, code, message, details);
+    return new ApiError(res.status, code, FRIENDLY[code] ?? message, details);
   }
-  return new ApiError(res.status, `HTTP_${res.status}`, 'Something went wrong. Please try again.');
+  return new ApiError(res.status, `HTTP_${res.status}`, GENERIC);
 }
 
 export async function api<T = void>(path: string, options: Options = {}): Promise<T> {

@@ -427,3 +427,47 @@ html:has(.dashboard-root) {
     animation: pop-in 0.18s ease-out both;
   }
 }
+
+/* The first-publish celebration: a few small pieces fall once and fade. Only for people who have
+   not asked for less motion; the words in the dialog say it all. */
+.confetti {
+  display: none;
+}
+@keyframes confetti-fall {
+  from {
+    opacity: 1;
+    transform: translateY(0) rotate(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(15rem) rotate(var(--r));
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .confetti {
+    display: block;
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .confetti span {
+    position: absolute;
+    top: 0;
+    left: var(--x);
+    width: 0.5rem;
+    height: 0.75rem;
+    border-radius: 2px;
+    background: var(--accent);
+    opacity: 0;
+    animation: confetti-fall 2.2s ease-in var(--d) 1 both;
+  }
+  .confetti span[data-tone='1'] {
+    background: var(--accent-soft);
+    outline: 1px solid var(--accent);
+  }
+  .confetti span[data-tone='2'] {
+    background: var(--color-gray-400);
+  }
+}

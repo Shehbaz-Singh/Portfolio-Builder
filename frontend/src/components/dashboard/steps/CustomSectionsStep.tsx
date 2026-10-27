@@ -1,5 +1,6 @@
 'use client';
 
+import { LayoutPanelTop, ListPlus } from 'lucide-react';
 import { createContext, useContext, useState, type FormEvent } from 'react';
 import { useForm } from 'react-hook-form';
 import {
@@ -67,7 +68,13 @@ function CustomItemForm({ item, onDone, onSaved }: FormProps<CustomItem>) {
 
   return (
     <EditorForm form={form} onSubmit={onSubmit} submitLabel="Save item" onCancel={onDone}>
-      <TextField name="title" label="Title" maxLength={CUSTOM_TITLE_MAX} required />
+      <TextField
+        name="title"
+        label="Title"
+        placeholder="e.g. AWS Certified Developer"
+        maxLength={CUSTOM_TITLE_MAX}
+        required
+      />
       <TextField
         name="subtitle"
         label="Subtitle (optional)"
@@ -220,7 +227,8 @@ function CustomSectionCard({ section }: { section: MyCustomSection }) {
           list={list}
           noun="item"
           addLabel="Add an item"
-          empty="No items yet. A section with no items is not shown on your page."
+          icon={ListPlus}
+          empty="Nothing here yet. Add your first item. Until you do, this section stays off your page."
           limit={MAX_CUSTOM_ITEMS}
           summary={summarizeItem}
           Form={CustomItemForm}
@@ -344,7 +352,14 @@ export function CustomSectionsStep() {
         </p>
       </div>
 
-      {sections.length === 0 && <EmptyState>No custom sections yet.</EmptyState>}
+      {sections.length === 0 && (
+        <Card dashed padding="lg" className="text-center">
+          <EmptyState icon={LayoutPanelTop}>
+            Nothing here yet. Add a section for anything that doesn't fit elsewhere, like
+            certifications, awards or talks.
+          </EmptyState>
+        </Card>
+      )}
       {sections.map((section) => (
         <CustomSectionCard key={section.id} section={section} />
       ))}

@@ -113,10 +113,12 @@ export function useEditor(): EditorContextValue {
 }
 
 export const errorText = (err: unknown) =>
-  err instanceof ApiError ? err.message : 'Something went wrong. Please try again.';
+  err instanceof ApiError
+    ? err.message
+    : 'Something went wrong, and your change may not have been saved. Please try again.';
 
 // A brand-new profile has only a name. Those people start on the resume import.
-const isBlank = (p: MyProfile) =>
+export const isBlank = (p: MyProfile) =>
   !p.about &&
   !p.tagline &&
   !p.location &&

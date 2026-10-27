@@ -11,7 +11,15 @@ import {
   type HeaderModel,
 } from './blocks';
 import { LeaveTestimonial } from './LeaveTestimonial';
-import { Avatar, DateRange, EmptyPage, HeaderLink, NewTabLink } from './parts';
+import {
+  Avatar,
+  DateRange,
+  EmptyPage,
+  HeaderLink,
+  NewTabLink,
+  RoleList,
+  TotalExperience,
+} from './parts';
 import { Reveal } from './Reveal';
 import { ThemeWrapper } from './ThemeWrapper';
 import type { ThemeProps } from './types';
@@ -194,38 +202,53 @@ function BlockView({ block }: { block: Block }) {
       );
     case 'entries':
       return (
-        <ol className="space-y-8">
-          {block.entries.map((entry) => (
-            <li key={entry.id} className="min-w-0 border-s-4 border-accent ps-5">
-              {entry.start && (
-                <p
-                  className={`${monoText} mb-2 inline-block bg-ink px-2 py-0.5 text-xs font-bold tracking-widest text-page uppercase tabular-nums`}
-                >
-                  <DateRange
-                    start={entry.start}
-                    end={entry.end}
-                    openEnded={block.variant !== 'custom'}
-                  />
-                </p>
-              )}
-              <h3 className="text-2xl leading-tight font-black">{entry.title}</h3>
-              {entry.subtitle && <p className="mt-1 font-medium text-muted">{entry.subtitle}</p>}
-              {entry.description && <p className="mt-3 whitespace-pre-line">{entry.description}</p>}
-              {entry.href && (
-                <p className="mt-3">
-                  <NewTabLink
-                    href={entry.href}
-                    context={entry.title}
-                    className={`inline-flex items-center gap-1 font-bold text-accent-fg underline underline-offset-4 ${focusRing}`}
+        <>
+          <TotalExperience total={block.total} className="mb-6 font-bold" />
+          <ol className="space-y-8">
+            {block.entries.map((entry) => (
+              <li key={entry.id} className="min-w-0 border-s-4 border-accent ps-5">
+                {entry.start && (
+                  <p
+                    className={`${monoText} mb-2 inline-block bg-ink px-2 py-0.5 text-xs font-bold tracking-widest text-page uppercase tabular-nums`}
                   >
-                    View
-                    <ArrowUpRight aria-hidden="true" className="size-5" />
-                  </NewTabLink>
-                </p>
-              )}
-            </li>
-          ))}
-        </ol>
+                    <DateRange
+                      start={entry.start}
+                      end={entry.end}
+                      openEnded={block.variant !== 'custom'}
+                      duration={entry.duration}
+                    />
+                  </p>
+                )}
+                <h3 className="text-2xl leading-tight font-black">{entry.title}</h3>
+                {entry.subtitle && <p className="mt-1 font-medium text-muted">{entry.subtitle}</p>}
+                {entry.roles && (
+                  <RoleList
+                    roles={entry.roles}
+                    className="mt-4 space-y-5 border-s-2 border-ink ps-4"
+                    titleClassName="text-xl leading-tight font-black"
+                    datesClassName={`${monoText} text-xs font-bold tracking-widest text-muted uppercase tabular-nums`}
+                    descriptionClassName="mt-2"
+                  />
+                )}
+                {entry.description && (
+                  <p className="mt-3 whitespace-pre-line">{entry.description}</p>
+                )}
+                {entry.href && (
+                  <p className="mt-3">
+                    <NewTabLink
+                      href={entry.href}
+                      context={entry.title}
+                      className={`inline-flex items-center gap-1 font-bold text-accent-fg underline underline-offset-4 ${focusRing}`}
+                    >
+                      View
+                      <ArrowUpRight aria-hidden="true" className="size-5" />
+                    </NewTabLink>
+                  </p>
+                )}
+              </li>
+            ))}
+          </ol>
+        </>
       );
   }
 }

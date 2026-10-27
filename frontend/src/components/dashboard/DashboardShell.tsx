@@ -11,6 +11,7 @@ import { cx } from '../ui/cx';
 import { EditorProvider } from './editor-context';
 import { BottomNav, Sidebar } from './Nav';
 import { Preview } from './Preview';
+import { Onboarding } from './Onboarding';
 import { LoadFailed, Loading } from './screens';
 import { ImportBanner } from './steps/ImportStep';
 import { TopBar } from './TopBar';
@@ -37,7 +38,7 @@ function Workspace({ children }: { children: ReactNode }) {
           {(
             [
               ['edit', 'Edit', Pencil],
-              ['preview', 'Preview', Eye],
+              ['preview', 'See your page', Eye],
             ] as const
           ).map(([id, label, Icon]) => (
             <button
@@ -58,7 +59,7 @@ function Workspace({ children }: { children: ReactNode }) {
       )}
       {/* minmax(0, 1fr): a column may shrink below its content, or the preview (whose size follows
           the column) would hold the column open and spill off a narrow screen. */}
-      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-2">
+      <div className="grid grid-cols-[minmax(0,1fr)] gap-6 xl:grid-cols-[minmax(0,5fr)_minmax(0,6fr)]">
         <div className={cx('min-w-0', !showForm && 'hidden')}>{children}</div>
         {showPreview && (
           <div className="min-w-0 xl:sticky xl:top-20 xl:self-start">
@@ -78,6 +79,7 @@ function Frame({ children }: { children: ReactNode }) {
       <Sidebar />
       <div className="min-w-0 flex-1 pb-20 lg:pb-0">
         <TopBar />
+        <Onboarding />
         <main id="main">
           <ImportBanner />
           {withPreview ? <Workspace>{children}</Workspace> : <div className="p-4">{children}</div>}
@@ -95,10 +97,10 @@ function Frame({ children }: { children: ReactNode }) {
 export function DashboardShell({ children }: { children: ReactNode }) {
   const { state, retry } = useLoad(loadProfile);
 
-  if (state.status === 'loading') return <Loading label="Loading your portfolio…" />;
+  if (state.status === 'loading') return <Loading label="Getting your page ready…" />;
   if (state.status === 'error') {
     return (
-      <LoadFailed page title="We couldn't load your portfolio" error={state.error} retry={retry} />
+      <LoadFailed page title="We couldn’t open your dashboard" error={state.error} retry={retry} />
     );
   }
   return (

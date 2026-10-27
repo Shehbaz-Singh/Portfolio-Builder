@@ -13,6 +13,7 @@ import {
   type MyLink,
   type MyProfile,
 } from '@portfolio/shared';
+import { Link2 } from 'lucide-react';
 import { ApiError, api } from '@/lib/client-api';
 import { schemaResolver } from '@/lib/form';
 import { initials } from '@/lib/format';
@@ -36,7 +37,7 @@ function AvatarUpload() {
     try {
       await api('/profile/me/avatar', { method: 'DELETE' });
       update((p) => ({ ...p, avatarUrl: null }));
-      notify('success', 'Photo removed.');
+      notify('success', 'Photo removed. Your initials will show instead.');
     } catch (err) {
       notify('error', errorText(err));
     } finally {
@@ -48,8 +49,12 @@ function AvatarUpload() {
     if (!file) return;
     // Same limits as the API, checked here first so a wrong file fails instantly.
     if (!AVATAR_TYPES.includes(file.type))
-      return notify('error', 'Choose a JPG, PNG or WebP image.');
-    if (file.size > AVATAR_MAX_BYTES) return notify('error', 'That image is larger than 2 MB.');
+      return notify('error', "That file type won't work. Choose a JPG, PNG or WebP image.");
+    if (file.size > AVATAR_MAX_BYTES)
+      return notify(
+        'error',
+        'That image is over 2 MB. Choose a smaller one, or shrink it and try again.',
+      );
 
     const form = new FormData();
     form.append('avatar', file);
@@ -60,7 +65,7 @@ function AvatarUpload() {
         form,
       });
       update((p) => ({ ...p, avatarUrl }));
-      notify('success', 'Photo updated.');
+      notify('success', 'Looking good. Your photo is up.');
     } catch (err) {
       notify('error', errorText(err));
     } finally {
@@ -175,13 +180,26 @@ function DetailsForm() {
 
   return (
     <Form form={form} onSubmit={save} submitLabel={reviewing ? 'Save details' : undefined}>
-      <TextField name="fullName" label="Full name" autoComplete="name" required />
+      <TextField
+        name="fullName"
+        label="Full name"
+        placeholder="e.g. Priya Sharma"
+        hint="The name you want people to see at the top of your page."
+        autoComplete="name"
+        required
+      />
       <TextField
         name="tagline"
         label="Tagline"
-        hint="One line under your name, for example your role."
+        placeholder="e.g. Product designer who loves simple, useful interfaces"
+        hint="One short line under your name: what you do, and who you do it for. Save the longer story for the About tab."
       />
-      <TextField name="location" label="Location" />
+      <TextField
+        name="location"
+        label="Location"
+        placeholder="e.g. Pune, India"
+        hint="A city or region is plenty. Leave it blank if you'd rather not say."
+      />
     </Form>
   );
 }
@@ -219,7 +237,7 @@ function SlugForm() {
         required
         autoCapitalize="none"
         spellCheck={false}
-        hint={`Your page will be at ${window.location.host}/${slug || 'your-name'}`}
+        hint={`Your page will live at ${window.location.host}/${slug || 'your-name'}. Short and easy to say out loud works best.`}
       />
     </EditorForm>
   );
@@ -295,7 +313,10 @@ function VisibilityToggle({ link }: { link: MyLink }) {
     try {
       await updateItem(link.id, { type: link.type, url: link.url, visible: !link.visible });
     } catch (err) {
-      notify('error', err instanceof ApiError ? err.message : 'Could not update the link.');
+      notify(
+        'error',
+        err instanceof ApiError ? err.message : "We couldn't update that link. Please try again.",
+      );
     } finally {
       setPending(false);
     }
@@ -341,14 +362,16 @@ export function BasicsStep() {
             Links
           </h2>
           <p className="text-sm text-muted">
-            Drag the grip to reorder. Use the switch to hide a link without deleting it.
+            Add the places people can find you. Drag the grip to reorder, and use the switch to hide
+            a link without deleting it.
           </p>
         </div>
         <SectionManager
           section="links"
           noun="link"
           addLabel="Add a link"
-          empty="No links yet."
+          icon={Link2}
+          empty="Nothing here yet. Add your LinkedIn, GitHub or email so people can get in touch."
           summary={(link) => ({ title: LINK_LABELS[link.type], subtitle: link.url })}
           Form={LinkForm}
           extra={(link) => <VisibilityToggle link={link} />}

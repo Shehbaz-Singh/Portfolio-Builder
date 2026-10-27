@@ -53,7 +53,7 @@ export function AboutStep() {
   return (
     <section aria-labelledby="about-heading" className="space-y-4">
       <h2 id="about-heading" className="type-section">
-        About you
+        A little about you
       </h2>
       <Form form={form} onSubmit={save} submitLabel={reviewing ? 'Save about' : undefined}>
         <TextArea
@@ -61,7 +61,8 @@ export function AboutStep() {
           label="About"
           rows={10}
           maxLength={5000}
-          hint="A few paragraphs. A blank line starts a new paragraph. Up to 5000 characters. Saved automatically."
+          placeholder="Hi, I'm Priya. I design apps people actually enjoy using. Lately I've been working on…"
+          hint="Write the way you'd introduce yourself to someone new: who you are, what you do, what you care about. Two or three short paragraphs is plenty. A blank line starts a new paragraph. Saved as you type."
         />
       </Form>
     </section>

@@ -31,7 +31,9 @@ function ChangePassword() {
   async function onSubmit(values: ChangePasswordInput) {
     setChanged(false);
     if (values.newPassword !== form.getValues('confirmPassword')) {
-      form.setError('confirmPassword', { message: 'The two passwords do not match' });
+      form.setError('confirmPassword', {
+        message: 'Those two passwords are different. Type the new one the same way twice.',
+      });
       return;
     }
     await api('/auth/change-password', {
@@ -66,7 +68,7 @@ function ChangePassword() {
           required
           type="password"
           autoComplete="new-password"
-          hint="At least 8 characters."
+          hint="At least 8 characters. A short phrase you’ll remember works well."
         />
         <TextField
           name="confirmPassword"
@@ -77,10 +79,10 @@ function ChangePassword() {
         />
       </Form>
       <p role="status" className="text-sm font-medium text-green-700">
-        {changed ? 'Your password has been changed.' : ''}
+        {changed ? 'All set. Your password has been changed.' : ''}
       </p>
       <p className="text-xs text-muted">
-        Other devices you are logged in on stay logged in until their session expires.
+        If you’re logged in on other devices, they’ll stay logged in until their session runs out.
       </p>
     </section>
   );
@@ -152,9 +154,15 @@ function DeleteAccount() {
 export function AccountSettings() {
   const { state, retry } = useLoad(loadSession);
 
-  if (state.status === 'loading') return <ContentSkeleton label="Loading your account…" />;
+  if (state.status === 'loading') return <ContentSkeleton label="Getting your account…" />;
   if (state.status === 'error') {
-    return <LoadFailed title="We couldn't load your account" error={state.error} retry={retry} />;
+    return (
+      <LoadFailed
+        title="We couldn’t open your account settings"
+        error={state.error}
+        retry={retry}
+      />
+    );
   }
 
   return (

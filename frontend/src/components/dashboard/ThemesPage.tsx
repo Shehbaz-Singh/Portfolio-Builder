@@ -47,8 +47,11 @@ export function ThemesPage() {
   return (
     <section aria-labelledby="look-heading" className="space-y-4">
       <h2 id="look-heading" className="type-section">
-        Look and feel
+        Pick a look
       </h2>
+      <p className="text-sm text-muted">
+        Try a few. Your words stay the same, and the preview shows each one with your own details.
+      </p>
       <Form form={form} onSubmit={save}>
         <ThemePicker />
         <AccentPicker />

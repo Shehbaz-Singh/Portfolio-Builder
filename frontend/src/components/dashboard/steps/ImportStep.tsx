@@ -25,9 +25,14 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
     setEmpty(false);
     // The same limits as the API, checked first so a wrong file fails at once.
     if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-      return setError('Choose a PDF file.');
+      return setError(
+        'That doesn’t look like a PDF. Choose a PDF file, or fill in your details by hand.',
+      );
     }
-    if (file.size > MAX_BYTES) return setError('That PDF is larger than 4.5 MB.');
+    if (file.size > MAX_BYTES)
+      return setError(
+        'That PDF is over 4.5 MB. Try a smaller or compressed version, or fill in your details by hand.',
+      );
 
     const form = new FormData();
     form.append('resume', file);
@@ -38,10 +43,17 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
         form,
       });
       applyImport(resume, skipped);
-      notify('success', 'Resume read. Check each step, then save.');
+      notify(
+        'success',
+        'Got it. Take a look through each tab, fix anything that’s off, then save.',
+      );
       goTo('basics');
     } catch (err) {
-      setError(err instanceof ApiError ? err.message : 'Something went wrong. Please try again.');
+      setError(
+        err instanceof ApiError
+          ? err.message
+          : 'We couldn’t read that file. Try again, or fill in your details by hand.',
+      );
       // Only a missing key means "do not try again": offer the manual route clearly.
       setEmpty(err instanceof ApiError && err.code === 'RESUME_IMPORT_UNAVAILABLE');
     } finally {
@@ -53,11 +65,12 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
     <section aria-labelledby="import-heading" className="space-y-5">
       <div>
         <h2 id="import-heading" className="type-section">
-          Start from your resume
+          Got a resume? Start there
         </h2>
         <p className="mt-1 text-sm text-muted">
-          Upload a PDF and we fill in what we can find: your details, links, skills, jobs, education
-          and projects. You review and fix everything first, and nothing is saved until you save it.
+          Upload a PDF and we’ll fill in what we can find: your details, links, skills, jobs,
+          education and projects. You look it over and fix anything first, and nothing is saved
+          until you say so.
         </p>
       </div>
 
@@ -82,13 +95,15 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
           }}
         />
         <Button variant="primary" disabled={reading} onClick={() => input.current?.click()}>
-          {reading ? 'Reading your resume…' : 'Choose a PDF'}
+          {reading ? 'Reading your resume…' : 'Choose your resume (PDF)'}
         </Button>
         <p className="text-xs text-muted">
           PDF with selectable text, up to 4.5 MB. Scanned images are not supported.
         </p>
         <p role="status" className="text-sm text-muted">
-          {reading ? 'Reading your resume. This usually takes 10 to 20 seconds.' : ''}
+          {reading
+            ? 'Reading your resume. This usually takes 10 to 20 seconds, so feel free to stretch.'
+            : ''}
         </p>
         <SlowNotice pending={reading} />
         <ErrorText>{error}</ErrorText>
@@ -100,7 +115,7 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
       </p>
 
       <Button variant={empty ? 'primary' : 'ghost'} onClick={() => goTo('basics')}>
-        {empty ? 'Fill it in by hand' : 'Skip, I will fill it in myself'}
+        {empty ? 'Fill it in by hand' : 'No resume handy? Start from scratch'}
       </Button>
     </section>
   );

@@ -3,11 +3,13 @@
 import { useState } from 'react';
 import { Check, CircleAlert, Copy, ExternalLink, LoaderCircle } from 'lucide-react';
 import { api } from '@/lib/client-api';
+import { readFlag, writeFlag } from '@/lib/storage';
 import { SITE_URL } from '@/lib/config';
 import { ShareButton } from '../ShareButton';
 import { Button, Modal, Switch, buttonStyles } from '../ui';
 import { errorText, useEditor, type SaveStatus } from './editor-context';
 import { useGo } from './navigation';
+import { PublishCelebration } from './PublishCelebration';
 
 // The fields a portfolio is not much use without, and the Profile tab that fills each in.
 const REQUIRED: {
@@ -20,12 +22,12 @@ const REQUIRED: {
 ];
 
 const STATUS_TEXT: Record<SaveStatus | 'dirty', string> = {
-  saved: 'All changes saved',
-  pending: 'Unsaved changes',
-  dirty: 'Unsaved changes',
+  saved: 'All saved',
+  pending: 'Saving in a moment…',
+  dirty: 'Not saved yet',
   saving: 'Saving…',
-  invalid: 'Fix the highlighted fields to save',
-  error: 'Could not save your changes',
+  invalid: 'Check the highlighted fields and we’ll save',
+  error: 'We couldn’t save. Your changes are still here',
 };
 
 // Whether what you see is safe on the server. Screen readers hear every state except "Saving…",
@@ -69,6 +71,7 @@ function PublishControls() {
   const [pending, setPending] = useState(false);
   const [asking, setAsking] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [celebrating, setCelebrating] = useState(false);
 
   const missing = REQUIRED.filter((field) => field.isEmpty(profile));
   const url = `${SITE_URL}/${profile.slug}`; // the canonical address, not whatever host this tab is on
@@ -82,7 +85,19 @@ function PublishControls() {
         body: { published },
       });
       update((p) => ({ ...p, published: res.published }));
-      notify('success', res.published ? 'Your portfolio is live.' : 'Your portfolio is hidden.');
+      // The first time it goes live is a moment worth marking; after that a quiet note will do.
+      const celebratedKey = `celebrated:${profile.id}`;
+      if (res.published && !readFlag(celebratedKey)) {
+        writeFlag(celebratedKey);
+        setCelebrating(true);
+      } else {
+        notify(
+          'success',
+          res.published
+            ? 'Your portfolio is live again.'
+            : 'Your portfolio is hidden. Only you can see it now, and you can publish it again any time.',
+        );
+      }
     } catch (err) {
       notify('error', errorText(err));
     } finally {
@@ -103,7 +118,7 @@ function PublishControls() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      notify('error', 'Could not copy. Select the link and copy it by hand.');
+      notify('error', "We couldn't copy the link automatically. Select it and copy it by hand.");
     }
   }
 
@@ -151,11 +166,19 @@ function PublishControls() {
         )}
       </div>
 
+      <PublishCelebration
+        open={celebrating}
+        onClose={() => setCelebrating(false)}
+        url={url}
+        slug={profile.slug}
+        name={profile.fullName}
+      />
+
       <Modal
         open={asking}
         onClose={() => setAsking(false)}
-        title="Publish an unfinished page?"
-        description={`Your page is missing ${missing.map((field) => field.label).join(' and ')}. Visitors will see an incomplete portfolio.`}
+        title="Your page isn’t quite finished"
+        description={`It’s still missing ${missing.map((field) => field.label).join(' and ')}. You can publish now and finish later, but visitors will see it as it is.`}
         footer={
           <>
             <Button variant="ghost" onClick={() => setAsking(false)}>
@@ -167,10 +190,10 @@ function PublishControls() {
                 void go('/dashboard', missing[0]?.tab);
               }}
             >
-              Fix it first
+              Finish it first
             </Button>
             <Button variant="primary" onClick={() => void setPublished(true)}>
-              Publish anyway
+              Publish as it is
             </Button>
           </>
         }

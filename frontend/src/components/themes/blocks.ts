@@ -15,8 +15,21 @@ import { initials, linkTarget, safeHttpUrl } from '@/lib/format';
 // custom sections, empty sections skipped, only http(s) links) are the same in every theme.
 
 // One entry of a dated list: a job, a degree, or an item of a custom section.
+// One position within a company the person stayed at (see groupJobs).
+export interface Role {
+  id: string;
+  title: string;
+  start: string | null;
+  end: string | null;
+  description: string | null;
+}
+
 export interface Entry {
   id: string;
+  // Set when several jobs in a row were at the same company. The entry is then the company (title),
+  // with the whole stay as its dates, and the jobs listed here. Subtitle and description are empty.
+  roles?: Role[];
+  duration?: string; // the whole stay, "6 years 9 months", for every company
   title: string;
   subtitle: string | null;
   start: string | null; // ISO date
@@ -60,7 +73,105 @@ export type Block =
       // experience and education show "Present" for an open end date; custom items show nothing
       variant: 'experience' | 'education' | 'custom';
       entries: Entry[];
+      // experience only: all the jobs together, "6 years 2 months" (set from two jobs on)
+      total?: string;
     });
+
+// Whole months from start to end (or to now, for an open job), counting both months, the way
+// LinkedIn does: Jan 2020 to Dec 2020 is 12 months.
+function stay(start: string | null, end: string | null): string | undefined {
+  if (!start) return undefined;
+  const from = new Date(start);
+  const to = end ? new Date(end) : new Date();
+  return formatMonths(monthIndex(to) - monthIndex(from) + 1);
+}
+
+const monthIndex = (date: Date) => date.getUTCFullYear() * 12 + date.getUTCMonth();
+
+function formatMonths(months: number): string | undefined {
+  if (!(months > 0)) return undefined;
+  const years = Math.floor(months / 12);
+  const rest = months % 12;
+  return [
+    years > 0 && `${years} ${years === 1 ? 'year' : 'years'}`,
+    rest > 0 && `${rest} ${rest === 1 ? 'month' : 'months'}`,
+  ]
+    .filter(Boolean)
+    .join(' ');
+}
+
+// All the jobs together. Months worked at two jobs at once count once, so overlapping or back-to-back
+// jobs add up to the time actually spent working.
+function totalExperience(jobs: PublicProfile['experience']): string | undefined {
+  const now = monthIndex(new Date());
+  const spans = jobs
+    .filter((job) => job.startDate)
+    .map((job) => [
+      monthIndex(new Date(job.startDate as string)),
+      job.endDate ? monthIndex(new Date(job.endDate)) : now,
+    ])
+    .sort((a, b) => a[0] - b[0]);
+  let months = 0;
+  let reached = -Infinity; // the last month already counted
+  for (const [from, to] of spans) {
+    const begin = Math.max(from, reached + 1);
+    if (to >= begin) months += to - begin + 1;
+    reached = Math.max(reached, to);
+  }
+  return formatMonths(months);
+}
+
+const sameCompany = (a: string, b: string) =>
+  a.trim().replace(/\s+/g, ' ').toLowerCase() === b.trim().replace(/\s+/g, ' ').toLowerCase();
+
+// Jobs in a row at the same company become one entry, the way LinkedIn shows a career at one
+// employer: the company once, then each position under it. Only neighbours are joined, so the
+// owner's order is kept (a return to a company later stays a separate entry). A stay is open-ended
+// if any of its jobs is; otherwise it ends with the latest end.
+function groupJobs(jobs: PublicProfile['experience']): Entry[] {
+  const groups: PublicProfile['experience'][] = [];
+  for (const job of jobs) {
+    const last = groups.at(-1);
+    if (last && sameCompany(last[0].company, job.company)) last.push(job);
+    else groups.push([job]);
+  }
+  return groups.map((group): Entry => {
+    if (group.length === 1) {
+      const [job] = group;
+      return {
+        id: job.id,
+        title: job.title,
+        subtitle: job.company,
+        start: job.startDate,
+        end: job.endDate,
+        duration: stay(job.startDate, job.endDate),
+        href: null,
+        description: job.description || null,
+      };
+    }
+    const starts = group.map((job) => job.startDate).filter((d): d is string => !!d);
+    const ends = group.map((job) => job.endDate).filter((d): d is string => !!d);
+    const start = starts.length > 0 ? starts.reduce((a, b) => (a < b ? a : b)) : null;
+    const end = ends.length < group.length ? null : ends.reduce((a, b) => (a > b ? a : b));
+    return {
+      id: group[0].id,
+      duration: stay(start, end),
+      title: group[0].company,
+      subtitle: null,
+      start,
+      end,
+      href: null,
+      description: null,
+      roles: group.map((job) => ({
+        id: job.id,
+        title: job.title,
+        start: job.startDate,
+        end: job.endDate,
+        description: job.description || null,
+      })),
+    };
+  });
+}
 
 const isBuiltIn = (key: string): key is SectionKey => Object.hasOwn(SECTION_LABELS, key);
 
@@ -115,15 +226,8 @@ export function buildBlocks(profile: PublicProfile, idPrefix = ''): Block[] {
             kind: 'entries',
             variant: 'experience',
             ...base,
-            entries: profile.experience.map((job) => ({
-              id: job.id,
-              title: job.title,
-              subtitle: job.company,
-              start: job.startDate,
-              end: job.endDate,
-              href: null,
-              description: job.description || null,
-            })),
+            entries: groupJobs(profile.experience),
+            total: profile.experience.length > 1 ? totalExperience(profile.experience) : undefined,
           });
         }
         break;

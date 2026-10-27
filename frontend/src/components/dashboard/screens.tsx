@@ -14,12 +14,12 @@ function WaitMessage({ label }: { label: string }) {
   return (
     <div className="space-y-1">
       <p role="status" className="text-sm font-medium">
-        {slow ? 'Waking up the server…' : label}
+        {slow ? 'Still waking things up…' : label}
       </p>
       {slow && (
         <p className="max-w-sm text-sm text-muted">
-          The server sleeps when nobody has used it for a while. This can take up to a minute the
-          first time, and then it is fast again.
+          Our server takes a nap when nobody has used it for a while. The first visit can take up to
+          a minute, and after that it’s quick. Thanks for waiting.
         </p>
       )}
     </div>
@@ -91,8 +91,8 @@ export function LoadFailed({
     <Centered>
       <h1 className="type-page">{title}</h1>
       <div className="max-w-sm text-muted">
-        <p>{error instanceof ApiError ? error.message : 'Something went wrong.'}</p>
-        <p>Everything you saved earlier is safe.</p>
+        <p>{error instanceof ApiError ? error.message : 'Something went wrong on our side.'}</p>
+        <p>Nothing you’ve saved is lost. Give it another try in a moment.</p>
       </div>
       <Button variant="primary" onClick={retry}>
         Try again

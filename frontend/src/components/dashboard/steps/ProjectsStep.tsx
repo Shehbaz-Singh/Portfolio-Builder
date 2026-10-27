@@ -1,5 +1,6 @@
 'use client';
 
+import { FolderKanban } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { projectInputSchema, type ProjectInput } from '@portfolio/shared';
 import { schemaResolver } from '@/lib/form';
@@ -40,16 +41,28 @@ function ProjectForm({ item, draft, onDone, onSaved }: ItemFormProps<'projects'>
 
   return (
     <EditorForm form={form} onSubmit={onSubmit} submitLabel="Save project" onCancel={onDone}>
-      <TextField name="name" label="Project name" required />
+      <TextField
+        name="name"
+        label="Project name"
+        placeholder="e.g. Recipe Box, a meal planner"
+        required
+      />
       <TextField
         name="url"
         label="Link"
         placeholder="https://"
-        hint="Optional. Makes the project card clickable."
+        hint="Optional. Where people can see it live or read the code."
         autoCapitalize="none"
         spellCheck={false}
       />
-      <TextArea name="description" label="Description" rows={4} maxLength={3000} />
+      <TextArea
+        name="description"
+        label="Description"
+        rows={4}
+        maxLength={3000}
+        placeholder="A weekly meal planner that builds your shopping list for you."
+        hint="What it is, who it's for, and what you did on it."
+      />
       <TextField
         name="techTags"
         label="Technologies"
@@ -75,7 +88,8 @@ export function ProjectsStep() {
         section="projects"
         noun="project"
         addLabel="Add a project"
-        empty="No projects added yet."
+        icon={FolderKanban}
+        empty="Nothing here yet. Add your first project. Even a small one is worth showing."
         summary={(project) => ({
           title: project.name,
           subtitle: project.techTags.join(', ') || undefined,

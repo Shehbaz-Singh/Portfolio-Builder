@@ -96,9 +96,10 @@ export function SectionsStep() {
         Order and headings
       </h2>
       <p className="text-sm text-muted">
-        Choose which sections appear on your page and in what order, and rename their headings.
-        Hiding a section keeps what you wrote in it. To reorder with the keyboard, focus a grip,
-        press Space, move with the arrow keys, then press Space again.
+        Decide what goes on your page and in what order, and rename the headings to sound like you.
+        Hiding a section keeps everything you wrote in it, so there’s no risk in trying things out.
+        To reorder with the keyboard, focus a grip, press Space, move with the arrow keys, then
+        press Space again.
       </p>
 
       <SortableList

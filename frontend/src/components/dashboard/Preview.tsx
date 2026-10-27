@@ -66,7 +66,10 @@ export function Preview() {
   return (
     <section aria-label="Live preview" className="overflow-hidden rounded-card border border-line">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-surface px-3 py-2">
-        <p className="text-xs font-medium text-muted">Live preview</p>
+        <div>
+          <p className="text-sm font-semibold">Your page, live</p>
+          <p className="text-xs text-muted">Updates as you type</p>
+        </div>
         <div role="group" aria-label="Preview width" className="flex gap-1">
           {DEVICES.map(({ id, label, Icon }) => (
             <button

@@ -2,7 +2,7 @@ import type { ComponentType, ReactNode } from 'react';
 import { Globe, Link2, Mail, Phone } from 'lucide-react';
 import type { PublicLink } from '@portfolio/shared';
 import { formatMonthYear, initials } from '@/lib/format';
-import type { Entry, HeaderModel } from './blocks';
+import type { Entry, HeaderModel, Role } from './blocks';
 
 // Small pieces every theme uses, so the markup that matters (dates as <time>, links that open in a
 // new tab, the photo or the initials, the icon on a link) is the same everywhere. Layout and
@@ -13,7 +13,8 @@ export function DateRange({
   start,
   end,
   openEnded = false,
-}: Pick<Entry, 'start' | 'end'> & { openEnded?: boolean }) {
+  duration,
+}: Pick<Entry, 'start' | 'end'> & { openEnded?: boolean; duration?: string }) {
   if (!start) return null;
   return (
     <>
@@ -26,7 +27,60 @@ export function DateRange({
       ) : (
         openEnded && ' – Present'
       )}
+      {duration && ` · ${duration}`}
     </>
+  );
+}
+
+// The positions held at one company (Entry.roles), under the company's heading. Each theme says how
+// its parts look through the class names; the structure is the same everywhere: a list of roles,
+// each with its title as a heading, its dates and what was done.
+export function RoleList({
+  roles,
+  headingLevel = 'h4',
+  className,
+  roleClassName,
+  titleClassName,
+  datesClassName,
+  descriptionClassName,
+}: {
+  roles: Role[];
+  headingLevel?: 'h4';
+  className?: string;
+  roleClassName?: string;
+  titleClassName?: string;
+  datesClassName?: string;
+  descriptionClassName?: string;
+}) {
+  const Heading = headingLevel;
+  return (
+    <ol className={className}>
+      {roles.map((role) => (
+        <li key={role.id} className={roleClassName}>
+          <Heading className={titleClassName}>{role.title}</Heading>
+          {role.start && (
+            <p className={datesClassName}>
+              <DateRange start={role.start} end={role.end} openEnded />
+            </p>
+          )}
+          {role.description && (
+            <p className={`whitespace-pre-line ${descriptionClassName ?? ''}`}>
+              {role.description}
+            </p>
+          )}
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+// "Total experience: 6 years 2 months", above the jobs. Nothing if the total is unknown.
+export function TotalExperience({ total, className }: { total?: string; className?: string }) {
+  if (!total) return null;
+  return (
+    <p className={className}>
+      Total experience: <strong className="font-semibold">{total}</strong>
+    </p>
   );
 }
 

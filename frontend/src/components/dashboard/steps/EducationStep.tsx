@@ -1,5 +1,6 @@
 'use client';
 
+import { GraduationCap } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { educationInputSchema, type EducationInput } from '@portfolio/shared';
 import { schemaResolver } from '@/lib/form';
@@ -34,8 +35,18 @@ function EducationForm({ item, draft, onDone, onSaved }: ItemFormProps<'educatio
 
   return (
     <EditorForm form={form} onSubmit={onSubmit} submitLabel="Save education" onCancel={onDone}>
-      <TextField name="degree" label="Degree or course" required />
-      <TextField name="institution" label="School or university" required />
+      <TextField
+        name="degree"
+        label="Degree or course"
+        placeholder="e.g. BSc Computer Science"
+        required
+      />
+      <TextField
+        name="institution"
+        label="School or university"
+        placeholder="e.g. University of Pune"
+        required
+      />
       <DateRangeFields presentLabel="I am still studying here" />
     </EditorForm>
   );
@@ -56,7 +67,8 @@ export function EducationStep() {
         section="education"
         noun="entry"
         addLabel="Add education"
-        empty="No education added yet."
+        icon={GraduationCap}
+        empty="Nothing here yet. Add a degree, a course or a bootcamp, whatever you're proud of."
         summary={(entry) => ({
           title: entry.degree,
           subtitle: `${entry.institution} · ${formatRange(entry.startDate, entry.endDate)}`,

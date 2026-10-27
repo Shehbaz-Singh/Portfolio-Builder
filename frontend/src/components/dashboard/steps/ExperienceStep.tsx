@@ -1,5 +1,6 @@
 'use client';
 
+import { Briefcase } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { experienceInputSchema, type ExperienceInput } from '@portfolio/shared';
 import { schemaResolver } from '@/lib/form';
@@ -35,10 +36,28 @@ function ExperienceForm({ item, draft, onDone, onSaved }: ItemFormProps<'experie
 
   return (
     <EditorForm form={form} onSubmit={onSubmit} submitLabel="Save job" onCancel={onDone}>
-      <TextField name="title" label="Job title" required />
-      <TextField name="company" label="Company" required />
+      <TextField
+        name="title"
+        label="Job title"
+        placeholder="e.g. Senior Product Designer"
+        required
+      />
+      <TextField
+        name="company"
+        label="Company"
+        placeholder="e.g. Acme Studio"
+        hint="Changed roles here? Add each role as its own job with the same company name, one after the other, and your page shows them together under the company."
+        required
+      />
       <DateRangeFields presentLabel="I currently work here" />
-      <TextArea name="description" label="What you did" rows={5} maxLength={3000} />
+      <TextArea
+        name="description"
+        label="What you did"
+        rows={5}
+        maxLength={3000}
+        placeholder="Led the redesign of the checkout flow, which cut drop-off by a fifth."
+        hint="Say what you did and what changed because of it. Numbers help, if you have them."
+      />
     </EditorForm>
   );
 }
@@ -58,7 +77,8 @@ export function ExperienceStep() {
         section="experience"
         noun="job"
         addLabel="Add a job"
-        empty="No experience added yet."
+        icon={Briefcase}
+        empty="Nothing here yet. Add your most recent job first, and the rest can follow."
         summary={(job) => ({
           title: `${job.title} at ${job.company}`,
           subtitle: `${formatRange(job.startDate, job.endDate)}`,

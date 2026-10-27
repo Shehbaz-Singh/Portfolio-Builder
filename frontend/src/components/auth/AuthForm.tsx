@@ -20,14 +20,14 @@ type Fields = { email: string; password: string; fullName: string };
 
 const copy = {
   login: {
-    title: 'Welcome back',
+    title: 'Good to see you again',
     submit: 'Log in',
     switchText: 'New here?',
     switchLink: { href: '/register', label: 'Create an account' },
   },
   register: {
-    title: 'Create your portfolio',
-    submit: 'Create account',
+    title: 'Let’s build your portfolio',
+    submit: 'Create my account',
     switchText: 'Already have an account?',
     switchLink: { href: '/login', label: 'Log in' },
   },
@@ -54,7 +54,8 @@ export function AuthForm({ mode, expired = false }: { mode: Mode; expired?: bool
       <h1 className="type-page">{text.title}</h1>
       {expired && (
         <Card tone="warning" padding="sm" role="alert" className="mt-4 text-sm">
-          Your session has ended. Please log in again.
+          For your security we signed you out after a while. Log in again to pick up where you left
+          off.
         </Card>
       )}
       <div className="mt-6">
@@ -68,11 +69,19 @@ export function AuthForm({ mode, expired = false }: { mode: Mode; expired?: bool
             <TextField
               name="fullName"
               label="Full name"
-              hint="Shown on your portfolio. Optional, you can change it later."
+              placeholder="e.g. Priya Sharma"
+              hint="This is the name on your portfolio. You can change it any time."
               autoComplete="name"
             />
           )}
-          <TextField name="email" label="Email" type="email" autoComplete="email" required />
+          <TextField
+            name="email"
+            label="Email"
+            type="email"
+            placeholder="you@example.com"
+            autoComplete="email"
+            required
+          />
           <div>
             <TextField
               name="password"
@@ -80,7 +89,11 @@ export function AuthForm({ mode, expired = false }: { mode: Mode; expired?: bool
               required
               type={showPassword ? 'text' : 'password'}
               autoComplete={mode === 'login' ? 'current-password' : 'new-password'}
-              hint={mode === 'register' ? 'At least 8 characters.' : undefined}
+              hint={
+                mode === 'register'
+                  ? 'At least 8 characters. A short phrase you’ll remember works well.'
+                  : undefined
+              }
             />
             <Button
               variant="ghost"

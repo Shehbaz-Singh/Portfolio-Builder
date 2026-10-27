@@ -11,7 +11,15 @@ import {
   type HeaderModel,
 } from './blocks';
 import { LeaveTestimonial } from './LeaveTestimonial';
-import { Avatar, DateRange, EmptyPage, HeaderLink, NewTabLink } from './parts';
+import {
+  Avatar,
+  DateRange,
+  EmptyPage,
+  HeaderLink,
+  NewTabLink,
+  RoleList,
+  TotalExperience,
+} from './parts';
 import { Reveal } from './Reveal';
 import { ThemeWrapper } from './ThemeWrapper';
 import type { ThemeProps } from './types';
@@ -197,42 +205,55 @@ function BlockView({ block }: { block: Block }) {
       );
     case 'entries':
       return (
-        <ol className="divide-y divide-line border-y border-line">
-          {block.entries.map((entry) => (
-            <li
-              key={entry.id}
-              className={`min-w-0 py-7 ${entry.start ? 'md:grid md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-8' : ''}`}
-            >
-              {entry.start && (
-                <p className="mb-2 text-sm text-muted tabular-nums md:mt-1.5 md:mb-0">
-                  <DateRange
-                    start={entry.start}
-                    end={entry.end}
-                    openEnded={block.variant !== 'custom'}
-                  />
-                </p>
-              )}
-              <div className="min-w-0">
-                <h3 className={`${display} text-xl leading-snug font-medium sm:text-2xl`}>
-                  {entry.title}
-                </h3>
-                {entry.subtitle && (
-                  <p className={`${display} text-lg text-muted italic`}>{entry.subtitle}</p>
-                )}
-                {entry.description && (
-                  <p className="mt-3 leading-relaxed whitespace-pre-line">{entry.description}</p>
-                )}
-                {entry.href && (
-                  <p className="mt-3 text-sm">
-                    <NewTabLink href={entry.href} context={entry.title} className={link}>
-                      View
-                    </NewTabLink>
+        <>
+          <TotalExperience total={block.total} className="mb-5 text-sm text-muted" />
+          <ol className="divide-y divide-line border-y border-line">
+            {block.entries.map((entry) => (
+              <li
+                key={entry.id}
+                className={`min-w-0 py-7 ${entry.start ? 'md:grid md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-8' : ''}`}
+              >
+                {entry.start && (
+                  <p className="mb-2 text-sm text-muted tabular-nums md:mt-1.5 md:mb-0">
+                    <DateRange
+                      start={entry.start}
+                      end={entry.end}
+                      openEnded={block.variant !== 'custom'}
+                      duration={entry.duration}
+                    />
                   </p>
                 )}
-              </div>
-            </li>
-          ))}
-        </ol>
+                <div className="min-w-0">
+                  <h3 className={`${display} text-xl leading-snug font-medium sm:text-2xl`}>
+                    {entry.title}
+                  </h3>
+                  {entry.subtitle && (
+                    <p className={`${display} text-lg text-muted italic`}>{entry.subtitle}</p>
+                  )}
+                  {entry.roles && (
+                    <RoleList
+                      roles={entry.roles}
+                      className="mt-4 space-y-6 border-s border-line ps-5"
+                      titleClassName={`${display} text-lg font-medium`}
+                      datesClassName="text-sm text-muted tabular-nums"
+                      descriptionClassName="mt-2 leading-relaxed"
+                    />
+                  )}
+                  {entry.description && (
+                    <p className="mt-3 leading-relaxed whitespace-pre-line">{entry.description}</p>
+                  )}
+                  {entry.href && (
+                    <p className="mt-3 text-sm">
+                      <NewTabLink href={entry.href} context={entry.title} className={link}>
+                        View
+                      </NewTabLink>
+                    </p>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ol>
+        </>
       );
   }
 }

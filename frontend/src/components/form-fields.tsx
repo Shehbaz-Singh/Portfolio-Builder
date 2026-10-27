@@ -148,8 +148,9 @@ export function TextArea({
   hint,
   rows = 4,
   maxLength,
+  placeholder,
   required,
-}: FieldProps & { rows?: number; maxLength?: number }) {
+}: FieldProps & { rows?: number; maxLength?: number; placeholder?: string }) {
   const { id, error, register } = useField(name);
   return (
     <Field id={id} label={label} error={error} hint={hint} required={required}>
@@ -157,6 +158,7 @@ export function TextArea({
         id={id}
         rows={rows}
         maxLength={maxLength}
+        placeholder={placeholder}
         aria-required={required || undefined}
         aria-invalid={error ? true : undefined}
         aria-describedby={error || hint ? `${id}-note` : undefined}

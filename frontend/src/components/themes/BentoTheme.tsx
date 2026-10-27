@@ -13,7 +13,16 @@ import {
   type HeaderModel,
 } from './blocks';
 import { LeaveTestimonial } from './LeaveTestimonial';
-import { Avatar, DateRange, EmptyPage, HeaderLink, InitialsBadge, NewTabLink } from './parts';
+import {
+  Avatar,
+  DateRange,
+  EmptyPage,
+  HeaderLink,
+  InitialsBadge,
+  NewTabLink,
+  RoleList,
+  TotalExperience,
+} from './parts';
 import { ThemeWrapper } from './ThemeWrapper';
 import type { ThemeProps } from './types';
 
@@ -109,9 +118,12 @@ function EntriesTile({ block }: { block: Extract<Block, { kind: 'entries' }> }) 
   const [latest, ...earlier] = block.entries;
   const open = block.variant !== 'custom';
   const dates = (entry: Entry) =>
-    entry.start && <DateRange start={entry.start} end={entry.end} openEnded={open} />;
+    entry.start && (
+      <DateRange start={entry.start} end={entry.end} openEnded={open} duration={entry.duration} />
+    );
   return (
     <TileBody id={block.id} title={block.title}>
+      <TotalExperience total={block.total} className="mb-3 text-sm text-muted" />
       <div className="min-w-0">
         {latest.start && (
           <p className="mb-2 inline-block rounded-full bg-accent-soft px-3 py-0.5 text-xs font-semibold text-ink tabular-nums">
@@ -120,6 +132,15 @@ function EntriesTile({ block }: { block: Extract<Block, { kind: 'entries' }> }) 
         )}
         <h3 className={`${display} text-xl leading-snug font-bold`}>{latest.title}</h3>
         {latest.subtitle && <p className="text-muted">{latest.subtitle}</p>}
+        {latest.roles && (
+          <RoleList
+            roles={latest.roles}
+            className="mt-3 space-y-3 border-s border-line ps-4"
+            titleClassName="font-semibold"
+            datesClassName="text-sm text-muted tabular-nums"
+            descriptionClassName="mt-1 text-sm leading-relaxed"
+          />
+        )}
         {latest.description && (
           <p className="mt-3 leading-relaxed whitespace-pre-line">{latest.description}</p>
         )}
@@ -147,6 +168,14 @@ function EntriesTile({ block }: { block: Extract<Block, { kind: 'entries' }> }) 
                 )}
               </p>
               {entry.start && <p className="text-muted tabular-nums">{dates(entry)}</p>}
+              {entry.roles && (
+                <RoleList
+                  roles={entry.roles}
+                  className="mt-2 space-y-2 border-s border-line ps-3"
+                  titleClassName="font-medium"
+                  datesClassName="text-muted tabular-nums"
+                />
+              )}
               {entry.description && (
                 <p className="mt-1 whitespace-pre-line text-muted">{entry.description}</p>
               )}

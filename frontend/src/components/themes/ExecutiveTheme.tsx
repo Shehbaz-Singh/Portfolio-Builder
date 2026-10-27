@@ -11,7 +11,15 @@ import {
   type HeaderModel,
 } from './blocks';
 import { LeaveTestimonial } from './LeaveTestimonial';
-import { Avatar, DateRange, EmptyPage, HeaderLink, NewTabLink } from './parts';
+import {
+  Avatar,
+  DateRange,
+  EmptyPage,
+  HeaderLink,
+  NewTabLink,
+  RoleList,
+  TotalExperience,
+} from './parts';
 import { ThemeWrapper } from './ThemeWrapper';
 import type { ThemeProps } from './types';
 
@@ -194,36 +202,50 @@ function BlockView({ block }: { block: Block }) {
       );
     case 'entries':
       return (
-        <ol className="space-y-6">
-          {block.entries.map((entry) => (
-            <li key={entry.id} className="min-w-0 break-inside-avoid">
-              {/* Role, company, dates: the role and the dates share the first line. */}
-              <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
-                <h3 className={`${display} text-lg leading-snug font-semibold`}>{entry.title}</h3>
-                {entry.start && (
-                  <p className="text-sm font-semibold text-muted tabular-nums sm:shrink-0 sm:whitespace-nowrap">
-                    <DateRange
-                      start={entry.start}
-                      end={entry.end}
-                      openEnded={block.variant !== 'custom'}
-                    />
+        <>
+          <TotalExperience total={block.total} className="mb-4 text-sm text-muted" />
+          <ol className="space-y-6">
+            {block.entries.map((entry) => (
+              <li key={entry.id} className="min-w-0 break-inside-avoid">
+                {/* Role, company, dates: the role and the dates share the first line. */}
+                <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
+                  <h3 className={`${display} text-lg leading-snug font-semibold`}>{entry.title}</h3>
+                  {entry.start && (
+                    <p className="text-sm font-semibold text-muted tabular-nums sm:shrink-0 sm:whitespace-nowrap">
+                      <DateRange
+                        start={entry.start}
+                        end={entry.end}
+                        openEnded={block.variant !== 'custom'}
+                        duration={entry.duration}
+                      />
+                    </p>
+                  )}
+                </div>
+                {entry.subtitle && <p className="font-semibold text-muted">{entry.subtitle}</p>}
+                {entry.roles && (
+                  <RoleList
+                    roles={entry.roles}
+                    className="mt-3 space-y-4 border-s border-line ps-4"
+                    roleClassName="break-inside-avoid"
+                    titleClassName="font-bold"
+                    datesClassName="text-sm font-semibold text-muted tabular-nums"
+                    descriptionClassName="mt-1 leading-relaxed"
+                  />
+                )}
+                {entry.description && (
+                  <p className="mt-2 leading-relaxed whitespace-pre-line">{entry.description}</p>
+                )}
+                {entry.href && (
+                  <p className="mt-2 text-sm">
+                    <NewTabLink href={entry.href} context={entry.title} className={link}>
+                      View
+                    </NewTabLink>
                   </p>
                 )}
-              </div>
-              {entry.subtitle && <p className="font-semibold text-muted">{entry.subtitle}</p>}
-              {entry.description && (
-                <p className="mt-2 leading-relaxed whitespace-pre-line">{entry.description}</p>
-              )}
-              {entry.href && (
-                <p className="mt-2 text-sm">
-                  <NewTabLink href={entry.href} context={entry.title} className={link}>
-                    View
-                  </NewTabLink>
-                </p>
-              )}
-            </li>
-          ))}
-        </ol>
+              </li>
+            ))}
+          </ol>
+        </>
       );
   }
 }

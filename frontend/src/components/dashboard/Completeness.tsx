@@ -74,19 +74,36 @@ export function completeness(profile: MyProfile) {
   return { done, total: TASKS.length, percent: Math.round((done / TASKS.length) * 100) };
 }
 
+// A line to go with the number: where they are, and a nudge that is honest about what is left.
+// Nothing here pretends a page is finished before it is.
+export function encouragement(percent: number, published: boolean) {
+  if (percent === 100) {
+    return published
+      ? 'Everything is filled in and your page is live. Nicely done.'
+      : 'Everything is filled in. Your page is ready to publish whenever you are.';
+  }
+  if (percent >= 75) return 'Almost there. Just a few finishing touches left.';
+  if (percent >= 50) return "You're over halfway. Your page is really taking shape.";
+  if (percent >= 25) return 'Good start. Each thing you add makes your page more you.';
+  return "Let's get started. Your page is a blank canvas, and the first few details go quickly.";
+}
+
 export function Completeness() {
   const { profile } = useEditor();
   const go = useGo();
   const { done, total, percent } = completeness(profile);
   const next = TASKS.find((task) => !task.done(profile));
+  const message = encouragement(percent, profile.published);
 
   return (
     <Card as="section" aria-labelledby="completeness-heading" className="space-y-3">
       <div className="flex items-baseline justify-between gap-3">
         <h2 id="completeness-heading" className="type-section">
-          Profile completeness
+          Your page so far
         </h2>
-        <p className="text-sm font-medium tabular-nums">{percent}%</p>
+        <p className="text-sm font-medium tabular-nums">
+          {percent}%<span className="sr-only"> complete</span>
+        </p>
       </div>
       <div
         role="progressbar"
@@ -103,6 +120,8 @@ export function Completeness() {
         />
       </div>
 
+      <p className="text-sm">{message}</p>
+
       {next ? (
         <div className="flex flex-wrap items-center justify-between gap-2">
           <p className="text-sm text-muted">Next up: {next.todo.toLowerCase()}.</p>
@@ -111,12 +130,10 @@ export function Completeness() {
             <ArrowRight aria-hidden="true" className="size-4" />
           </Button>
         </div>
-      ) : (
-        <p className="text-sm text-muted">Everything is filled in. Nice work.</p>
-      )}
+      ) : null}
 
       <details className="text-sm">
-        <summary className="cursor-pointer text-muted">What is done so far</summary>
+        <summary className="cursor-pointer text-muted">See what's done so far</summary>
         <ul className="mt-2 grid gap-1 sm:grid-cols-2">
           {TASKS.map((task) => {
             const complete = task.done(profile);
