@@ -84,11 +84,12 @@ function Row({
         type="button"
         ref={setActivatorNodeRef}
         aria-label={`Reorder ${label}`}
-        className="flex shrink-0 cursor-grab touch-none items-center justify-center rounded p-1 text-muted hover:text-ink active:cursor-grabbing"
+        title="Drag to reorder"
+        className="flex shrink-0 cursor-grab touch-none items-center justify-center rounded-control border border-line p-1.5 text-muted hover:bg-surface hover:text-ink active:cursor-grabbing"
         {...attributes}
         {...listeners}
       >
-        <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className="size-4">
+        <svg aria-hidden="true" viewBox="0 0 20 20" fill="currentColor" className="size-5">
           <path d="M7 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm0 6a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm-1.5 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM16 4a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Zm-1.5 7.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3ZM16 16a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0Z" />
         </svg>
       </button>

@@ -1,24 +1,27 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
 import { profileUpdateSchema } from '@portfolio/shared';
 import { schemaResolver } from '@/lib/form';
-import { TextArea } from '../../form-fields';
-import { EditorForm } from '../EditorForm';
-import { useEditor } from '../editor-context';
-import { saveProfile } from '../save-profile';
+import { Form, TextArea } from '../../form-fields';
+import { useFormAutosave } from '../autosave';
+import { useEditor, useReportDirty } from '../editor-context';
 
 const schema = profileUpdateSchema.pick({ about: true });
 type Fields = { about: string };
 
+// Saves by itself shortly after typing stops. A summary read from a resume is the exception: it
+// arrives as an edit to review and is saved by the button, so nothing from a resume is saved unseen.
 export function AboutStep() {
-  const { profile, update, setDraft, notify, takeFields } = useEditor();
+  const { profile, saveFields, setDraft, notify, takeFields } = useEditor();
+  const [reviewing, setReviewing] = useState(false);
   const form = useForm<Fields, unknown, z.output<typeof schema>>({
     resolver: schemaResolver(schema),
     defaultValues: { about: profile.about ?? '' },
   });
+  useReportDirty(reviewing);
 
   useEffect(() => {
     const publish = (v: Partial<Fields>) => setDraft({ about: v.about || null });
@@ -30,33 +33,37 @@ export function AboutStep() {
     };
   }, [form, setDraft]);
 
-  // The summary read from an uploaded resume arrives as an unsaved edit, to review and fix.
   useEffect(() => {
     const { about } = takeFields(['about']);
-    if (about) form.setValue('about', about, { shouldDirty: true });
+    if (about) {
+      form.setValue('about', about, { shouldDirty: true });
+      setReviewing(true);
+    }
   }, [form, takeFields]);
 
-  async function onSubmit(values: z.output<typeof schema>) {
-    const saved = await saveProfile(profile, values);
-    update(() => saved);
-    form.reset({ about: saved.about ?? '' });
-    notify('success', 'Saved.');
+  async function save(values: z.output<typeof schema>) {
+    await saveFields(values);
+    if (reviewing) {
+      setReviewing(false);
+      notify('success', 'Saved.');
+    }
   }
+  useFormAutosave(form, save, { enabled: !reviewing });
 
   return (
     <section aria-labelledby="about-heading" className="space-y-4">
       <h2 id="about-heading" className="type-section">
         About you
       </h2>
-      <EditorForm form={form} onSubmit={onSubmit} submitLabel="Save about">
+      <Form form={form} onSubmit={save} submitLabel={reviewing ? 'Save about' : undefined}>
         <TextArea
           name="about"
           label="About"
           rows={10}
           maxLength={5000}
-          hint="A few paragraphs. A blank line starts a new paragraph. Up to 5000 characters."
+          hint="A few paragraphs. A blank line starts a new paragraph. Up to 5000 characters. Saved automatically."
         />
-      </EditorForm>
+      </Form>
     </section>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
-import type { z } from 'zod';
+import { z } from 'zod';
 import {
   linkInputSchema,
   linkTypeSchema,
@@ -14,18 +14,13 @@ import {
   type MyProfile,
 } from '@portfolio/shared';
 import { ApiError, api } from '@/lib/client-api';
-import { normalizeHex } from '@/lib/color';
 import { schemaResolver } from '@/lib/form';
-import { DEFAULT_THEME, getTheme } from '@/lib/themes';
 import { initials } from '@/lib/format';
-import { CheckboxField, SelectField, TextField } from '../../form-fields';
-
+import { CheckboxField, Form, SelectField, TextField } from '../../form-fields';
 import { Button, SlowNotice, Switch } from '../../ui';
-import { AccentPicker } from '../AccentPicker';
+import { useFormAutosave } from '../autosave';
 import { EditorForm } from '../EditorForm';
-import { ThemePicker } from '../ThemePicker';
-import { errorText, useEditor, useSection } from '../editor-context';
-import { saveProfile } from '../save-profile';
+import { errorText, useEditor, useReportDirty, useSection } from '../editor-context';
 import { SectionManager, type ItemFormProps } from '../SectionManager';
 
 const AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
@@ -121,85 +116,65 @@ function AvatarUpload() {
   );
 }
 
-const detailsSchema = profileUpdateSchema
-  .pick({ fullName: true, tagline: true, location: true, theme: true, accentColor: true })
-  .extend({ slug: slugSchema });
-type DetailsFields = {
-  fullName: string;
-  tagline: string;
-  location: string;
-  slug: string;
-  theme: string;
-  accentColor: string;
-};
+const detailsSchema = profileUpdateSchema.pick({ fullName: true, tagline: true, location: true });
+type DetailsFields = { fullName: string; tagline: string; location: string };
 
 const toFields = (p: MyProfile): DetailsFields => ({
   fullName: p.fullName,
   tagline: p.tagline ?? '',
   location: p.location ?? '',
-  slug: p.slug,
-  theme: getTheme(p.theme).key,
-  accentColor: p.accentColor,
 });
 
+// Saves by itself shortly after typing stops. Details read from a resume are the exception: they
+// arrive as edits to review and are only saved by the button, so nothing from a resume is saved
+// unseen.
 function DetailsForm() {
-  const { profile, update, setDraft, notify, takeFields } = useEditor();
+  const { profile, saveFields, setDraft, notify, takeFields } = useEditor();
+  const [reviewing, setReviewing] = useState(false);
   const form = useForm<DetailsFields, unknown, z.output<typeof detailsSchema>>({
     resolver: schemaResolver(detailsSchema),
     defaultValues: toFields(profile),
   });
-  const slug = useWatch({ control: form.control, name: 'slug' });
+  useReportDirty(reviewing);
 
-  // Typing shows up in the preview straight away; saving makes it permanent.
+  // Typing shows up in the preview straight away, before it is saved.
   useEffect(() => {
-    // While a hex code is half typed the preview keeps the last complete one.
-    let accent = profile.accentColor;
-    const publish = (v: Partial<DetailsFields>) => {
-      accent = normalizeHex(v.accentColor) ?? accent;
+    const publish = (v: Partial<DetailsFields>) =>
       setDraft({
         fullName: v.fullName ?? '',
         tagline: v.tagline || null,
         location: v.location || null,
-        theme: v.theme ?? DEFAULT_THEME,
-        accentColor: accent,
       });
-    };
     publish(form.getValues());
     const subscription = form.watch(publish);
     return () => {
       subscription.unsubscribe();
       setDraft(null);
     };
-  }, [form, setDraft, profile.accentColor]);
+  }, [form, setDraft]);
 
-  // Details read from an uploaded resume arrive here as unsaved edits, to review and fix.
   useEffect(() => {
     const imported = takeFields(['fullName', 'tagline', 'location']);
     for (const key of ['fullName', 'tagline', 'location'] as const) {
       const value = imported[key];
-      if (value) form.setValue(key, value, { shouldDirty: true });
+      if (value) {
+        form.setValue(key, value, { shouldDirty: true });
+        setReviewing(true);
+      }
     }
   }, [form, takeFields]);
 
-  async function onSubmit(values: z.output<typeof detailsSchema>) {
-    // The slug is only sent when it changed, so saving never re-checks an unchanged slug.
-    const { slug: nextSlug, ...rest } = values;
-    const saved = await saveProfile(profile, {
-      ...rest,
-      ...(nextSlug !== profile.slug && { slug: nextSlug }),
-    });
-    update(() => saved);
-    form.reset(toFields(saved));
-    notify('success', 'Saved.');
+  async function save(values: z.output<typeof detailsSchema>) {
+    await saveFields(values);
+    if (reviewing) {
+      setReviewing(false);
+      notify('success', 'Saved.');
+    }
   }
+  useFormAutosave(form, save, { enabled: !reviewing });
 
   return (
-    <EditorForm
-      form={form}
-      onSubmit={onSubmit}
-      codeFields={{ SLUG_TAKEN: 'slug' }}
-      submitLabel="Save details"
-    >
+    <Form form={form} onSubmit={save} submitLabel={reviewing ? 'Save details' : undefined}>
       <TextField name="fullName" label="Full name" autoComplete="name" required />
       <TextField
         name="tagline"
@@ -207,6 +182,37 @@ function DetailsForm() {
         hint="One line under your name, for example your role."
       />
       <TextField name="location" label="Location" />
+    </Form>
+  );
+}
+
+// The address is saved with a button, not automatically: half a typed address is not one worth
+// claiming, and changing it moves the page.
+const addressSchema = z.object({ slug: slugSchema });
+
+function SlugForm() {
+  const { profile, saveFields, notify } = useEditor();
+  const form = useForm<{ slug: string }, unknown, z.output<typeof addressSchema>>({
+    resolver: schemaResolver(addressSchema),
+    defaultValues: { slug: profile.slug },
+  });
+  const slug = useWatch({ control: form.control, name: 'slug' });
+
+  async function onSubmit(values: z.output<typeof addressSchema>) {
+    if (values.slug !== profile.slug) {
+      const saved = await saveFields({ slug: values.slug });
+      notify('success', 'Page address saved.');
+      form.reset({ slug: saved.slug });
+    }
+  }
+
+  return (
+    <EditorForm
+      form={form}
+      onSubmit={onSubmit}
+      codeFields={{ SLUG_TAKEN: 'slug' }}
+      submitLabel="Save address"
+    >
       <TextField
         name="slug"
         label="Page address"
@@ -215,8 +221,6 @@ function DetailsForm() {
         spellCheck={false}
         hint={`Your page will be at ${window.location.host}/${slug || 'your-name'}`}
       />
-      <ThemePicker />
-      <AccentPicker />
     </EditorForm>
   );
 }
@@ -322,6 +326,13 @@ export function BasicsStep() {
           Details
         </h2>
         <DetailsForm />
+      </section>
+
+      <section aria-labelledby="address-heading" className="space-y-4">
+        <h2 id="address-heading" className="type-section">
+          Page address
+        </h2>
+        <SlugForm />
       </section>
 
       <section aria-labelledby="links-heading" className="space-y-4">

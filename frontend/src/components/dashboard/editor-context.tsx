@@ -16,12 +16,14 @@ import {
   type MyProfile,
   type MyTestimonial,
   type ParsedResume,
+  type ProfileUpdateInput,
   type PublicProfile,
   type Section,
   type SectionConfig,
 } from '@portfolio/shared';
 import { ApiError, api } from '@/lib/client-api';
 import { ToastRegion, type ToastData } from '../ui';
+import { saveProfile } from './save-profile';
 
 // Fields the live preview shows while they are still being typed (not yet saved).
 export type Draft = Partial<
@@ -30,7 +32,15 @@ export type Draft = Partial<
     'fullName' | 'tagline' | 'location' | 'about' | 'theme' | 'accentColor' | 'sectionConfig'
   >
 >;
-type Notice = ToastData;
+
+// What an autosaving form or list is doing, and how the top bar tells the person.
+//   pending: edited, waiting a moment for more typing    saving: the request is on its way
+//   invalid: edited, but not valid yet, so not saved      error:  the request failed
+export type SaveState = 'pending' | 'saving' | 'invalid' | 'error';
+export type SaveStatus = SaveState | 'saved';
+type Saves = Record<string, { state: SaveState; retry?: () => void }>;
+// The most urgent state wins when several things are saving at once.
+const SAVE_ORDER: SaveState[] = ['error', 'invalid', 'saving', 'pending'];
 
 // ---- Resume import. Nothing from a resume is saved until the person saves it. The profile
 // fields are put into the Basics and About forms (unsaved); each list entry becomes a
@@ -70,10 +80,21 @@ interface EditorContextValue {
   profile: MyProfile; // what is saved on the server
   preview: PublicProfile; // saved profile + draft, minus hidden links
   update: (change: (profile: MyProfile) => MyProfile) => void;
+  // Saves profile fields (PUT /profile/me), one request at a time and always on top of the latest
+  // saved profile, so two autosaves can never overwrite each other's fields.
+  saveFields: (changes: Partial<ProfileUpdateInput>) => Promise<MyProfile>;
   setDraft: (draft: Draft | null) => void;
-  notify: (kind: Notice['kind'], text: string) => void;
+  notify: (kind: ToastData['kind'], text: string) => void;
   markDirty: () => () => void;
-  hasUnsaved: () => boolean;
+  hasUnsaved: () => boolean; // edits that would be lost by leaving (not an autosave still waiting)
+  saveStatus: SaveStatus;
+  retrySave: (() => void) | undefined;
+  reportSave: (id: string, state: SaveState | null, retry?: () => void) => void;
+  // Edits not yet safe on the server, for the "unsaved changes" mark and the tab-close warning.
+  unsaved: boolean;
+  // The tab open on the Profile page; kept here so other pages can send you to one.
+  tab: string;
+  setTab: (tab: string) => void;
   imported: Imported | null;
   hasPendingImport: boolean;
   applyImport: (resume: ParsedResume, skipped: number) => void;
@@ -94,12 +115,27 @@ export function useEditor(): EditorContextValue {
 export const errorText = (err: unknown) =>
   err instanceof ApiError ? err.message : 'Something went wrong. Please try again.';
 
+// A brand-new profile has only a name. Those people start on the resume import.
+const isBlank = (p: MyProfile) =>
+  !p.about &&
+  !p.tagline &&
+  !p.location &&
+  !p.avatarUrl &&
+  [p.links, p.skills, p.experience, p.projects, p.education].every((list) => list.length === 0);
+
 export function EditorProvider({ initial, children }: { initial: MyProfile; children: ReactNode }) {
   const [profile, setProfile] = useState(initial);
   const [draft, setDraft] = useState<Draft | null>(null);
-  const [notice, setNotice] = useState<Notice | null>(null);
-  const noticeTimer = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const [toasts, setToasts] = useState<ToastData[]>([]);
+  const nextToast = useRef(0);
+  const [tab, setTab] = useState(() => (isBlank(initial) ? 'import' : 'basics'));
   const dirtyForms = useRef(0);
+  const [dirtyCount, setDirtyCount] = useState(0);
+  const [saves, setSaves] = useState<Saves>({});
+  const savesRef = useRef<Saves>({});
+  // The newest saved profile, for the save queue below (state would be a render behind).
+  const latest = useRef(initial);
+  const queue = useRef<Promise<unknown>>(Promise.resolve());
   // The ref is read synchronously (a form takes its fields on mount); the state drives rendering.
   const [imported, setImportedState] = useState<Imported | null>(null);
   const importedRef = useRef<Imported | null>(null);
@@ -108,20 +144,61 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
     setImportedState(next);
   }, []);
 
-  const notify = useCallback((kind: Notice['kind'], text: string) => {
-    clearTimeout(noticeTimer.current);
-    setNotice({ kind, text });
-    noticeTimer.current = setTimeout(() => setNotice(null), 5000);
-  }, []);
+  const dismissToast = useCallback(
+    (id: number) => setToasts((list) => list.filter((toast) => toast.id !== id)),
+    [],
+  );
+  const notify = useCallback(
+    (kind: ToastData['kind'], text: string) => {
+      const id = ++nextToast.current;
+      setToasts((list) => [...list.slice(-2), { id, kind, text }]);
+      setTimeout(() => dismissToast(id), kind === 'error' ? 8000 : 5000);
+    },
+    [dismissToast],
+  );
 
-  // Forms that hold unsaved edits register here; leaving the page or a step asks first.
+  // Forms that hold unsaved edits (the add/edit forms, which save with a button) register here;
+  // leaving the page or a tab asks first.
   const markDirty = useCallback(() => {
     dirtyForms.current += 1;
+    setDirtyCount(dirtyForms.current);
     return () => {
       dirtyForms.current -= 1;
+      setDirtyCount(dirtyForms.current);
     };
   }, []);
-  const hasUnsaved = useCallback(() => dirtyForms.current > 0, []);
+
+  // Autosaving forms report what they are doing here (see autosave.ts).
+  const reportSave = useCallback((id: string, state: SaveState | null, retry?: () => void) => {
+    const before = savesRef.current[id];
+    if (state ? before?.state === state && before.retry === retry : !before) return;
+    const next = { ...savesRef.current };
+    if (state) next[id] = { state, retry };
+    else delete next[id];
+    savesRef.current = next;
+    setSaves(next);
+  }, []);
+  const hasUnsaved = useCallback(
+    () =>
+      dirtyForms.current > 0 ||
+      Object.values(savesRef.current).some((s) => s.state === 'error' || s.state === 'invalid'),
+    [],
+  );
+
+  const saveFields = useCallback((changes: Partial<ProfileUpdateInput>) => {
+    const run = queue.current.then(async () => {
+      const saved = await saveProfile(latest.current, changes);
+      latest.current = saved;
+      setProfile(saved);
+      return saved;
+    });
+    queue.current = run.catch(() => {});
+    return run;
+  }, []);
+  const update = useCallback((change: (profile: MyProfile) => MyProfile) => {
+    latest.current = change(latest.current);
+    setProfile(latest.current);
+  }, []);
 
   const applyImport = useCallback(
     (resume: ParsedResume, skipped: number) => {
@@ -180,10 +257,24 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
 
   const discardImport = useCallback(() => setImported(null), [setImported]);
 
+  // The most urgent thing the autosavers are doing, and the retry of the one that failed.
+  const savingStates = Object.values(saves);
+  const saveStatus: SaveStatus =
+    SAVE_ORDER.find((state) => savingStates.some((s) => s.state === state)) ?? 'saved';
+  const retrySave = savingStates.find((s) => s.state === 'error')?.retry;
+  const unsaved = dirtyCount > 0 || saveStatus !== 'saved';
+
   useEffect(() => {
     const warn = (e: BeforeUnloadEvent) => {
-      // Also guards a parsed resume that has not been reviewed yet: it is not stored anywhere.
-      if (dirtyForms.current > 0 || pendingCount(importedRef.current) > 0) e.preventDefault();
+      // Also guards a parsed resume that has not been reviewed yet: it is not stored anywhere, and
+      // an autosave that has not gone out yet (closing the tab cannot wait for it).
+      if (
+        dirtyForms.current > 0 ||
+        Object.keys(savesRef.current).length > 0 ||
+        pendingCount(importedRef.current) > 0
+      ) {
+        e.preventDefault();
+      }
     };
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
@@ -216,11 +307,18 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
     () => ({
       profile,
       preview,
-      update: setProfile,
+      update,
+      saveFields,
       setDraft,
       notify,
       markDirty,
       hasUnsaved,
+      saveStatus,
+      retrySave,
+      reportSave,
+      unsaved,
+      tab,
+      setTab,
       imported,
       hasPendingImport: pendingCount(imported) > 0,
       applyImport,
@@ -231,9 +329,16 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
     [
       profile,
       preview,
+      update,
+      saveFields,
       notify,
       markDirty,
       hasUnsaved,
+      saveStatus,
+      retrySave,
+      reportSave,
+      unsaved,
+      tab,
       imported,
       applyImport,
       takeFields,
@@ -245,7 +350,7 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
   return (
     <EditorContext value={value}>
       {children}
-      <ToastRegion toast={notice} />
+      <ToastRegion toasts={toasts} onDismiss={dismissToast} />
     </EditorContext>
   );
 }

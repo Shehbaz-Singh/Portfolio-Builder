@@ -19,7 +19,7 @@ interface FormProps<TIn extends FieldValues, TOut> {
   onSubmit: (values: TOut) => Promise<void>;
   // Error codes that belong to one field, for example { SLUG_TAKEN: 'slug' }.
   codeFields?: Record<string, string>;
-  submitLabel: string;
+  submitLabel?: string; // none: a form that saves by itself has no button
   danger?: boolean; // styles the submit button as a destructive action
   pendingLabel?: string; // the submit button while sending, "Saving…" by default
   onCancel?: () => void;
@@ -50,16 +50,20 @@ export function Form<TIn extends FieldValues, TOut>({
       <form noValidate onSubmit={submit} className="space-y-4">
         {children}
         <ErrorText>{errors.root?.server?.message}</ErrorText>
-        <div className="flex flex-wrap items-center gap-3">
-          <Button type="submit" variant={danger ? 'danger' : 'primary'} loading={isSubmitting}>
-            {isSubmitting ? pendingLabel : submitLabel}
-          </Button>
-          {onCancel && (
-            <Button onClick={onCancel} disabled={isSubmitting}>
-              Cancel
-            </Button>
-          )}
-        </div>
+        {(submitLabel || onCancel) && (
+          <div className="flex flex-wrap items-center gap-3">
+            {submitLabel && (
+              <Button type="submit" variant={danger ? 'danger' : 'primary'} loading={isSubmitting}>
+                {isSubmitting ? pendingLabel : submitLabel}
+              </Button>
+            )}
+            {onCancel && (
+              <Button onClick={onCancel} disabled={isSubmitting}>
+                Cancel
+              </Button>
+            )}
+          </div>
+        )}
         <SlowNotice pending={isSubmitting} />
       </form>
     </FormProvider>

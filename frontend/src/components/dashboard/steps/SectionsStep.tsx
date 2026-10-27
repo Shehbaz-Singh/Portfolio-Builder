@@ -13,9 +13,11 @@ import {
   type SectionKey,
 } from '@portfolio/shared';
 import { api } from '@/lib/client-api';
-import { Button, Card, Input, SlowNotice, Switch } from '../../ui';
+import { Button, Card, Input, Switch } from '../../ui';
+import { useAutosave } from '../autosave';
+import { useEditor } from '../editor-context';
+import { useGo } from '../navigation';
 import { SortableList } from '../SortableList';
-import { errorText, useEditor, useReportDirty } from '../editor-context';
 
 // What the form edits. A title is plain text here: blank means "use the default heading".
 type Row = { key: ConfigKey; visible: boolean; title: string };
@@ -29,15 +31,6 @@ const toConfig = (rows: Row[]): SectionConfig =>
     visible,
     ...(title.trim() && { title: title.trim() }),
   }));
-
-const sameConfig = (a: SectionConfig, b: SectionConfig) =>
-  a.length === b.length &&
-  a.every(
-    (item, i) =>
-      item.key === b[i].key &&
-      item.visible === b[i].visible &&
-      (item.title ?? '') === (b[i].title ?? ''),
-  );
 
 // A section that is switched on but has nothing in it is not shown; the row says so.
 const BUILT_IN_HAS_CONTENT: Record<SectionKey, (profile: MyProfile) => boolean> = {
@@ -65,47 +58,42 @@ const hasContent = (profile: MyProfile, key: ConfigKey) =>
 
 // Choose which sections the page shows, in what order, and under which heading. Only the layout
 // is saved here: hiding a section keeps its content. Changes show in the preview at once and are
-// saved with the button.
-export function SectionsStep({ goTo }: { goTo: (stepId: string) => void }) {
-  const { profile, update, setDraft, notify } = useEditor();
+// saved by themselves a moment later.
+export function SectionsStep() {
+  const { profile, update, setDraft } = useEditor();
+  const go = useGo();
   const [rows, setRows] = useState(() => toRows(profile.sectionConfig));
-  const [saving, setSaving] = useState(false);
 
   const config = useMemo(() => toConfig(rows), [rows]);
-  const isDirty = !sameConfig(config, profile.sectionConfig);
-  useReportDirty(isDirty);
 
   useEffect(() => {
     setDraft({ sectionConfig: config });
     return () => setDraft(null);
   }, [config, setDraft]);
 
-  const patch = (key: ConfigKey, change: Partial<Row>) =>
-    setRows((current) => current.map((row) => (row.key === key ? { ...row, ...change } : row)));
-  const reorder = (ids: string[]) =>
-    setRows((current) => ids.flatMap((id) => current.find((row) => row.key === id) ?? []));
-
-  async function onSave() {
-    setSaving(true);
-    try {
+  // The rows are not replaced by the server's answer: that would undo typing done while the
+  // request was on its way.
+  useAutosave({
+    key: JSON.stringify(config),
+    run: async () => {
       const { sections } = await api<{ sections: SectionConfig }>('/profile/me/sections', {
         method: 'PUT',
         body: { sections: config },
       });
       update((p) => ({ ...p, sectionConfig: sections }));
-      setRows(toRows(sections));
-      notify('success', 'Saved.');
-    } catch (err) {
-      notify('error', errorText(err));
-    } finally {
-      setSaving(false);
-    }
-  }
+      return 'saved';
+    },
+  });
+
+  const patch = (key: ConfigKey, change: Partial<Row>) =>
+    setRows((current) => current.map((row) => (row.key === key ? { ...row, ...change } : row)));
+  const reorder = (ids: string[]) =>
+    setRows((current) => ids.flatMap((id) => current.find((row) => row.key === id) ?? []));
 
   return (
     <section aria-labelledby="sections-heading" className="space-y-4">
       <h2 id="sections-heading" className="type-section">
-        Sections
+        Order and headings
       </h2>
       <p className="text-sm text-muted">
         Choose which sections appear on your page and in what order, and rename their headings.
@@ -138,7 +126,7 @@ export function SectionsStep({ goTo }: { goTo: (stepId: string) => void }) {
               {custom ? (
                 <p className="flex flex-wrap items-center gap-2 text-sm text-muted">
                   The heading is the section's own title.
-                  <Button variant="ghost" onClick={() => goTo('custom')}>
+                  <Button variant="ghost" onClick={() => void go('/dashboard', 'custom')}>
                     Edit items and title
                   </Button>
                 </p>
@@ -166,19 +154,9 @@ export function SectionsStep({ goTo }: { goTo: (stepId: string) => void }) {
         }}
       />
 
-      <div className="flex flex-wrap items-center gap-2">
-        <Button variant="primary" disabled={!isDirty} loading={saving} onClick={onSave}>
-          {saving ? 'Saving…' : 'Save sections'}
-        </Button>
-        <Button
-          variant="ghost"
-          disabled={saving}
-          onClick={() => setRows(toRows(defaultSectionConfig()))}
-        >
-          Reset to default
-        </Button>
-      </div>
-      <SlowNotice pending={saving} />
+      <Button variant="ghost" onClick={() => setRows(toRows(defaultSectionConfig()))}>
+        Reset to default
+      </Button>
     </section>
   );
 }

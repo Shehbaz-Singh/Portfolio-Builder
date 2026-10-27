@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import {
@@ -15,7 +14,8 @@ import { schemaResolver } from '@/lib/form';
 import { useLoad } from '@/lib/hooks';
 import { Form, TextField } from '../form-fields';
 import { Button, Card } from '../ui';
-import { LoadFailed, Loading } from './screens';
+import { LogOutButton } from './Nav';
+import { ContentSkeleton, LoadFailed } from './screens';
 
 const loadSession = (signal: AbortSignal) => api<SessionResponse>('/auth/me', { signal });
 
@@ -152,24 +152,27 @@ function DeleteAccount() {
 export function AccountSettings() {
   const { state, retry } = useLoad(loadSession);
 
-  if (state.status === 'loading') return <Loading label="Loading your account…" />;
+  if (state.status === 'loading') return <ContentSkeleton label="Loading your account…" />;
   if (state.status === 'error') {
     return <LoadFailed title="We couldn't load your account" error={state.error} retry={retry} />;
   }
 
   return (
-    <main id="main" className="mx-auto max-w-xl space-y-10 px-4 py-8">
+    <div className="mx-auto max-w-xl space-y-10 py-4">
       <div>
-        <Link href="/dashboard" className="text-sm font-medium text-accent-fg underline">
-          ← Back to editor
-        </Link>
-        <h1 className="type-page mt-4">Account settings</h1>
+        <h1 className="type-page">Account settings</h1>
         <p className="mt-1 text-sm text-muted">
           Signed in as <span className="font-medium">{state.data.user.email}</span>
         </p>
       </div>
       <ChangePassword />
+      <section aria-labelledby="session-heading" className="space-y-3">
+        <h2 id="session-heading" className="type-section">
+          Log out
+        </h2>
+        <LogOutButton className="border border-line" />
+      </section>
       <DeleteAccount />
-    </main>
+    </div>
   );
 }

@@ -5,29 +5,15 @@ import { ApiError } from '@/lib/client-api';
 import { useSlow } from '@/lib/hooks';
 import { Button, Skeleton } from '../ui';
 
-// Full-page states shared by the editor and the settings page.
+// Waiting and failure states shared by the dashboard shell and the account settings.
 
-function Centered({ children }: { children: ReactNode }) {
-  return (
-    <main
-      id="main"
-      className="flex min-h-screen flex-col items-center justify-center gap-4 px-6 text-center"
-    >
-      {children}
-    </main>
-  );
-}
-
-export function Loading({ label }: { label: string }) {
+// What is said next to the placeholders: the label, and after a few seconds why it is slow (the free
+// server sleeps when nobody has used it for a while).
+function WaitMessage({ label }: { label: string }) {
   const slow = useSlow(true);
   return (
-    <Centered>
-      <div aria-hidden="true" className="w-48 space-y-2">
-        <Skeleton className="h-3" />
-        <Skeleton className="mx-auto h-3 w-3/4" />
-        <Skeleton className="mx-auto h-3 w-1/2" />
-      </div>
-      <p role="status" className="font-medium">
+    <div className="space-y-1">
+      <p role="status" className="text-sm font-medium">
         {slow ? 'Waking up the server…' : label}
       </p>
       {slow && (
@@ -36,7 +22,57 @@ export function Loading({ label }: { label: string }) {
           first time, and then it is fast again.
         </p>
       )}
-    </Centered>
+    </div>
+  );
+}
+
+// Grey shapes where the content will be, for a page that is still loading.
+export function ContentSkeleton({ label }: { label: string }) {
+  return (
+    <div className="space-y-6">
+      <div aria-hidden="true" className="space-y-3">
+        <Skeleton className="h-7 w-48" />
+        <Skeleton className="h-4 w-2/3" />
+        <Skeleton className="h-28" />
+        <Skeleton className="h-28" />
+      </div>
+      <WaitMessage label={label} />
+    </div>
+  );
+}
+
+// The whole dashboard (sidebar, top bar, form, preview) as placeholders, before the profile is here.
+export function Loading({ label }: { label: string }) {
+  return (
+    <div className="min-h-screen lg:flex">
+      <div
+        aria-hidden="true"
+        className="hidden w-60 shrink-0 space-y-3 border-e border-line p-4 lg:block"
+      >
+        <Skeleton className="h-6 w-40" />
+        {[0, 1, 2, 3, 4].map((i) => (
+          <Skeleton key={i} className="h-9" />
+        ))}
+      </div>
+      <main id="main" className="min-w-0 flex-1">
+        <div aria-hidden="true" className="flex gap-4 border-b border-line px-4 py-3">
+          <Skeleton className="h-7 w-40" />
+          <Skeleton className="ms-auto h-7 w-56" />
+        </div>
+        <div className="grid gap-6 p-4 xl:grid-cols-2">
+          <ContentSkeleton label={label} />
+          <Skeleton className="hidden h-96 xl:block" />
+        </div>
+      </main>
+    </div>
+  );
+}
+
+function Centered({ children }: { children: ReactNode }) {
+  return (
+    <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 px-6 text-center">
+      {children}
+    </div>
   );
 }
 
@@ -44,12 +80,14 @@ export function LoadFailed({
   title,
   error,
   retry,
+  page,
 }: {
   title: string;
   error: unknown;
   retry: () => void;
+  page?: boolean; // the whole screen (no dashboard around it), so it is the page's main region
 }) {
-  return (
+  const body = (
     <Centered>
       <h1 className="type-page">{title}</h1>
       <div className="max-w-sm text-muted">
@@ -61,4 +99,5 @@ export function LoadFailed({
       </Button>
     </Centered>
   );
+  return page ? <main id="main">{body}</main> : body;
 }

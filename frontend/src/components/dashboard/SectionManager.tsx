@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, type ComponentType, type ReactNode } from 'react';
+import { useEffect, useId, useRef, useState, type ComponentType, type ReactNode } from 'react';
+import { ChevronDown, Trash2, Undo2 } from 'lucide-react';
 import type { Section } from '@portfolio/shared';
-import { Button, Card, EmptyState, useConfirm } from '../ui';
+import { Button, Card, EmptyState } from '../ui';
+import { cx } from '../ui/cx';
 import {
   errorText,
   useEditor,
@@ -11,6 +13,7 @@ import {
   type SectionItem,
   type SuggestionMap,
 } from './editor-context';
+import { useLeaveGuard } from './navigation';
 import { SortableList } from './SortableList';
 
 // Every list except skills (which are single words and have their own quick-add) can receive
@@ -52,11 +55,16 @@ interface ListProps<T extends { id: string }, D> {
   extra?: (item: T) => ReactNode; // extra controls in a row (link visibility)
 }
 
+// How long a deleted item can be brought back before the delete is sent.
+const UNDO_MS = 6000;
+
 const noSuggestions = { suggestions: [], dismiss: () => {}, dismissAll: () => {} };
 
-// One list in the editor: rows with Edit and Delete, an Add button, and drag-to-reorder.
-// Entries read from a resume appear above it as suggestions that can be edited and added, or
-// skipped. The create/edit form is passed in, so every list shares this shell.
+// One list in the editor: collapsible cards (the title and a summary, open one to edit it), an Add
+// button, and drag-to-reorder. Delete is immediate but can be undone for a few seconds: the item
+// is only removed on the server once the time is up (or when you leave the page). Entries read from
+// a resume appear above it as suggestions that can be edited and added, or skipped. The create/edit
+// form is passed in, so every list shares this shell.
 export function ListManager<T extends { id: string }, D = never>({
   list,
   suggestions: suggestionApi = noSuggestions,
@@ -71,34 +79,74 @@ export function ListManager<T extends { id: string }, D = never>({
   const { items, create, remove, reorder } = list;
   const { suggestions, dismiss, dismissAll } = suggestionApi;
   const { notify } = useEditor();
-  const confirm = useConfirm();
+  const canLeave = useLeaveGuard();
+  const panelBase = useId();
   // An item id, "new", "s:<suggestion key>", or nothing. One form at a time keeps unsaved
   // edits from being lost.
   const [editing, setEditing] = useState<string | null>(null);
-  const [deleting, setDeleting] = useState<string | null>(null);
+  const [deleted, setDeleted] = useState<string[]>([]); // waiting out the undo time
   const [adding, setAdding] = useState(false);
+  const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  const removeRef = useRef(remove);
+  const focusNext = useRef<string | null>(null); // a selector to focus after the next render
+  const root = useRef<HTMLDivElement>(null);
   const sortable = items.length > 1;
   const full = limit !== undefined && items.length >= limit;
+  const showEmpty = items.length === 0 && editing !== 'new' && suggestions.length === 0;
   const close = () => setEditing(null);
   const summarize = (item: T | D) => summary(item);
 
-  async function onDelete(id: string) {
-    const sure = await confirm({
-      title: `Delete this ${noun}?`,
-      message: 'This cannot be undone.',
-      confirmLabel: 'Delete',
-      danger: true,
-    });
-    if (!sure) return;
-    setDeleting(id);
+  useEffect(() => {
+    removeRef.current = remove;
+  });
+  useEffect(() => {
+    if (!focusNext.current) return;
+    root.current?.querySelector<HTMLElement>(focusNext.current)?.focus();
+    focusNext.current = null;
+  });
+
+  async function commitDelete(id: string) {
+    timers.current.delete(id);
     try {
-      await remove(id);
-      notify('success', `Deleted ${noun}.`);
+      await removeRef.current(id);
     } catch (err) {
       notify('error', errorText(err));
-    } finally {
-      setDeleting(null);
     }
+    setDeleted((ids) => ids.filter((x) => x !== id));
+  }
+
+  function onDelete(id: string) {
+    if (editing === id) close();
+    focusNext.current = `[data-undo="${id}"]`;
+    setDeleted((ids) => [...ids, id]);
+    timers.current.set(
+      id,
+      setTimeout(() => void commitDelete(id), UNDO_MS),
+    );
+  }
+
+  function undo(id: string) {
+    clearTimeout(timers.current.get(id));
+    timers.current.delete(id);
+    focusNext.current = `[data-toggle="${id}"]`;
+    setDeleted((ids) => ids.filter((x) => x !== id));
+  }
+
+  // Leaving the page does not cancel a delete that is waiting: it is sent now.
+  useEffect(() => {
+    const waiting = timers.current;
+    return () => {
+      for (const [id, timer] of waiting) {
+        clearTimeout(timer);
+        void commitDelete(id);
+      }
+    };
+  }, []);
+
+  // Opens a card (or closes it), asking first when the open form has edits that would be lost.
+  async function toggle(id: string) {
+    if (editing !== null && !(await canLeave())) return;
+    setEditing(editing === id ? null : id);
   }
 
   // Adds suggestions as they are, one after another so their order is kept. Stops at the
@@ -118,44 +166,68 @@ export function ListManager<T extends { id: string }, D = never>({
   }
 
   function row(item: T, handle?: ReactNode) {
-    if (editing === item.id) {
+    const { title, subtitle } = summarize(item);
+    if (deleted.includes(item.id)) {
       return (
-        <Card tone="accent">
-          <Form item={item} onDone={close} />
+        <Card padding="sm" dashed className="flex items-center gap-3">
+          <p className="min-w-0 flex-1 text-sm">
+            Deleted <span className="font-medium">{title}</span>.
+          </p>
+          <Button
+            data-undo={item.id}
+            onClick={() => undo(item.id)}
+            aria-label={`Undo delete ${title}`}
+          >
+            <Undo2 aria-hidden="true" className="size-4" />
+            Undo
+          </Button>
         </Card>
       );
     }
-    const { title, subtitle } = summarize(item);
+    const open = editing === item.id;
+    const panelId = `${panelBase}-${item.id}`;
     return (
-      <Card padding="sm" className="flex items-center gap-2">
-        {handle}
-        <div className="min-w-0 flex-1">
-          <p className="font-medium">{title}</p>
-          {subtitle && <p className="text-sm text-muted">{subtitle}</p>}
+      <Card padding="sm" tone={open ? 'accent' : 'default'} className="space-y-3">
+        <div className="flex items-center gap-2">
+          {!open && handle}
+          <button
+            type="button"
+            data-toggle={item.id}
+            aria-expanded={open}
+            aria-controls={open ? panelId : undefined}
+            disabled={adding}
+            onClick={() => void toggle(item.id)}
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-control p-1 text-start hover:bg-surface"
+          >
+            <span className="min-w-0 flex-1">
+              <span className="block font-medium">{title}</span>
+              {subtitle && <span className="block text-sm text-muted">{subtitle}</span>}
+            </span>
+            <ChevronDown
+              aria-hidden="true"
+              className={cx(
+                'size-5 shrink-0 text-muted transition-transform',
+                open && 'rotate-180',
+              )}
+            />
+          </button>
+          {extra?.(item)}
+          <Button variant="danger" onClick={() => onDelete(item.id)} aria-label={`Delete ${title}`}>
+            <Trash2 aria-hidden="true" className="size-4" />
+            <span className="max-sm:sr-only">Delete</span>
+          </Button>
         </div>
-        {extra?.(item)}
-        <Button
-          variant="ghost"
-          disabled={editing !== null}
-          onClick={() => setEditing(item.id)}
-          aria-label={`Edit ${title}`}
-        >
-          Edit
-        </Button>
-        <Button
-          variant="danger"
-          disabled={deleting === item.id}
-          onClick={() => onDelete(item.id)}
-          aria-label={`Delete ${title}`}
-        >
-          {deleting === item.id ? 'Deleting…' : 'Delete'}
-        </Button>
+        {open && (
+          <div id={panelId}>
+            <Form item={item} onDone={close} />
+          </div>
+        )}
       </Card>
     );
   }
 
   return (
-    <div className="space-y-3">
+    <div ref={root} className="space-y-3">
       {suggestions.length > 0 && (
         <Card
           as="section"
@@ -235,8 +307,18 @@ export function ListManager<T extends { id: string }, D = never>({
         </Card>
       )}
 
-      {items.length === 0 && editing !== 'new' && suggestions.length === 0 && (
-        <EmptyState>{empty}</EmptyState>
+      {showEmpty && (
+        <Card dashed padding="lg" className="text-center">
+          <EmptyState
+            action={
+              <Button variant="primary" onClick={() => setEditing('new')}>
+                Add your first {noun}
+              </Button>
+            }
+          >
+            {empty}
+          </EmptyState>
+        </Card>
       )}
 
       {sortable ? (
@@ -244,7 +326,7 @@ export function ListManager<T extends { id: string }, D = never>({
           items={items}
           onReorder={reorder}
           label={(item) => summarize(item).title}
-          renderItem={(item, handle) => row(item, editing === item.id ? undefined : handle)}
+          renderItem={(item, handle) => row(item, handle)}
         />
       ) : (
         <ul className="space-y-3">
@@ -258,7 +340,7 @@ export function ListManager<T extends { id: string }, D = never>({
         <Card tone="accent">
           <Form onDone={close} />
         </Card>
-      ) : full ? (
+      ) : showEmpty ? null : full ? (
         <p className="text-sm text-muted">
           You have reached the limit of {limit} {noun}s here. Delete one to add another.
         </p>

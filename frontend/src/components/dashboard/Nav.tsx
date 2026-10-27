@@ -1,0 +1,143 @@
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import type { MouseEvent } from 'react';
+import {
+  LayoutList,
+  LogOut,
+  MessageSquareQuote,
+  Palette,
+  Settings,
+  UserRound,
+  type LucideIcon,
+} from 'lucide-react';
+import { api } from '@/lib/client-api';
+import { Badge, Button } from '../ui';
+import { cx } from '../ui/cx';
+import { completeness } from './Completeness';
+import { useEditor } from './editor-context';
+import { useGo, useLeaveGuard } from './navigation';
+
+// The dashboard's pages. Analytics is not here because the app has none.
+const ITEMS: { href: string; label: string; Icon: LucideIcon }[] = [
+  { href: '/dashboard', label: 'Profile', Icon: UserRound },
+  { href: '/dashboard/sections', label: 'Sections', Icon: LayoutList },
+  { href: '/dashboard/themes', label: 'Themes', Icon: Palette },
+  { href: '/dashboard/testimonials', label: 'Testimonials', Icon: MessageSquareQuote },
+  { href: '/dashboard/settings', label: 'Settings', Icon: Settings },
+];
+
+// What shows beside a label: the share of the profile that is filled in, or testimonials waiting.
+function useHints(): Record<string, string | undefined> {
+  const { profile } = useEditor();
+  const pending = profile.testimonials.filter((t) => t.status === 'pending').length;
+  return {
+    '/dashboard': `${completeness(profile).percent}%`,
+    '/dashboard/testimonials': pending > 0 ? String(pending) : undefined,
+  };
+}
+
+function NavLinks({ layout }: { layout: 'side' | 'bottom' }) {
+  const pathname = usePathname();
+  const go = useGo();
+  const hints = useHints();
+  const { profile } = useEditor();
+  const pending = profile.testimonials.filter((t) => t.status === 'pending').length;
+
+  // A plain click goes through the leave check; opening in a new tab or window is left alone.
+  function onClick(e: MouseEvent<HTMLAnchorElement>, href: string) {
+    if (e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    void go(href);
+  }
+
+  return (
+    <ul className={layout === 'side' ? 'space-y-1' : 'grid grid-cols-5'}>
+      {ITEMS.map(({ href, label, Icon }) => {
+        const current = pathname === href;
+        const hint = hints[href];
+        return (
+          <li key={href}>
+            <Link
+              href={href}
+              onClick={(e) => onClick(e, href)}
+              aria-current={current ? 'page' : undefined}
+              className={cx(
+                'flex items-center rounded-control text-sm font-medium transition',
+                layout === 'side'
+                  ? 'gap-3 px-3 py-2'
+                  : 'min-h-14 flex-col justify-center gap-0.5 px-0.5 text-[0.6875rem]',
+                current
+                  ? 'bg-accent-soft text-accent-fg'
+                  : 'text-muted hover:bg-surface hover:text-ink',
+              )}
+            >
+              <span className="relative">
+                <Icon aria-hidden="true" className="size-5" />
+                {layout === 'bottom' && href === '/dashboard/testimonials' && pending > 0 && (
+                  <span
+                    aria-hidden="true"
+                    className="absolute -top-1 -right-1.5 size-2.5 rounded-full bg-accent"
+                  />
+                )}
+              </span>
+              <span>{label}</span>
+              {layout === 'side' && hint && (
+                <Badge tone={href === '/dashboard' ? 'neutral' : 'solid'} className="ms-auto">
+                  {hint}
+                  {href === '/dashboard/testimonials' && <span className="sr-only"> pending</span>}
+                  {href === '/dashboard' && <span className="sr-only"> complete</span>}
+                </Badge>
+              )}
+              {layout === 'bottom' && href === '/dashboard/testimonials' && pending > 0 && (
+                <span className="sr-only">{pending} pending</span>
+              )}
+            </Link>
+          </li>
+        );
+      })}
+    </ul>
+  );
+}
+
+export function LogOutButton({ className }: { className?: string }) {
+  const canLeave = useLeaveGuard();
+  async function logOut() {
+    if (!(await canLeave())) return;
+    await api('/auth/logout', { method: 'POST', redirectOn401: false }).catch(() => {});
+    window.location.assign('/login'); // a full load, so no profile data lingers in memory
+  }
+  return (
+    <Button variant="ghost" onClick={logOut} className={className}>
+      <LogOut aria-hidden="true" className="size-4" />
+      Log out
+    </Button>
+  );
+}
+
+// Wide screens: a sidebar. Narrow ones: a bar along the bottom.
+export function Sidebar() {
+  return (
+    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col justify-between border-e border-line p-4 lg:flex">
+      <div className="space-y-6">
+        <p className="px-3 pt-1 font-semibold">Portfolio Generator</p>
+        <nav aria-label="Dashboard">
+          <NavLinks layout="side" />
+        </nav>
+      </div>
+      <LogOutButton className="w-full justify-start" />
+    </aside>
+  );
+}
+
+export function BottomNav() {
+  return (
+    <nav
+      aria-label="Dashboard"
+      className="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-page lg:hidden"
+    >
+      <NavLinks layout="bottom" />
+    </nav>
+  );
+}

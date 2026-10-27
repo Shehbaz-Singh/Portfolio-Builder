@@ -7,8 +7,8 @@ Fill in your details once and get a clean, shareable portfolio page at your own 
 **For the person building a portfolio**
 
 - Start from your resume: upload a PDF and the details, links, skills, jobs, education and projects it contains are filled in for you to review, fix and save. Nothing is saved until you say so, and the PDF itself is never stored.
-- Sign up, then build your page step by step: basics, about, skills, experience, projects and education.
-- See a live preview next to the form while you type, using the same theme your visitors will see.
+- Sign up, then build your page from a dashboard with a sidebar (a bottom bar on phones): Profile (basics, about, skills, experience, projects, education), Sections, Themes, Testimonials and Settings. A completeness meter suggests what to fill in next, and your changes save automatically.
+- See a live preview next to the form while you type, using the same theme your visitors will see, at phone, tablet or desktop width.
 - Add links (LinkedIn, GitHub, email, phone, website) and hide any of them with a switch without deleting it.
 - Upload a profile photo; it is cropped to a square automatically.
 - Drag to reorder links, skills, experience, projects and education. Keyboard reordering works too.
