@@ -11,7 +11,7 @@ export function Preview() {
   const { Component: Theme } = getTheme(preview.theme);
 
   return (
-    <section aria-label="Live preview" className="overflow-hidden rounded-2xl border border-line">
+    <section aria-label="Live preview" className="overflow-hidden rounded-card border border-line">
       <p className="border-b border-line bg-surface px-4 py-2 text-xs font-medium text-muted">
         Live preview
       </p>

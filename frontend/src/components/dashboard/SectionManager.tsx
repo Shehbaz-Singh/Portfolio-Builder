@@ -2,7 +2,7 @@
 
 import { useState, type ComponentType, type ReactNode } from 'react';
 import type { Section } from '@portfolio/shared';
-import { Button } from '../ui';
+import { Button, Card, EmptyState, useConfirm } from '../ui';
 import {
   errorText,
   useEditor,
@@ -52,7 +52,6 @@ interface ListProps<T extends { id: string }, D> {
   extra?: (item: T) => ReactNode; // extra controls in a row (link visibility)
 }
 
-const cardClass = 'rounded-xl border border-accent/50 p-4';
 const noSuggestions = { suggestions: [], dismiss: () => {}, dismissAll: () => {} };
 
 // One list in the editor: rows with Edit and Delete, an Add button, and drag-to-reorder.
@@ -72,6 +71,7 @@ export function ListManager<T extends { id: string }, D = never>({
   const { items, create, remove, reorder } = list;
   const { suggestions, dismiss, dismissAll } = suggestionApi;
   const { notify } = useEditor();
+  const confirm = useConfirm();
   // An item id, "new", "s:<suggestion key>", or nothing. One form at a time keeps unsaved
   // edits from being lost.
   const [editing, setEditing] = useState<string | null>(null);
@@ -83,7 +83,13 @@ export function ListManager<T extends { id: string }, D = never>({
   const summarize = (item: T | D) => summary(item);
 
   async function onDelete(id: string) {
-    if (!window.confirm(`Delete this ${noun}? This cannot be undone.`)) return;
+    const sure = await confirm({
+      title: `Delete this ${noun}?`,
+      message: 'This cannot be undone.',
+      confirmLabel: 'Delete',
+      danger: true,
+    });
+    if (!sure) return;
     setDeleting(id);
     try {
       await remove(id);
@@ -114,14 +120,14 @@ export function ListManager<T extends { id: string }, D = never>({
   function row(item: T, handle?: ReactNode) {
     if (editing === item.id) {
       return (
-        <div className={cardClass}>
+        <Card tone="accent">
           <Form item={item} onDone={close} />
-        </div>
+        </Card>
       );
     }
     const { title, subtitle } = summarize(item);
     return (
-      <div className="flex items-center gap-2 rounded-xl border border-line p-3">
+      <Card padding="sm" className="flex items-center gap-2">
         {handle}
         <div className="min-w-0 flex-1">
           <p className="font-medium">{title}</p>
@@ -144,16 +150,20 @@ export function ListManager<T extends { id: string }, D = never>({
         >
           {deleting === item.id ? 'Deleting…' : 'Delete'}
         </Button>
-      </div>
+      </Card>
     );
   }
 
   return (
     <div className="space-y-3">
       {suggestions.length > 0 && (
-        <section
+        <Card
+          as="section"
+          tone="tint"
+          dashed
+          padding="sm"
           aria-label={`${noun} suggestions from your resume`}
-          className="space-y-3 rounded-2xl border border-dashed border-accent/50 bg-accent-soft p-3"
+          className="space-y-3"
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-medium">From your resume ({suggestions.length})</p>
@@ -175,19 +185,21 @@ export function ListManager<T extends { id: string }, D = never>({
               const { title, subtitle } = summarize(suggestion.data);
               if (editing === `s:${suggestion.key}`) {
                 return (
-                  <li key={suggestion.key} className={cardClass}>
+                  <Card as="li" key={suggestion.key} tone="accent">
                     <Form
                       draft={suggestion.data}
                       onDone={close}
                       onSaved={() => dismiss(suggestion.key)}
                     />
-                  </li>
+                  </Card>
                 );
               }
               return (
-                <li
+                <Card
+                  as="li"
                   key={suggestion.key}
-                  className="flex items-center gap-2 rounded-xl border border-line bg-page p-3"
+                  padding="sm"
+                  className="flex items-center gap-2 bg-page"
                 >
                   <div className="min-w-0 flex-1">
                     <p className="font-medium">{title}</p>
@@ -216,15 +228,15 @@ export function ListManager<T extends { id: string }, D = never>({
                   >
                     Skip
                   </Button>
-                </li>
+                </Card>
               );
             })}
           </ul>
-        </section>
+        </Card>
       )}
 
       {items.length === 0 && editing !== 'new' && suggestions.length === 0 && (
-        <p className="text-sm text-muted">{empty}</p>
+        <EmptyState>{empty}</EmptyState>
       )}
 
       {sortable ? (
@@ -243,9 +255,9 @@ export function ListManager<T extends { id: string }, D = never>({
       )}
 
       {editing === 'new' ? (
-        <div className={cardClass}>
+        <Card tone="accent">
           <Form onDone={close} />
-        </div>
+        </Card>
       ) : full ? (
         <p className="text-sm text-muted">
           You have reached the limit of {limit} {noun}s here. Delete one to add another.

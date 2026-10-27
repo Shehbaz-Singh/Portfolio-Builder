@@ -13,7 +13,7 @@ import {
   type SectionKey,
 } from '@portfolio/shared';
 import { api } from '@/lib/client-api';
-import { Button, SlowNotice, Switch, inputClass } from '../../ui';
+import { Button, Card, Input, SlowNotice, Switch } from '../../ui';
 import { SortableList } from '../SortableList';
 import { errorText, useEditor, useReportDirty } from '../editor-context';
 
@@ -104,7 +104,7 @@ export function SectionsStep({ goTo }: { goTo: (stepId: string) => void }) {
 
   return (
     <section aria-labelledby="sections-heading" className="space-y-4">
-      <h2 id="sections-heading" className="text-lg font-semibold">
+      <h2 id="sections-heading" className="type-section">
         Sections
       </h2>
       <p className="text-sm text-muted">
@@ -122,7 +122,7 @@ export function SectionsStep({ goTo }: { goTo: (stepId: string) => void }) {
           const custom = isCustomKey(row.key);
           const inputId = `section-title-${row.key}`;
           return (
-            <div className="space-y-3 rounded-xl border border-line p-3">
+            <Card padding="sm" className="space-y-3">
               <div className="flex items-center gap-3">
                 {handle}
                 <span className={`font-medium ${row.visible ? '' : 'text-muted'}`}>{label}</span>
@@ -147,13 +147,12 @@ export function SectionsStep({ goTo }: { goTo: (stepId: string) => void }) {
                   <label htmlFor={inputId} className="mb-1 block text-xs font-medium text-muted">
                     Heading on your page
                   </label>
-                  <input
+                  <Input
                     id={inputId}
                     value={row.title}
                     onChange={(e) => patch(row.key, { title: e.target.value })}
                     placeholder={label}
                     maxLength={SECTION_TITLE_MAX}
-                    className={inputClass}
                   />
                 </div>
               )}
@@ -162,13 +161,13 @@ export function SectionsStep({ goTo }: { goTo: (stepId: string) => void }) {
                   Nothing here yet, so this section stays off your page until you add something.
                 </p>
               )}
-            </div>
+            </Card>
           );
         }}
       />
 
       <div className="flex flex-wrap items-center gap-2">
-        <Button variant="primary" disabled={!isDirty || saving} onClick={onSave}>
+        <Button variant="primary" disabled={!isDirty} loading={saving} onClick={onSave}>
           {saving ? 'Saving…' : 'Save sections'}
         </Button>
         <Button

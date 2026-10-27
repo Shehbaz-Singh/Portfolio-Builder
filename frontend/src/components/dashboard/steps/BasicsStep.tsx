@@ -311,14 +311,14 @@ export function BasicsStep() {
   return (
     <div className="space-y-10">
       <section aria-labelledby="photo-heading" className="space-y-4">
-        <h2 id="photo-heading" className="text-lg font-semibold">
+        <h2 id="photo-heading" className="type-section">
           Photo
         </h2>
         <AvatarUpload />
       </section>
 
       <section aria-labelledby="details-heading" className="space-y-4">
-        <h2 id="details-heading" className="text-lg font-semibold">
+        <h2 id="details-heading" className="type-section">
           Details
         </h2>
         <DetailsForm />
@@ -326,7 +326,7 @@ export function BasicsStep() {
 
       <section aria-labelledby="links-heading" className="space-y-4">
         <div>
-          <h2 id="links-heading" className="text-lg font-semibold">
+          <h2 id="links-heading" className="type-section">
             Links
           </h2>
           <p className="text-sm text-muted">

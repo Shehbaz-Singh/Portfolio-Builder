@@ -136,7 +136,7 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
         <ul
           ref={menu}
           id={menuId}
-          className={`absolute top-full z-20 mt-2 w-48 rounded-xl border border-line bg-page p-1 text-ink shadow-lg ${alignEnd ? 'end-0' : 'start-0'}`}
+          className={`absolute top-full z-20 mt-2 w-48 rounded-box border border-line bg-page p-1 text-ink shadow-overlay ${alignEnd ? 'end-0' : 'start-0'}`}
         >
           <li>
             <button type="button" onClick={copy} className={itemClass}>

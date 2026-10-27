@@ -47,7 +47,7 @@ export function ExperienceStep() {
   return (
     <section aria-labelledby="experience-heading" className="space-y-4">
       <div>
-        <h2 id="experience-heading" className="text-lg font-semibold">
+        <h2 id="experience-heading" className="type-section">
           Experience
         </h2>
         <p className="text-sm text-muted">

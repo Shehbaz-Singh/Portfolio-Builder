@@ -5,7 +5,7 @@ import { useState, type ComponentType } from 'react';
 import type { MyProfile } from '@portfolio/shared';
 import { api } from '@/lib/client-api';
 import { useLoad } from '@/lib/hooks';
-import { Button } from '../ui';
+import { Button, ConfirmProvider, Tabs, useConfirm, type TabItem } from '../ui';
 import { EditorProvider, useEditor } from './editor-context';
 import { Preview } from './Preview';
 import { PublishPanel } from './PublishPanel';
@@ -46,11 +46,19 @@ const loadProfile = (signal: AbortSignal) => api<MyProfile>('/profile/me', { sig
 function Header() {
   const router = useRouter();
   const { hasUnsaved } = useEditor();
-  const confirmLeave = () =>
-    !hasUnsaved() || window.confirm('You have unsaved changes. Leave without saving them?');
+  const confirm = useConfirm();
+  const confirmLeave = async () =>
+    !hasUnsaved() ||
+    (await confirm({
+      title: 'Leave without saving?',
+      message: 'You have unsaved changes. Leave without saving them?',
+      confirmLabel: 'Leave',
+      cancelLabel: 'Stay',
+      danger: true,
+    }));
 
   async function logOut() {
-    if (!confirmLeave()) return;
+    if (!(await confirmLeave())) return;
     await api('/auth/logout', { method: 'POST', redirectOn401: false }).catch(() => {});
     window.location.assign('/login'); // a full load, so no profile data lingers in memory
   }
@@ -61,7 +69,9 @@ function Header() {
       <div className="flex gap-2">
         <Button
           variant="ghost"
-          onClick={() => confirmLeave() && router.push('/dashboard/settings')}
+          onClick={async () => {
+            if (await confirmLeave()) router.push('/dashboard/settings');
+          }}
         >
           Settings
         </Button>
@@ -83,17 +93,29 @@ const isBlank = (p: MyProfile) =>
 
 function Workspace() {
   const { hasUnsaved, profile } = useEditor();
+  const confirm = useConfirm();
   const pendingTestimonials = profile.testimonials.filter((t) => t.status === 'pending').length;
   const [stepId, setStepId] = useState(() => (isBlank(profile) ? 'import' : 'basics'));
   // Below the lg breakpoint the form and the preview do not fit side by side.
   const [showPreview, setShowPreview] = useState(false);
-  const { Component, label } = STEPS.find((s) => s.id === stepId) ?? STEPS[0];
+  const { Component } = STEPS.find((s) => s.id === stepId) ?? STEPS[0];
+  const tabs: TabItem[] = STEPS.map((step, i) => ({
+    id: step.id,
+    label: i === 0 ? step.label : `${i}. ${step.label}`,
+    ...(step.id === 'testimonials' && { count: pendingTestimonials, countLabel: 'pending' }),
+  }));
 
-  function goTo(id: string) {
+  async function goTo(id: string) {
     if (id === stepId) return;
     if (
       hasUnsaved() &&
-      !window.confirm('You have unsaved changes. Leave this step and lose them?')
+      !(await confirm({
+        title: 'Leave this step?',
+        message: 'You have unsaved changes. Leave this step and lose them?',
+        confirmLabel: 'Leave and lose changes',
+        cancelLabel: 'Keep editing',
+        danger: true,
+      }))
     ) {
       return;
     }
@@ -108,32 +130,15 @@ function Workspace() {
         <ImportBanner />
         <div className="grid gap-6 p-4 lg:grid-cols-2">
           <div className={`min-w-0 ${showPreview ? 'hidden lg:block' : ''}`}>
-            <nav aria-label="Editor steps" className="mb-6 flex flex-wrap gap-1">
-              {STEPS.map((step, i) => (
-                <button
-                  key={step.id}
-                  type="button"
-                  aria-current={step.id === stepId ? 'step' : undefined}
-                  onClick={() => goTo(step.id)}
-                  className={`shrink-0 rounded-lg px-3 py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-accent ${
-                    step.id === stepId ? 'bg-accent text-on-accent' : 'hover:bg-surface'
-                  }`}
-                >
-                  {i === 0 ? step.label : `${i}. ${step.label}`}
-                  {step.id === 'testimonials' && pendingTestimonials > 0 && (
-                    <span className="ms-1.5 rounded-full bg-ink px-1.5 py-0.5 text-xs text-page">
-                      {pendingTestimonials}
-                      <span className="sr-only"> pending</span>
-                    </span>
-                  )}
-                </button>
-              ))}
-            </nav>
-            {/* Switching steps swaps the content under the focused tab; say so. */}
-            <p role="status" className="sr-only">
-              {label} step
-            </p>
-            <Component goTo={goTo} />
+            <Tabs
+              label="Editor steps"
+              idBase="editor"
+              tabs={tabs}
+              value={stepId}
+              onChange={(id) => void goTo(id)}
+            >
+              <Component goTo={goTo} />
+            </Tabs>
           </div>
 
           <div
@@ -144,7 +149,11 @@ function Workspace() {
         </div>
 
         <div className="fixed right-4 bottom-4 lg:hidden">
-          <Button variant="primary" className="shadow-lg" onClick={() => setShowPreview((v) => !v)}>
+          <Button
+            variant="primary"
+            className="shadow-overlay"
+            onClick={() => setShowPreview((v) => !v)}
+          >
             {showPreview ? 'Back to editing' : 'Preview'}
           </Button>
         </div>
@@ -162,7 +171,9 @@ export function Editor() {
   }
   return (
     <EditorProvider initial={state.data}>
-      <Workspace />
+      <ConfirmProvider>
+        <Workspace />
+      </ConfirmProvider>
     </EditorProvider>
   );
 }

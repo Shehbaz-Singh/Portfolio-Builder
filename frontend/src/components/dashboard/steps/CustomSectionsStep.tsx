@@ -16,7 +16,7 @@ import {
 import { schemaResolver } from '@/lib/form';
 import { formatRange } from '@/lib/format';
 import { TextArea, TextField } from '../../form-fields';
-import { Button, ErrorText, FocusedInput } from '../../ui';
+import { Button, Card, EmptyState, ErrorText, FocusedInput, useConfirm } from '../../ui';
 import { toMonth } from '../DateRangeFields';
 import { EditorForm } from '../EditorForm';
 import { ListManager, type FormProps } from '../SectionManager';
@@ -156,6 +156,7 @@ function RenameForm({ section, onDone }: { section: MyCustomSection; onDone: () 
 function CustomSectionCard({ section }: { section: MyCustomSection }) {
   const { remove } = useCustomSections();
   const { notify } = useEditor();
+  const confirm = useConfirm();
   const list = useCustomItems(section.id);
   const [renaming, setRenaming] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -163,7 +164,13 @@ function CustomSectionCard({ section }: { section: MyCustomSection }) {
   async function onDelete() {
     const count = section.items.length;
     const items = count ? ` and its ${count} item${count === 1 ? '' : 's'}` : '';
-    if (!window.confirm(`Delete "${section.title}"${items}? This cannot be undone.`)) return;
+    const sure = await confirm({
+      title: 'Delete this section?',
+      message: `Delete "${section.title}"${items}? This cannot be undone.`,
+      confirmLabel: 'Delete section',
+      danger: true,
+    });
+    if (!sure) return;
     setDeleting(true);
     try {
       await remove(section.id);
@@ -176,19 +183,13 @@ function CustomSectionCard({ section }: { section: MyCustomSection }) {
 
   return (
     <SectionIdContext value={section.id}>
-      <article
-        aria-labelledby={`custom-title-${section.id}`}
-        className="space-y-4 rounded-2xl border border-line p-4"
-      >
+      <Card as="article" aria-labelledby={`custom-title-${section.id}`} className="space-y-4">
         <header className="flex flex-wrap items-center gap-2">
           {renaming ? (
             <RenameForm section={section} onDone={() => setRenaming(false)} />
           ) : (
             <>
-              <h3
-                id={`custom-title-${section.id}`}
-                className="min-w-0 text-base font-semibold break-words"
-              >
+              <h3 id={`custom-title-${section.id}`} className="type-subsection min-w-0 break-words">
                 {section.title}
               </h3>
               <span className="text-sm text-muted">
@@ -224,7 +225,7 @@ function CustomSectionCard({ section }: { section: MyCustomSection }) {
           summary={summarizeItem}
           Form={CustomItemForm}
         />
-      </article>
+      </Card>
     </SectionIdContext>
   );
 }
@@ -274,7 +275,7 @@ function AddSection({ count }: { count: number }) {
 
   if (title !== null) {
     return (
-      <form onSubmit={onSubmit} className="space-y-3 rounded-2xl border border-accent/50 p-4">
+      <Card as="form" tone="accent" onSubmit={onSubmit} className="space-y-3">
         <div>
           <label htmlFor="new-section-title" className="mb-1 block text-sm font-medium">
             Section title
@@ -297,7 +298,7 @@ function AddSection({ count }: { count: number }) {
             Cancel
           </Button>
         </div>
-      </form>
+      </Card>
     );
   }
 
@@ -333,7 +334,7 @@ export function CustomSectionsStep() {
   return (
     <section aria-labelledby="custom-heading" className="space-y-4">
       <div>
-        <h2 id="custom-heading" className="text-lg font-semibold">
+        <h2 id="custom-heading" className="type-section">
           Custom sections
         </h2>
         <p className="text-sm text-muted">
@@ -343,7 +344,7 @@ export function CustomSectionsStep() {
         </p>
       </div>
 
-      {sections.length === 0 && <p className="text-sm text-muted">No custom sections yet.</p>}
+      {sections.length === 0 && <EmptyState>No custom sections yet.</EmptyState>}
       {sections.map((section) => (
         <CustomSectionCard key={section.id} section={section} />
       ))}

@@ -45,7 +45,7 @@ export function EducationStep() {
   return (
     <section aria-labelledby="education-heading" className="space-y-4">
       <div>
-        <h2 id="education-heading" className="text-lg font-semibold">
+        <h2 id="education-heading" className="type-section">
           Education
         </h2>
         <p className="text-sm text-muted">

@@ -21,7 +21,7 @@ export function AppTestimonials() {
     >
       {APP_TESTIMONIALS.map((item, i) => (
         <li key={i} className="w-72 shrink-0 p-2 sm:w-80">
-          <figure className="flex h-full flex-col rounded-2xl border border-line bg-surface p-6">
+          <figure className="flex h-full flex-col rounded-card border border-line bg-surface p-6">
             <blockquote className="flex-1 leading-relaxed">
               <span aria-hidden="true" className="text-accent-fg">
                 “

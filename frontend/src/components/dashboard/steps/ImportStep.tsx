@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import type { ResumeResponse } from '@portfolio/shared';
 import { ApiError, api } from '@/lib/client-api';
-import { Button, ErrorText, SlowNotice } from '../../ui';
+import { Button, Card, ErrorText, SlowNotice, useConfirm } from '../../ui';
 import { useEditor } from '../editor-context';
 
 // Larger than the API's 5 MB limit is refused there too; this lower one is what fits through
@@ -52,7 +52,7 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
   return (
     <section aria-labelledby="import-heading" className="space-y-5">
       <div>
-        <h2 id="import-heading" className="text-lg font-semibold">
+        <h2 id="import-heading" className="type-section">
           Start from your resume
         </h2>
         <p className="mt-1 text-sm text-muted">
@@ -62,13 +62,13 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
       </div>
 
       {hasPendingImport && (
-        <p role="status" className="rounded-lg bg-accent-soft px-3 py-2 text-sm text-ink">
+        <Card tone="tint" padding="sm" role="status" className="text-sm">
           You have a resume waiting for review. Go through the other steps, or upload a different
           one to replace it.
-        </p>
+        </Card>
       )}
 
-      <div className="space-y-3 rounded-2xl border border-dashed border-line p-6 text-center">
+      <Card dashed padding="lg" className="space-y-3 text-center">
         <input
           ref={input}
           type="file"
@@ -92,7 +92,7 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
         </p>
         <SlowNotice pending={reading} />
         <ErrorText>{error}</ErrorText>
-      </div>
+      </Card>
 
       <p className="text-xs text-muted">
         The PDF is not stored. Its text is sent to an AI service to be read, and only the result is
@@ -110,12 +110,15 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
 // not stored anywhere, so this is also where someone can throw it away.
 export function ImportBanner() {
   const { imported, hasPendingImport, discardImport } = useEditor();
+  const confirm = useConfirm();
   if (!imported || !hasPendingImport) return null;
 
   return (
-    <section
+    <Card
+      as="section"
+      tone="tint"
       aria-label="Resume import"
-      className="mx-4 mt-4 flex flex-wrap items-start justify-between gap-3 rounded-2xl bg-accent-soft p-4 text-sm text-ink"
+      className="mx-4 mt-4 flex flex-wrap items-start justify-between gap-3 text-sm"
     >
       <div className="max-w-2xl space-y-1">
         <p className="font-medium">Imported from your resume. Nothing is saved yet.</p>
@@ -134,12 +137,18 @@ export function ImportBanner() {
       </div>
       <Button
         variant="ghost"
-        onClick={() => {
-          if (window.confirm('Discard everything read from your resume?')) discardImport();
+        onClick={async () => {
+          const discard = await confirm({
+            title: 'Discard the import?',
+            message: 'Everything read from your resume will be thrown away.',
+            confirmLabel: 'Discard',
+            danger: true,
+          });
+          if (discard) discardImport();
         }}
       >
         Discard import
       </Button>
-    </section>
+    </Card>
   );
 }

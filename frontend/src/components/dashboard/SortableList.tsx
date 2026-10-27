@@ -84,7 +84,7 @@ function Row({
         type="button"
         ref={setActivatorNodeRef}
         aria-label={`Reorder ${label}`}
-        className="flex shrink-0 cursor-grab touch-none items-center justify-center rounded p-1 text-muted hover:text-ink focus-visible:outline-2 focus-visible:outline-accent active:cursor-grabbing"
+        className="flex shrink-0 cursor-grab touch-none items-center justify-center rounded p-1 text-muted hover:text-ink active:cursor-grabbing"
         {...attributes}
         {...listeners}
       >
@@ -119,7 +119,7 @@ function Row({
     <li
       ref={setNodeRef}
       style={{ transform: CSS.Translate.toString(transform), transition }}
-      className={`${layout === 'wrap' ? '' : 'w-full'} ${isDragging ? 'relative z-10 opacity-80 shadow-lg' : ''}`}
+      className={`${layout === 'wrap' ? '' : 'w-full'} ${isDragging ? 'relative z-10 opacity-80 shadow-overlay' : ''}`}
     >
       {children(handle)}
     </li>

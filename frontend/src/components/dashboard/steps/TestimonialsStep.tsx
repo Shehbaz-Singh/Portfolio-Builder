@@ -17,7 +17,7 @@ import {
 import { api } from '@/lib/client-api';
 import { schemaResolver } from '@/lib/form';
 import { TextArea, TextField } from '../../form-fields';
-import { Button, Switch } from '../../ui';
+import { Badge, Button, Card, EmptyState, Switch, useConfirm } from '../../ui';
 import { EditorForm } from '../EditorForm';
 import { ListManager, type FormProps } from '../SectionManager';
 import { errorText, useEditor, useTestimonials } from '../editor-context';
@@ -116,20 +116,16 @@ function ReviewList({
         id={id}
         ref={heading}
         tabIndex={-1}
-        className="flex items-center gap-2 text-base font-semibold focus:outline-none"
+        className="type-subsection flex items-center gap-2 focus:outline-none"
       >
         {title}
-        {items.length > 0 && (
-          <span className="rounded-full bg-ink px-2 py-0.5 text-xs font-medium text-page">
-            {items.length}
-          </span>
-        )}
+        {items.length > 0 && <Badge tone="solid">{items.length}</Badge>}
       </h3>
-      {items.length === 0 && empty && <p className="text-sm text-muted">{empty}</p>}
+      {items.length === 0 && empty && <EmptyState>{empty}</EmptyState>}
       {items.length > 0 && (
         <ul className="space-y-3">
           {items.map((item) => (
-            <li key={item.id} className="space-y-3 rounded-xl border border-line p-4">
+            <Card as="li" key={item.id} className="space-y-3">
               <blockquote className="whitespace-pre-line">{item.message}</blockquote>
               <p className="text-sm">
                 <span className="font-medium">{item.authorName}</span>
@@ -145,7 +141,7 @@ function ReviewList({
                 </p>
               )}
               <div className="flex flex-wrap gap-2">{actions(item, done)}</div>
-            </li>
+            </Card>
           ))}
         </ul>
       )}
@@ -157,6 +153,7 @@ function ReviewList({
 
 export function TestimonialsStep() {
   const t = useTestimonials();
+  const confirm = useConfirm();
   const { profile, update, notify } = useEditor();
   const [busy, setBusy] = useState<string | null>(null);
   const sectionShown =
@@ -205,11 +202,14 @@ export function TestimonialsStep() {
       'The Testimonials section is now shown on your page.',
     );
 
-  const confirmDelete = (item: MyTestimonial, done: () => void) => {
-    if (!window.confirm(`Delete the testimonial from ${item.authorName}? This cannot be undone.`)) {
-      return;
-    }
-    void run(item.id, () => t.remove(item.id), 'Testimonial deleted.', done);
+  const confirmDelete = async (item: MyTestimonial, done: () => void) => {
+    const sure = await confirm({
+      title: 'Delete this testimonial?',
+      message: `The testimonial from ${item.authorName} will be deleted. This cannot be undone.`,
+      confirmLabel: 'Delete',
+      danger: true,
+    });
+    if (sure) void run(item.id, () => t.remove(item.id), 'Testimonial deleted.', done);
   };
 
   const approve = (item: MyTestimonial, done: () => void) =>
@@ -225,7 +225,7 @@ export function TestimonialsStep() {
   return (
     <section aria-labelledby="testimonials-heading" className="space-y-6">
       <div>
-        <h2 id="testimonials-heading" className="text-lg font-semibold">
+        <h2 id="testimonials-heading" className="type-section">
           Testimonials
         </h2>
         <p className="text-sm text-muted">
@@ -234,7 +234,7 @@ export function TestimonialsStep() {
         </p>
       </div>
 
-      <div className="space-y-3 rounded-xl border border-line p-4">
+      <Card className="space-y-3">
         <div className="flex items-center gap-3">
           <div className="min-w-0 flex-1">
             <p className="font-medium">Accept testimonials</p>
@@ -258,7 +258,7 @@ export function TestimonialsStep() {
             </Button>
           </p>
         )}
-      </div>
+      </Card>
 
       <ReviewList
         id="testimonials-pending"
@@ -303,7 +303,7 @@ export function TestimonialsStep() {
 
       <section aria-labelledby="testimonials-approved" className="space-y-3">
         <div>
-          <h3 id="testimonials-approved" className="text-base font-semibold">
+          <h3 id="testimonials-approved" className="type-subsection">
             Approved
           </h3>
           <p className="text-sm text-muted">

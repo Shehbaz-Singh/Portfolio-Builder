@@ -13,7 +13,7 @@ import {
 import { api } from '@/lib/client-api';
 import { schemaResolver } from '@/lib/form';
 import { Form, TextField } from '../form-fields';
-import { Button } from '../ui';
+import { Button, Card } from '../ui';
 
 type Mode = 'login' | 'register';
 type Fields = { email: string; password: string; fullName: string };
@@ -51,11 +51,11 @@ export function AuthForm({ mode, expired = false }: { mode: Mode; expired?: bool
 
   return (
     <div>
-      <h1 className="text-2xl font-bold tracking-tight">{text.title}</h1>
+      <h1 className="type-page">{text.title}</h1>
       {expired && (
-        <p role="alert" className="mt-4 rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-900">
+        <Card tone="warning" padding="sm" role="alert" className="mt-4 text-sm">
           Your session has ended. Please log in again.
-        </p>
+        </Card>
       )}
       <div className="mt-6">
         <Form
@@ -84,7 +84,8 @@ export function AuthForm({ mode, expired = false }: { mode: Mode; expired?: bool
             />
             <Button
               variant="ghost"
-              className="mt-1 !px-2 !py-1 text-xs"
+              size="sm"
+              className="mt-1"
               aria-pressed={showPassword}
               onClick={() => setShowPassword((v) => !v)}
             >
@@ -95,7 +96,7 @@ export function AuthForm({ mode, expired = false }: { mode: Mode; expired?: bool
       </div>
       <p className="mt-6 text-sm text-muted">
         {text.switchText}{' '}
-        <Link href={text.switchLink.href} className="font-medium text-accent underline">
+        <Link href={text.switchLink.href} className="font-medium text-accent-fg underline">
           {text.switchLink.label}
         </Link>
       </p>

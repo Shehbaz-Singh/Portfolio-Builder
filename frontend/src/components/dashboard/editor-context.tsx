@@ -21,6 +21,7 @@ import {
   type SectionConfig,
 } from '@portfolio/shared';
 import { ApiError, api } from '@/lib/client-api';
+import { ToastRegion, type ToastData } from '../ui';
 
 // Fields the live preview shows while they are still being typed (not yet saved).
 export type Draft = Partial<
@@ -29,7 +30,7 @@ export type Draft = Partial<
     'fullName' | 'tagline' | 'location' | 'about' | 'theme' | 'accentColor' | 'sectionConfig'
   >
 >;
-type Notice = { kind: 'success' | 'error'; text: string };
+type Notice = ToastData;
 
 // ---- Resume import. Nothing from a resume is saved until the person saves it. The profile
 // fields are put into the Basics and About forms (unsaved); each list entry becomes a
@@ -244,21 +245,7 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
   return (
     <EditorContext value={value}>
       {children}
-      <div
-        role="status"
-        aria-live="polite"
-        className="pointer-events-none fixed inset-x-0 bottom-20 z-50 lg:bottom-4 flex justify-center px-4"
-      >
-        {notice && (
-          <p
-            className={`rounded-lg px-4 py-2 text-sm font-medium shadow-lg ${
-              notice.kind === 'success' ? 'bg-ink text-page' : 'bg-red-700 text-white'
-            }`}
-          >
-            {notice.text}
-          </p>
-        )}
-      </div>
+      <ToastRegion toast={notice} />
     </EditorContext>
   );
 }

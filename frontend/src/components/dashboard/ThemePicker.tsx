@@ -18,7 +18,7 @@ export function ThemePicker() {
         {THEME_LIST.map((theme) => (
           <label
             key={theme.key}
-            className="flex cursor-pointer flex-col gap-2 rounded-xl border border-line p-2 transition hover:bg-surface has-checked:border-accent has-checked:ring-2 has-checked:ring-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent"
+            className="flex cursor-pointer flex-col gap-2 rounded-box border border-line p-2 transition hover:bg-surface has-checked:border-accent has-checked:ring-2 has-checked:ring-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent"
           >
             <input type="radio" value={theme.key} className="sr-only" {...register('theme')} />
             {/* A picture of the theme, not content: hidden from assistive technology, and inert so
@@ -26,7 +26,7 @@ export function ThemePicker() {
             <div
               aria-hidden="true"
               inert
-              className="pointer-events-none h-40 overflow-hidden rounded-lg border border-line"
+              className="pointer-events-none h-40 overflow-hidden rounded-control border border-line"
             >
               <div style={{ zoom: 0.2 }}>
                 <theme.Component profile={preview} idPrefix={`pick-${theme.key}-`} />

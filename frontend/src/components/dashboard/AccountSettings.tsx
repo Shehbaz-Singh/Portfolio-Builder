@@ -14,7 +14,7 @@ import { api } from '@/lib/client-api';
 import { schemaResolver } from '@/lib/form';
 import { useLoad } from '@/lib/hooks';
 import { Form, TextField } from '../form-fields';
-import { Button } from '../ui';
+import { Button, Card } from '../ui';
 import { LoadFailed, Loading } from './screens';
 
 const loadSession = (signal: AbortSignal) => api<SessionResponse>('/auth/me', { signal });
@@ -44,7 +44,7 @@ function ChangePassword() {
 
   return (
     <section aria-labelledby="password-heading" className="space-y-4">
-      <h2 id="password-heading" className="text-lg font-semibold">
+      <h2 id="password-heading" className="type-section">
         Change password
       </h2>
       <Form
@@ -109,11 +109,8 @@ function DeleteAccount() {
   }
 
   return (
-    <section
-      aria-labelledby="delete-heading"
-      className="space-y-4 rounded-2xl border border-red-300 p-4"
-    >
-      <h2 id="delete-heading" className="text-lg font-semibold text-red-700">
+    <Card as="section" tone="danger" aria-labelledby="delete-heading" className="space-y-4">
+      <h2 id="delete-heading" className="type-section text-danger">
         Delete account
       </h2>
       <p className="text-sm text-ink">
@@ -121,7 +118,7 @@ function DeleteAccount() {
         stops working. It cannot be undone.
       </p>
       {confirming ? (
-        <div ref={panel} className="space-y-4 rounded-lg bg-red-50 p-4">
+        <Card ref={panel} tone="danger-soft" className="space-y-4">
           <p className="text-sm font-medium">Enter your password to confirm.</p>
           <Form
             form={form}
@@ -142,13 +139,13 @@ function DeleteAccount() {
               autoComplete="current-password"
             />
           </Form>
-        </div>
+        </Card>
       ) : (
         <Button ref={openButton} variant="danger" onClick={() => setConfirming(true)}>
           Delete my account
         </Button>
       )}
-    </section>
+    </Card>
   );
 }
 
@@ -163,10 +160,10 @@ export function AccountSettings() {
   return (
     <main id="main" className="mx-auto max-w-xl space-y-10 px-4 py-8">
       <div>
-        <Link href="/dashboard" className="text-sm font-medium text-accent underline">
+        <Link href="/dashboard" className="text-sm font-medium text-accent-fg underline">
           ← Back to editor
         </Link>
-        <h1 className="mt-4 text-2xl font-bold tracking-tight">Account settings</h1>
+        <h1 className="type-page mt-4">Account settings</h1>
         <p className="mt-1 text-sm text-muted">
           Signed in as <span className="font-medium">{state.data.user.email}</span>
         </p>

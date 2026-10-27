@@ -3,7 +3,7 @@
 import type { ReactNode } from 'react';
 import { ApiError } from '@/lib/client-api';
 import { useSlow } from '@/lib/hooks';
-import { Button } from '../ui';
+import { Button, Skeleton } from '../ui';
 
 // Full-page states shared by the editor and the settings page.
 
@@ -22,10 +22,11 @@ export function Loading({ label }: { label: string }) {
   const slow = useSlow(true);
   return (
     <Centered>
-      <div
-        aria-hidden="true"
-        className="size-8 animate-spin rounded-full border-4 border-line border-t-accent"
-      />
+      <div aria-hidden="true" className="w-48 space-y-2">
+        <Skeleton className="h-3" />
+        <Skeleton className="mx-auto h-3 w-3/4" />
+        <Skeleton className="mx-auto h-3 w-1/2" />
+      </div>
       <p role="status" className="font-medium">
         {slow ? 'Waking up the server…' : label}
       </p>
@@ -50,7 +51,7 @@ export function LoadFailed({
 }) {
   return (
     <Centered>
-      <h1 className="text-2xl font-bold tracking-tight">{title}</h1>
+      <h1 className="type-page">{title}</h1>
       <div className="max-w-sm text-muted">
         <p>{error instanceof ApiError ? error.message : 'Something went wrong.'}</p>
         <p>Everything you saved earlier is safe.</p>

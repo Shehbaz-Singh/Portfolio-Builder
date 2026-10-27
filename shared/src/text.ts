@@ -10,9 +10,9 @@ const isControl = (char: string) => {
 const withoutControls = (text: string) => [...text].filter((char) => !isControl(char)).join('');
 
 // One line: line breaks and runs of spaces become a single space.
-export const oneLine = (text: string) => withoutControls(text).replace(/\s+/g, ' ').trim();
+const oneLine = (text: string) => withoutControls(text).replace(/\s+/g, ' ').trim();
 // Several lines: line breaks are kept, Windows ones normalised.
-export const block = (text: string) => withoutControls(text).replace(/\r\n?/g, '\n').trim();
+const block = (text: string) => withoutControls(text).replace(/\r\n?/g, '\n').trim();
 
 // The lengths are checked after the text is cleaned up, so they count what is stored.
 const lengthRule = (min: number, max: number) =>

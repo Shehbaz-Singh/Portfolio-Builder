@@ -5,7 +5,7 @@ import { DEFAULT_ACCENT } from '@portfolio/shared';
 import { ACCENT_PRESETS, normalizeHex, readableAccent } from '@/lib/color';
 import { PALETTES } from '@/lib/palettes';
 import { getTheme } from '@/lib/themes';
-import { ErrorText, inputClass } from '../ui';
+import { Card, ErrorText, Input } from '../ui';
 
 // Choose the page's accent color: 8 swatches, the browser's color picker, or a typed hex code.
 // All three write the form's `accentColor` field, which the live preview shows at once. A color
@@ -49,9 +49,9 @@ export function AccentPicker() {
           aria-label="Pick a custom color"
           value={hex ?? DEFAULT_ACCENT}
           onChange={(e) => set(e.target.value)}
-          className="h-10 w-12 cursor-pointer rounded-lg border border-line bg-page p-1"
+          className="h-10 w-12 cursor-pointer rounded-control border border-line bg-page p-1"
         />
-        <input
+        <Input
           {...register('accentColor')}
           aria-label="Hex color code"
           aria-invalid={!hex}
@@ -60,18 +60,18 @@ export function AccentPicker() {
           spellCheck={false}
           autoCapitalize="none"
           autoComplete="off"
-          className={`${inputClass} w-28 font-mono`}
+          className="w-28 font-mono"
         />
       </div>
 
       {/* Shown as soon as the value is not a full #RRGGBB, not only after a save attempt. */}
       <ErrorText id="accent-error">{hex ? undefined : 'Use a hex color like #2563eb.'}</ErrorText>
       {adjusted && (
-        <p role="status" className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+        <Card tone="warning" padding="sm" role="status" className="text-sm">
           This color is too {theme.scheme === 'dark' ? 'dark' : 'light'} to read as text on the{' '}
           {theme.name} theme. Buttons and the header use it as it is, and links and tags use a
           nearby shade that stays readable.
-        </p>
+        </Card>
       )}
     </fieldset>
   );

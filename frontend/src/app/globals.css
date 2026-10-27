@@ -1,5 +1,82 @@
 @import 'tailwindcss';
 
+/* ===== Design tokens: the one place the look of the app is defined =====
+   Everything below is read by Tailwind as theme values (bg-*, text-*, rounded-*, shadow-*, p-*),
+   so components use these names and never raw values. The portfolio themes (further down) only
+   change the colors; type, spacing, radius and shadows are shared. */
+@theme {
+  /* Type: one sans font for the app (Inter, loaded in app/layout.tsx with next/font). Themes that
+     want another face (Classic uses the serif) opt in with font-serif. */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  /* Type scale (size / line height). Use these; no arbitrary sizes. */
+  --text-xs: 0.75rem; /* captions, hints, counts */
+  --text-xs--line-height: 1rem;
+  --text-sm: 0.875rem; /* UI text: buttons, inputs, labels, secondary copy */
+  --text-sm--line-height: 1.25rem;
+  --text-base: 1rem; /* body, h3 */
+  --text-base--line-height: 1.5rem;
+  --text-lg: 1.125rem; /* h2: step and section titles */
+  --text-lg--line-height: 1.75rem;
+  --text-2xl: 1.5rem; /* h1: page titles */
+  --text-2xl--line-height: 2rem;
+  --text-4xl: 2.25rem; /* hero */
+  --text-4xl--line-height: 2.5rem;
+
+  /* Spacing: a 4px grid (p-1 = 4px). The named steps are what components use for the padding
+     of boxes, so every card breathes the same. */
+  --spacing: 0.25rem;
+  --spacing-card-sm: 0.75rem; /* a row or a small box */
+  --spacing-card: 1rem; /* a panel */
+  --spacing-card-lg: 1.5rem; /* an empty or hero panel */
+
+  /* Radius */
+  --radius-control: 0.5rem; /* buttons, inputs, selects */
+  --radius-box: 0.75rem; /* rows and small boxes */
+  --radius-card: 1rem; /* panels, dialogs */
+
+  /* Shadow: flat by default, a little lift for raised things, a clear lift for overlays */
+  --shadow-raised: 0 1px 2px rgb(15 23 42 / 0.06), 0 1px 3px rgb(15 23 42 / 0.1);
+  --shadow-overlay: 0 10px 30px -6px rgb(15 23 42 / 0.3);
+
+  /* Neutral gray palette (slate). The minimal theme and the whole app use these steps. */
+  --color-gray-50: #f8fafc;
+  --color-gray-100: #f1f5f9;
+  --color-gray-200: #e2e8f0;
+  --color-gray-300: #cbd5e1;
+  --color-gray-400: #94a3b8;
+  --color-gray-500: #64748b;
+  --color-gray-600: #475569;
+  --color-gray-700: #334155;
+  --color-gray-800: #1e293b;
+  --color-gray-900: #0f172a;
+  --color-gray-950: #020617;
+}
+
+/* Type roles for headings: pick the role, not a size. */
+@utility type-hero {
+  font-size: var(--text-4xl);
+  line-height: var(--text-4xl--line-height);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+@utility type-page {
+  font-size: var(--text-2xl);
+  line-height: var(--text-2xl--line-height);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+@utility type-section {
+  font-size: var(--text-lg);
+  line-height: var(--text-lg--line-height);
+  font-weight: 600;
+}
+@utility type-subsection {
+  font-size: var(--text-base);
+  line-height: var(--text-base--line-height);
+  font-weight: 600;
+}
+
 /* Colors are variables defined on a theme wrapper (.theme-root). A theme restyles the page by
    defining the same variables on its own wrapper class (.theme-dark, ...); the profile's accent is
    set inline on that wrapper by the server (see accentVars in lib/color.ts), so there is no flash
@@ -7,13 +84,17 @@
    visitor's system light or dark mode. The editor and the account pages are always light. */
 .theme-root {
   --bg: #ffffff; /* page background */
-  --surface: #f1f5f9; /* chips, hovered controls, code */
-  --text: #0f172a;
-  --muted: #475569;
-  --border: #cbd5e1;
+  --surface: var(--color-gray-100); /* chips, hovered controls, code */
+  --text: var(--color-gray-900);
+  --muted: var(--color-gray-600);
+  --border: var(--color-gray-300);
   --accent: #2563eb;
   --on-accent: #ffffff; /* text placed on the accent */
-  --danger: #b91c1c; /* error text */
+  --danger: #b91c1c; /* error text and destructive actions */
+  --danger-bg: #fef2f2; /* a destructive panel */
+  --danger-border: #fca5a5;
+  --warning-bg: #fffbeb; /* a notice that needs a look */
+  --warning-fg: #78350f;
   --accent-fg: var(--accent); /* the accent as text on the page: set readable by accentVars */
   --accent-soft: color-mix(in srgb, var(--accent) 12%, var(--bg));
   color-scheme: light;
@@ -59,7 +140,8 @@ button,
 }
 
 /* Utilities: bg-page, bg-surface, text-ink, text-muted, border-line, bg-accent, text-accent,
-   text-accent-fg, text-on-accent, bg-accent-soft, text-danger. `inline` keeps them reading the variables of whichever wrapper
+   text-accent-fg, text-on-accent, bg-accent-soft, text-danger, bg-danger-bg, border-danger-border,
+   bg-warning-bg, text-warning-fg. `inline` keeps them reading the variables of whichever wrapper
    they are inside. */
 @theme inline {
   --color-page: var(--bg);
@@ -71,6 +153,10 @@ button,
   --color-accent-fg: var(--accent-fg);
   --color-on-accent: var(--on-accent);
   --color-danger: var(--danger);
+  --color-danger-bg: var(--danger-bg);
+  --color-danger-border: var(--danger-border);
+  --color-warning-bg: var(--warning-bg);
+  --color-warning-fg: var(--warning-fg);
   --color-accent-soft: var(--accent-soft);
 }
 

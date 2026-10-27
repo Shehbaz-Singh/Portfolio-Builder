@@ -45,7 +45,7 @@ export function AboutStep() {
 
   return (
     <section aria-labelledby="about-heading" className="space-y-4">
-      <h2 id="about-heading" className="text-lg font-semibold">
+      <h2 id="about-heading" className="type-section">
         About you
       </h2>
       <EditorForm form={form} onSubmit={onSubmit} submitLabel="Save about">

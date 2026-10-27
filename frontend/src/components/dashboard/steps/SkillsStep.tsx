@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { skillInputSchema, type SkillInput } from '@portfolio/shared';
 import { schemaResolver, showApiError } from '@/lib/form';
-import { Button, ErrorText, SlowNotice, inputClass } from '../../ui';
+import { Button, Card, EmptyState, ErrorText, Input, SlowNotice } from '../../ui';
 import {
   errorText,
   useEditor,
@@ -55,7 +55,7 @@ export function SkillsStep() {
   return (
     <section aria-labelledby="skills-heading" className="space-y-4">
       <div>
-        <h2 id="skills-heading" className="text-lg font-semibold">
+        <h2 id="skills-heading" className="type-section">
           Skills
         </h2>
         <p className="text-sm text-muted">
@@ -64,16 +64,15 @@ export function SkillsStep() {
       </div>
 
       <form onSubmit={add} noValidate className="flex gap-2">
-        <input
+        <Input
           aria-label="New skill"
           placeholder="Add a skill, e.g. TypeScript"
           autoComplete="off"
-          className={inputClass}
           aria-invalid={errors.name ? true : undefined}
           aria-describedby={skillError ? 'skill-error' : undefined}
           {...form.register('name')}
         />
-        <Button type="submit" variant="primary" disabled={isSubmitting}>
+        <Button type="submit" variant="primary" loading={isSubmitting}>
           Add
         </Button>
       </form>
@@ -81,9 +80,13 @@ export function SkillsStep() {
       <SlowNotice pending={isSubmitting} />
 
       {suggestions.length > 0 && (
-        <section
+        <Card
+          as="section"
+          tone="tint"
+          dashed
+          padding="sm"
           aria-label="Skill suggestions from your resume"
-          className="space-y-3 rounded-2xl border border-dashed border-accent/50 bg-accent-soft p-3"
+          className="space-y-3"
         >
           <div className="flex flex-wrap items-center justify-between gap-2">
             <p className="text-sm font-medium">From your resume ({suggestions.length})</p>
@@ -106,7 +109,7 @@ export function SkillsStep() {
                   type="button"
                   aria-label={`Add ${suggestion.data}`}
                   disabled={adding}
-                  className="rounded-l-full py-1 pr-2 pl-3 hover:bg-surface focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-60"
+                  className="rounded-l-full py-1 pr-2 pl-3 hover:bg-surface disabled:opacity-60"
                   onClick={() => addSuggested([suggestion])}
                 >
                   + {suggestion.data}
@@ -115,7 +118,7 @@ export function SkillsStep() {
                   type="button"
                   aria-label={`Skip ${suggestion.data}`}
                   disabled={adding}
-                  className="rounded-r-full px-2 py-1 text-muted hover:bg-surface focus-visible:outline-2 focus-visible:outline-accent disabled:opacity-60"
+                  className="rounded-r-full px-2 py-1 text-muted hover:bg-surface disabled:opacity-60"
                   onClick={() => dismiss(suggestion.key)}
                 >
                   ×
@@ -123,11 +126,11 @@ export function SkillsStep() {
               </li>
             ))}
           </ul>
-        </section>
+        </Card>
       )}
 
       {items.length === 0 ? (
-        <p className="text-sm text-muted">No skills yet.</p>
+        <EmptyState>No skills yet.</EmptyState>
       ) : (
         <SortableList
           items={items}
@@ -141,7 +144,7 @@ export function SkillsStep() {
               <button
                 type="button"
                 aria-label={`Remove ${skill.name}`}
-                className="min-h-6 min-w-6 rounded-full px-2 text-muted hover:bg-line hover:text-red-700 focus-visible:outline-2 focus-visible:outline-accent"
+                className="min-h-6 min-w-6 rounded-full px-2 text-muted hover:bg-line hover:text-danger"
                 onClick={() =>
                   remove(skill.id).then(
                     () => notify('success', `Removed ${skill.name}.`),

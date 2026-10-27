@@ -9,7 +9,7 @@ import {
   type UseFormReturn,
 } from 'react-hook-form';
 import { showApiError } from '@/lib/form';
-import { Button, ErrorText, SlowNotice, inputClass } from './ui';
+import { Button, ErrorText, Input, Select, SlowNotice, Textarea } from './ui';
 
 // Form building blocks. <Form> provides the form to the fields below it through context, so
 // a field only needs its `name`.
@@ -51,7 +51,7 @@ export function Form<TIn extends FieldValues, TOut>({
         {children}
         <ErrorText>{errors.root?.server?.message}</ErrorText>
         <div className="flex flex-wrap items-center gap-3">
-          <Button type="submit" variant={danger ? 'danger' : 'primary'} disabled={isSubmitting}>
+          <Button type="submit" variant={danger ? 'danger' : 'primary'} loading={isSubmitting}>
             {isSubmitting ? pendingLabel : submitLabel}
           </Button>
           {onCancel && (
@@ -125,9 +125,8 @@ export function TextField({
   const { id, error, register } = useField(name);
   return (
     <Field id={id} label={label} error={error} hint={hint} required={required}>
-      <input
+      <Input
         id={id}
-        className={inputClass}
         aria-required={required || undefined}
         aria-invalid={error ? true : undefined}
         aria-describedby={error || hint ? `${id}-note` : undefined}
@@ -149,11 +148,10 @@ export function TextArea({
   const { id, error, register } = useField(name);
   return (
     <Field id={id} label={label} error={error} hint={hint} required={required}>
-      <textarea
+      <Textarea
         id={id}
         rows={rows}
         maxLength={maxLength}
-        className={`${inputClass} resize-y`}
         aria-required={required || undefined}
         aria-invalid={error ? true : undefined}
         aria-describedby={error || hint ? `${id}-note` : undefined}
@@ -172,9 +170,8 @@ export function SelectField({
   const { id, error, register } = useField(name);
   return (
     <Field id={id} label={label} error={error} required={required}>
-      <select
+      <Select
         id={id}
-        className={inputClass}
         aria-required={required || undefined}
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? `${id}-note` : undefined}
@@ -185,7 +182,7 @@ export function SelectField({
             {o.label}
           </option>
         ))}
-      </select>
+      </Select>
     </Field>
   );
 }

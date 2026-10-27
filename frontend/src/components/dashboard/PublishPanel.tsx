@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { api } from '@/lib/client-api';
 import { SITE_URL } from '@/lib/config';
 import { ShareButton } from '../ShareButton';
-import { Button, Switch } from '../ui';
+import { Button, Card, Switch, buttonStyles } from '../ui';
 import { errorText, useEditor } from './editor-context';
 
 type Step = 'basics' | 'about';
@@ -64,10 +64,7 @@ export function PublishPanel({ onFix }: { onFix: (step: Step) => void }) {
   }
 
   return (
-    <section
-      aria-label="Publishing"
-      className="mx-4 mt-4 space-y-3 rounded-2xl border border-line p-4"
-    >
+    <Card as="section" aria-label="Publishing" className="mx-4 mt-4 space-y-3">
       <div className="flex items-center gap-3">
         <Switch
           checked={profile.published}
@@ -87,7 +84,7 @@ export function PublishPanel({ onFix }: { onFix: (step: Step) => void }) {
 
       {profile.published && (
         <div className="flex flex-wrap items-center gap-2">
-          <code className="min-w-0 flex-1 rounded-lg break-all bg-surface px-3 py-2 text-sm">
+          <code className="min-w-0 flex-1 rounded-control break-all bg-surface px-3 py-2 text-sm">
             {url}
           </code>
           <Button onClick={copy}>{copied ? 'Copied' : 'Copy link'}</Button>
@@ -96,7 +93,7 @@ export function PublishPanel({ onFix }: { onFix: (step: Step) => void }) {
             href={`/${profile.slug}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center justify-center rounded-lg border border-line px-4 py-2 text-sm font-medium transition hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            className={buttonStyles()}
           >
             Open<span className="sr-only"> your portfolio in a new tab</span>
           </a>
@@ -104,7 +101,7 @@ export function PublishPanel({ onFix }: { onFix: (step: Step) => void }) {
       )}
 
       {warning && (
-        <div role="alert" className="space-y-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+        <Card tone="warning" padding="sm" role="alert" className="space-y-3 text-sm">
           <p>
             Your page is missing {missing.map((field) => field.label).join(' and ')}. Visitors will
             see an incomplete portfolio.
@@ -126,8 +123,8 @@ export function PublishPanel({ onFix }: { onFix: (step: Step) => void }) {
               Cancel
             </Button>
           </div>
-        </div>
+        </Card>
       )}
-    </section>
+    </Card>
   );
 }

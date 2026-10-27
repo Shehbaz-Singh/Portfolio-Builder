@@ -64,7 +64,7 @@ export function ProjectsStep() {
   return (
     <section aria-labelledby="projects-heading" className="space-y-4">
       <div>
-        <h2 id="projects-heading" className="text-lg font-semibold">
+        <h2 id="projects-heading" className="type-section">
           Projects
         </h2>
         <p className="text-sm text-muted">
