@@ -2,6 +2,7 @@ import {
   SECTION_LABELS,
   customIdOf,
   isCustomKey,
+  type PublicLink,
   type PublicProfile,
   type SectionKey,
 } from '@portfolio/shared';
@@ -185,7 +186,7 @@ export interface HeaderModel {
   tagline: string | null;
   location: string | null;
   avatar: { src: string | null; alt: string; initials: string };
-  links: { id: string; href: string; label: string; external: boolean }[];
+  links: { id: string; type: PublicLink['type']; href: string; label: string; external: boolean }[];
   share: { url: string; title: string };
 }
 
@@ -202,8 +203,25 @@ export function buildHeader(profile: PublicProfile): HeaderModel {
     },
     links: profile.links.flatMap((link) => {
       const target = linkTarget(link);
-      return target ? [{ id: link.id, ...target }] : [];
+      return target ? [{ id: link.id, type: link.type, ...target }] : [];
     }),
     share: { url: `${SITE_URL}/${profile.slug}`, title: `${profile.fullName}'s portfolio` },
+  };
+}
+
+// The bottom of the page: the owner's name and a line about where the page came from.
+export interface FooterModel {
+  name: string;
+  year: number;
+  message: string;
+  cta: { href: string; label: string };
+}
+
+export function buildFooter(profile: PublicProfile): FooterModel {
+  return {
+    name: profile.fullName,
+    year: new Date().getFullYear(),
+    message: 'by a developer, for all developers.',
+    cta: { href: '/', label: 'Make your own portfolio' },
   };
 }

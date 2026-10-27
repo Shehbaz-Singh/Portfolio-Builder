@@ -219,6 +219,36 @@ main:focus {
   }
 }
 
+/* Motion on the public pages. Only for people who have not asked for less: the header rises in
+   once, and a section that starts below the fold fades up as it scrolls into view (the Reveal
+   component sets data-reveal; without it, or without JavaScript, everything is simply there). */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .rise-in {
+    animation: rise 0.7s ease-out both;
+  }
+  [data-reveal='hidden'] {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  [data-reveal='shown'] {
+    opacity: 1;
+    transform: none;
+    transition:
+      opacity 0.7s ease-out,
+      transform 0.7s ease-out;
+  }
+}
+
 /* People who ask their system for less motion get none: no spinners turning, no sliding. */
 @media (prefers-reduced-motion: reduce) {
   *,

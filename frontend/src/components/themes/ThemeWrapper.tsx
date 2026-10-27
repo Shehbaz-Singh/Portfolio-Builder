@@ -19,7 +19,7 @@ export function ThemeWrapper({
 }) {
   return (
     <div
-      className={`theme-root min-h-screen ${theme === 'minimal' ? '' : `theme-${theme}`}`}
+      className={`theme-root min-h-screen overflow-x-clip ${theme === 'minimal' ? '' : `theme-${theme}`}`}
       style={accentVars(profile.accentColor, PALETTES[theme]) as CSSProperties}
     >
       {children}
