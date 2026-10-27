@@ -1,9 +1,4 @@
 import { DEFAULT_THEME, THEME_KEYS, type ThemeKey } from '@portfolio/shared';
-import ClassicTheme from '@/components/themes/ClassicTheme';
-import CreativeTheme from '@/components/themes/CreativeTheme';
-import DarkTheme from '@/components/themes/DarkTheme';
-import MinimalTheme from '@/components/themes/MinimalTheme';
-import type { ThemeComponent } from '@/components/themes/types';
 import { PALETTES } from './palettes';
 
 export { DEFAULT_THEME };
@@ -16,32 +11,33 @@ export interface ThemeEntry {
   // against them and the page tells the browser about them.
   scheme: 'light' | 'dark';
   background: string;
-  Component: ThemeComponent;
 }
 
 // Typed as a Record over the shared key list: the compiler fails here if a theme key that the API
-// accepts has no entry, or an entry has no key. Every component gets the same props (the whole
-// public profile) and fetches nothing.
+// accepts has no entry, or an entry has no key. The components themselves are in
+// theme-components.ts (all of them, for the editor) and theme-loader.ts (one, for a public page).
 const entries: Record<ThemeKey, Omit<ThemeEntry, 'key' | 'scheme' | 'background'>> = {
-  minimal: {
-    name: 'Minimal',
-    description: 'A clean single column.',
-    Component: MinimalTheme,
+  editorial: {
+    name: 'Editorial',
+    description: 'A quiet magazine page: serif headings, a narrow reading column, generous space.',
   },
-  dark: {
-    name: 'Dark',
-    description: 'Light text on a dark background, whatever the visitor’s system setting.',
-    Component: DarkTheme,
+  bento: {
+    name: 'Bento',
+    description: 'A grid of rounded tiles that adapt to your content, tinted by your accent color.',
   },
   creative: {
     name: 'Creative',
     description: 'Bold type, a header in your accent color and an expressive layout.',
-    Component: CreativeTheme,
   },
-  classic: {
-    name: 'Classic',
-    description: 'A traditional resume layout with serif headings.',
-    Component: ClassicTheme,
+  soft: {
+    name: 'Soft',
+    description:
+      'Friendly and warm: pastel colors from your accent, rounded shapes and speech-bubble quotes.',
+  },
+  executive: {
+    name: 'Executive',
+    description:
+      'A professional two-column resume: sidebar with contact and skills, dense text, prints cleanly.',
   },
 };
 

@@ -11,16 +11,20 @@ import { PALETTES } from '@/lib/palettes';
 export function ThemeWrapper({
   theme,
   profile,
+  className = '',
+  vars,
   children,
 }: {
   theme: ThemeKey;
   profile: Pick<PublicProfile, 'accentColor'>;
+  className?: string; // the theme's font classes
+  vars?: Record<string, string>; // extra CSS variables of the theme
   children: ReactNode;
 }) {
   return (
     <div
-      className={`theme-root min-h-screen overflow-x-clip ${theme === 'minimal' ? '' : `theme-${theme}`}`}
-      style={accentVars(profile.accentColor, PALETTES[theme]) as CSSProperties}
+      className={`theme-root min-h-screen overflow-x-clip theme-${theme} ${className}`}
+      style={{ ...accentVars(profile.accentColor, PALETTES[theme]), ...vars } as CSSProperties}
     >
       {children}
     </div>

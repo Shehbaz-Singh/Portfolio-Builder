@@ -6,7 +6,7 @@
    change the colors; type, spacing, radius and shadows are shared. */
 @theme {
   /* Type: one sans font for the app (Inter, loaded in app/layout.tsx with next/font). Themes that
-     want another face (Classic uses the serif) opt in with font-serif. */
+     want another face (themes with their own fonts set them in their own file) opt in with a font class. */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
   /* Type scale (size / line height). Use these; no arbitrary sizes. */
@@ -39,7 +39,7 @@
   --shadow-raised: 0 1px 2px rgb(15 23 42 / 0.06), 0 1px 3px rgb(15 23 42 / 0.1);
   --shadow-overlay: 0 10px 30px -6px rgb(15 23 42 / 0.3);
 
-  /* Neutral gray palette (slate). The minimal theme and the whole app use these steps. */
+  /* Neutral gray palette (slate). The app and the themes use these steps. */
   --color-gray-50: #f8fafc;
   --color-gray-100: #f1f5f9;
   --color-gray-200: #e2e8f0;
@@ -78,7 +78,7 @@
 }
 
 /* Colors are variables defined on a theme wrapper (.theme-root). A theme restyles the page by
-   defining the same variables on its own wrapper class (.theme-dark, ...); the profile's accent is
+   defining the same variables on its own wrapper class (.theme-bento, ...); the profile's accent is
    set inline on that wrapper by the server (see accentVars in lib/color.ts), so there is no flash
    of other colors. Which palette applies is the profile's theme setting: nothing follows the
    visitor's system light or dark mode. The editor and the account pages are always light. */
@@ -113,22 +113,130 @@ button,
 
 /* The palettes of the themes. --bg and --text are also in lib/palettes.ts, which the accent
    color math uses; change them together. */
-.theme-dark {
-  --danger: #fca5a5;
-  --bg: #0b1020;
-  --surface: #161d33;
-  --text: #e8ecf5;
-  --muted: #a3adc2;
-  --border: #2b3452;
-  color-scheme: dark;
+/* Bento: tiles on a cool light page. Each tile is tinted from the accent (data-tone picks how
+   much); `data-tiles="dark"` on an ancestor turns the tiles dark while the page stays light. Inside
+   a tile the usual color variables are re-scoped, so text-ink, text-muted and border-line keep
+   working in every tone. --accent-fg-dark is the readable accent on a dark tile (set by the
+   theme). */
+.theme-bento {
+  --bg: #f5f6fa;
+  --surface: #ffffff;
+  --text: #141824;
+  --muted: #555b6e;
+  --border: #dfe2ec;
+}
+.bento-tile {
+  --tile: color-mix(in srgb, var(--accent) 6%, #ffffff);
+  --tile-border: color-mix(in srgb, var(--accent) 16%, #e4e6ee);
+  background-color: var(--tile);
+  border-color: var(--tile-border);
+  color: var(--text);
+}
+.bento-tile[data-tone='strong'] {
+  --tile: color-mix(in srgb, var(--accent) 14%, #ffffff);
+}
+[data-tiles='dark'] .bento-tile {
+  --tile: color-mix(in srgb, var(--accent) 12%, #12141c);
+  --tile-border: color-mix(in srgb, var(--accent) 28%, #262a3a);
+  --bg: #12141c;
+  --surface: #1b1e2b;
+  --text: #eef0f6;
+  --muted: #a9b0c4;
+  --border: #2a2e40;
+  --accent-fg: var(--accent-fg-dark);
+  --accent-soft: color-mix(in srgb, var(--accent) 24%, #12141c);
+}
+[data-tiles='dark'] .bento-tile[data-tone='strong'] {
+  --tile: color-mix(in srgb, var(--accent) 22%, #12141c);
+}
+.bento-tile[data-tone='solid'] {
+  --tile: var(--accent);
+  --tile-border: var(--accent);
+  --text: var(--on-accent);
+  --muted: var(--on-accent);
+  --border: color-mix(in srgb, var(--on-accent) 35%, transparent);
+  --surface: color-mix(in srgb, var(--on-accent) 16%, transparent);
+  --accent-fg: var(--on-accent);
+}
+/* Tiles rise in one after another (--i is the tile's position). Held back for people who prefer
+   less motion; `backwards` so the hover lift is not overridden once the entrance is over. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes bento-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px) scale(0.98);
+    }
+  }
+  .bento-in {
+    animation: bento-in 0.55s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+    animation-delay: calc(min(var(--i, 0), 12) * 60ms);
+  }
 }
 
-.theme-classic {
-  --bg: #fdfcf8;
-  --surface: #f3f0e8;
-  --text: #1c1917;
-  --muted: #57534e;
-  --border: #d6d0c4;
+/* Soft: a pastel page tinted from the accent (very little of it), white cards, a plum-gray text. */
+/* Executive: a document on a light gray desk. The sidebar is dark (tinted by the accent) and re-scopes
+   the color variables, so text-ink and friends work inside it. In print everything is black on white. */
+.theme-executive {
+  --bg: #eceef2;
+  --surface: #ffffff;
+  --text: #171a21;
+  --muted: #4b5262;
+  --border: #d5d9e1;
+}
+.exec-side {
+  --bg: #0e1118;
+  --text: #eef0f6;
+  --muted: #b9c0d1;
+  --border: rgb(255 255 255 / 0.2);
+  --surface: rgb(255 255 255 / 0.1);
+  --accent-fg: #ffffff;
+  background-color: color-mix(in srgb, var(--accent) 22%, #0e1118);
+  color: var(--text);
+}
+@media print {
+  .theme-executive {
+    --bg: #ffffff;
+  }
+  .exec-side {
+    --bg: #ffffff;
+    --text: #111111;
+    --muted: #444444;
+    --border: #bbbbbb;
+    --surface: #f3f3f3;
+    --accent-fg: #111111;
+    background: none;
+  }
+  .exec-sheet a[href^='http']::after {
+    content: ' (' attr(href) ')';
+    font-size: 0.85em;
+    color: var(--muted);
+  }
+}
+
+.theme-soft {
+  --bg: color-mix(in srgb, var(--accent) 7%, #fffaf6);
+  --surface: #ffffff;
+  --text: #2a2431;
+  --muted: #5f5868;
+  --border: color-mix(in srgb, var(--accent) 20%, #e9e2e6);
+}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes soft-float {
+    50% {
+      transform: translateY(-6px) rotate(3deg);
+    }
+  }
+  .soft-float {
+    animation: soft-float 9s ease-in-out infinite;
+  }
+}
+
+.theme-editorial {
+  --bg: #faf8f4;
+  --surface: #f0ece4;
+  --text: #1f1c18;
+  --muted: #5b564e;
+  --border: #ddd6ca;
 }
 
 .theme-creative {
@@ -137,6 +245,26 @@ button,
   --text: #09090b;
   --muted: #52525b;
   --border: #d4d4d8;
+}
+
+/* The Editorial theme's link: a thin underline that draws in from the left on hover and focus (no
+   animation for people who prefer less motion: it simply appears). `ed-hover` lets a whole
+   card trigger it. */
+.ed-underline {
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 100% / 0 1px;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ed-underline {
+    transition: background-size 0.3s ease;
+  }
+}
+.ed-underline:hover,
+.ed-underline:focus-visible,
+.ed-hover:hover .ed-underline,
+.ed-hover:focus-within .ed-underline {
+  background-size: 100% 1px;
 }
 
 /* Utilities: bg-page, bg-surface, text-ink, text-muted, border-line, bg-accent, text-accent,

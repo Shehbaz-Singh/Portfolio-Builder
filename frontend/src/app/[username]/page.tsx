@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from 'next';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { getPublicProfile } from '@/lib/api';
 import { truncate } from '@/lib/format';
+import { loadTheme } from '@/lib/theme-loader';
 import { getTheme } from '@/lib/themes';
 
 type Props = { params: Promise<{ username: string }> };
@@ -49,6 +50,6 @@ export default async function ProfilePage({ params }: Props) {
   // /JANE-DOE and /jane-doe are the same profile: keep one canonical URL.
   if (profile.slug !== username) permanentRedirect(`/${profile.slug}`);
 
-  const { Component: Theme } = getTheme(profile.theme);
+  const Theme = await loadTheme(getTheme(profile.theme).key);
   return <Theme profile={profile} />;
 }

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import type { PublicProfile } from '@portfolio/shared';
+import { THEME_COMPONENTS } from '@/lib/theme-components';
 import { getTheme } from '@/lib/themes';
 
 // The inside of the dashboard's preview frame (components/dashboard/Preview.tsx). It shows
@@ -25,7 +26,7 @@ export default function PreviewFramePage() {
   }, []);
 
   if (!profile) return null;
-  const { Component: Theme } = getTheme(profile.theme);
+  const Theme = THEME_COMPONENTS[getTheme(profile.theme).key];
   return (
     <div inert>
       <Theme profile={profile} idPrefix="preview-" />

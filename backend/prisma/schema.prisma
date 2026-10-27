@@ -41,7 +41,7 @@ model Profile {
   about              String?
   location           String?
   avatarUrl          String?
-  theme              String  @default("minimal")
+  theme              String  @default("editorial")
   accentColor        String  @default("#2563eb")
   published          Boolean @default(false)
   // Whether visitors may submit testimonials (POST /public/:slug/testimonials).

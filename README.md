@@ -12,7 +12,7 @@ Fill in your details once and get a clean, shareable portfolio page at your own 
 - Add links (LinkedIn, GitHub, email, phone, website) and hide any of them with a switch without deleting it.
 - Upload a profile photo; it is cropped to a square automatically.
 - Drag to reorder links, skills, experience, projects and education. Keyboard reordering works too.
-- Choose your own page address, pick one of four themes (Minimal, Dark, Creative or Classic) from a gallery of live previews, and an accent color (with a warning when it is hard to read on that theme).
+- Choose your own page address, pick one of five themes (Editorial, Bento, Soft, Executive or Creative) from a gallery of live previews, and an accent color (with a warning when it is hard to read on that theme).
 - Choose which sections your page shows, drag them into the order you want and rename their headings. Hiding a section keeps what you wrote in it.
 - Add your own sections (Certifications, Awards, Publications, Volunteering or anything else), each with its own list of items, and place them in the same order as the built-in ones.
 - Publish or unpublish with one switch. You get the public link with copy and open buttons, and a warning if your name or About section is still empty. Unpublishing takes the page down immediately.

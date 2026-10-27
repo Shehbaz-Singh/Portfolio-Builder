@@ -1,10 +1,23 @@
 import { Browser } from './Hero';
 
 const THEMES = [
-  { key: 'minimal', name: 'Minimal', text: 'A clean, airy single column.' },
-  { key: 'dark', name: 'Dark', text: 'Soft light text on a dark background.' },
+  {
+    key: 'editorial',
+    name: 'Editorial',
+    text: 'A quiet magazine page: serif headings, a drop cap, plenty of space.',
+  },
+  {
+    key: 'bento',
+    name: 'Bento',
+    text: 'A grid of rounded tiles that adapt to your content, tinted by your accent.',
+  },
+  { key: 'soft', name: 'Soft', text: 'Friendly pastels, rounded shapes and speech-bubble quotes.' },
+  {
+    key: 'executive',
+    name: 'Executive',
+    text: 'A professional two-column resume that prints cleanly.',
+  },
   { key: 'creative', name: 'Creative', text: 'Bold type and a header in your accent color.' },
-  { key: 'classic', name: 'Classic', text: 'A refined resume style with serif headings.' },
 ];
 
 export function Themes() {
@@ -15,7 +28,7 @@ export function Themes() {
       className="mx-auto max-w-6xl scroll-mt-20 px-5 py-16 sm:px-8"
     >
       <h2 id="themes-heading" className="type-page">
-        Four themes, any accent color
+        Five themes, any accent color
       </h2>
       <p className="mt-3 max-w-2xl text-muted">
         Every theme shows the same content, so you can switch at any time without retyping. These
@@ -23,7 +36,10 @@ export function Themes() {
       </p>
       <ul className="mt-10 grid gap-8 sm:grid-cols-2">
         {THEMES.map((theme) => (
-          <li key={theme.key}>
+          <li
+            key={theme.key}
+            className="sm:[&:last-child:nth-child(odd)]:col-span-2 sm:[&:last-child:nth-child(odd)]:mx-auto sm:[&:last-child:nth-child(odd)]:w-[calc(50%-1rem)]"
+          >
             <Browser
               src={`/landing/${theme.key}.jpg`}
               alt={`An example portfolio in the ${theme.name} theme.`}

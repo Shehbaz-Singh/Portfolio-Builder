@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Bricolage_Grotesque, Space_Mono } from 'next/font/google';
 import { ArrowUpRight, MapPin } from 'lucide-react';
 import { ShareButton } from '../ShareButton';
 import {
@@ -18,7 +19,19 @@ import type { ThemeProps } from './types';
 // Bold and expressive. The one big idea: every section hangs off a huge outlined number that stays
 // in view while its content scrolls past (stacked above the title on a phone), under a header in
 // the accent color whose bottom edge is cut on a slant. Oversized type, hard borders, offset
-// shadows that shift on hover.
+// shadows that shift on hover. Bricolage Grotesque for everything, Space Mono for dates and tags.
+
+// preload is off: every theme's fonts are known to the page bundle, and preloading would fetch all
+// of them. Only the faces a page draws are downloaded, when it draws them.
+const display = Bricolage_Grotesque({ subsets: ['latin'], display: 'swap', preload: false });
+const mono = Space_Mono({
+  subsets: ['latin'],
+  weight: ['400', '700'],
+  variable: '--font-theme-mono',
+  display: 'swap',
+  preload: false,
+});
+const monoText = 'font-(family-name:--font-theme-mono)';
 
 const focusRing =
   'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-fg';
@@ -119,7 +132,7 @@ function BlockView({ block }: { block: Block }) {
                 <p className="mt-3 whitespace-pre-line text-muted">{project.description}</p>
               )}
               {project.tags.length > 0 && (
-                <ul className="mt-4 flex flex-wrap gap-1.5">
+                <ul className={`${monoText} mt-4 flex flex-wrap gap-1.5`}>
                   {project.tags.map((tag) => (
                     <li
                       key={tag}
@@ -185,7 +198,9 @@ function BlockView({ block }: { block: Block }) {
           {block.entries.map((entry) => (
             <li key={entry.id} className="min-w-0 border-s-4 border-accent ps-5">
               {entry.start && (
-                <p className="mb-2 inline-block bg-ink px-2 py-0.5 text-xs font-bold tracking-widest text-page uppercase tabular-nums">
+                <p
+                  className={`${monoText} mb-2 inline-block bg-ink px-2 py-0.5 text-xs font-bold tracking-widest text-page uppercase tabular-nums`}
+                >
                   <DateRange
                     start={entry.start}
                     end={entry.end}
@@ -242,7 +257,11 @@ export default function CreativeTheme({ profile, idPrefix = '' }: ThemeProps) {
   const blocks = buildBlocks(profile, idPrefix);
   const animate = !idPrefix;
   return (
-    <ThemeWrapper theme="creative" profile={profile}>
+    <ThemeWrapper
+      theme="creative"
+      profile={profile}
+      className={`${display.className} ${mono.variable}`}
+    >
       <Header header={buildHeader(profile)} />
       <main id={`${idPrefix}main`} className="mx-auto max-w-5xl px-5 pb-20 sm:px-8">
         {blocks.map((block, index) => (

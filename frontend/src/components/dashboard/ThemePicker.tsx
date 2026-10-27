@@ -1,6 +1,7 @@
 'use client';
 
 import { useFormContext } from 'react-hook-form';
+import { THEME_COMPONENTS } from '@/lib/theme-components';
 import { THEME_LIST } from '@/lib/themes';
 import { useEditor } from './editor-context';
 
@@ -15,29 +16,32 @@ export function ThemePicker() {
     <fieldset>
       <legend className="mb-2 text-sm font-medium">Theme</legend>
       <div className="grid gap-3 sm:grid-cols-2">
-        {THEME_LIST.map((theme) => (
-          <label
-            key={theme.key}
-            className="flex cursor-pointer flex-col gap-2 rounded-box border border-line p-2 transition hover:bg-surface has-checked:border-accent has-checked:ring-2 has-checked:ring-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent"
-          >
-            <input type="radio" value={theme.key} className="sr-only" {...register('theme')} />
-            {/* A picture of the theme, not content: hidden from assistive technology, and inert so
-                nothing in it can be clicked or focused. The ids get a prefix so they stay unique. */}
-            <div
-              aria-hidden="true"
-              inert
-              className="pointer-events-none h-40 overflow-hidden rounded-control border border-line"
+        {THEME_LIST.map((theme) => {
+          const Theme = THEME_COMPONENTS[theme.key];
+          return (
+            <label
+              key={theme.key}
+              className="flex cursor-pointer flex-col gap-2 rounded-box border border-line p-2 transition hover:bg-surface has-checked:border-accent has-checked:ring-2 has-checked:ring-accent has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-accent"
             >
-              <div style={{ zoom: 0.2 }}>
-                <theme.Component profile={preview} idPrefix={`pick-${theme.key}-`} />
+              <input type="radio" value={theme.key} className="sr-only" {...register('theme')} />
+              {/* A picture of the theme, not content: hidden from assistive technology, and inert so
+                nothing in it can be clicked or focused. The ids get a prefix so they stay unique. */}
+              <div
+                aria-hidden="true"
+                inert
+                className="pointer-events-none h-40 overflow-hidden rounded-control border border-line"
+              >
+                <div style={{ zoom: 0.2 }}>
+                  <Theme profile={preview} idPrefix={`pick-${theme.key}-`} />
+                </div>
               </div>
-            </div>
-            <span className="relative bg-page px-1 pb-1">
-              <span className="block text-sm font-medium">{theme.name}</span>
-              <span className="block text-xs text-muted">{theme.description}</span>
-            </span>
-          </label>
-        ))}
+              <span className="relative bg-page px-1 pb-1">
+                <span className="block text-sm font-medium">{theme.name}</span>
+                <span className="block text-xs text-muted">{theme.description}</span>
+              </span>
+            </label>
+          );
+        })}
       </div>
     </fieldset>
   );

@@ -1,0 +1,273 @@
+import type { ReactNode } from 'react';
+import { Source_Sans_3, Source_Serif_4 } from 'next/font/google';
+import { ArrowUpRight, MapPin } from 'lucide-react';
+import { ShareButton } from '../ShareButton';
+import {
+  buildBlocks,
+  buildFooter,
+  buildHeader,
+  type Block,
+  type FooterModel,
+  type HeaderModel,
+} from './blocks';
+import { LeaveTestimonial } from './LeaveTestimonial';
+import { Avatar, DateRange, EmptyPage, HeaderLink, NewTabLink } from './parts';
+import { ThemeWrapper } from './ThemeWrapper';
+import type { ThemeProps } from './types';
+
+// A professional, resume-like page: a document on a gray desk with two columns. The left sidebar
+// (dark, tinted by the accent) holds the photo, name, tagline, contact links and skills; the wider
+// right column holds the rest, in the owner's order. On a phone the sidebar comes first. Dense,
+// tidy type; a job is its role, its company and its dates. Source Serif 4 for the name and
+// headings, Source Sans 3 for the text. No motion at all. Printing hides the buttons, shows the
+// address behind each link, and turns the sidebar white (see .exec-* in globals.css).
+
+// preload is off: every theme's fonts are known to the page bundle, and preloading would fetch all
+// of them. Only the faces a page draws are downloaded, when it draws them.
+const sans = Source_Sans_3({ subsets: ['latin'], display: 'swap', preload: false });
+const serif = Source_Serif_4({
+  subsets: ['latin'],
+  variable: '--font-theme-display',
+  display: 'swap',
+  preload: false,
+});
+
+const display = 'font-(family-name:--font-theme-display)';
+const focusRing =
+  'focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-fg';
+const link = `text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`;
+const small = 'text-xs font-bold tracking-[0.14em] uppercase';
+
+function Sidebar({
+  header,
+  skills,
+  idPrefix,
+}: {
+  header: HeaderModel;
+  idPrefix: string;
+  skills: Extract<Block, { kind: 'skills' }> | undefined;
+}) {
+  const contact = `flex max-w-full items-start gap-2.5 py-1 text-sm hover:underline ${focusRing}`;
+  return (
+    <aside className="exec-side p-7 sm:p-9 print:border-e print:border-line print:p-5">
+      <Avatar
+        avatar={header.avatar}
+        className="size-28 rounded-full ring-4 ring-white/20 print:ring-0"
+        placeholderClassName={`${display} bg-surface text-4xl font-semibold`}
+      />
+      <h1 className={`${display} mt-6 text-3xl leading-tight font-semibold text-balance`}>
+        {header.name}
+      </h1>
+      {header.tagline && (
+        <p className="mt-2 leading-snug text-pretty text-muted">{header.tagline}</p>
+      )}
+
+      <section
+        aria-labelledby={`${idPrefix}exec-contact`}
+        className="mt-8 border-t border-line pt-5"
+      >
+        <h2 id={`${idPrefix}exec-contact`} className={`${small} mb-3 text-muted`}>
+          Contact
+        </h2>
+        <ul className="space-y-0.5">
+          {header.location && (
+            <li className="flex items-start gap-2.5 py-1 text-sm">
+              <MapPin aria-hidden="true" className="mt-0.5 size-4 shrink-0" />
+              <span>{header.location}</span>
+            </li>
+          )}
+          {header.links.map((item) => (
+            <li key={item.id} className="max-w-full">
+              <HeaderLink link={item} className={contact} />
+            </li>
+          ))}
+        </ul>
+        <div className="mt-4 print:hidden">
+          <ShareButton url={header.share.url} title={header.share.title} variant="outline" />
+        </div>
+      </section>
+
+      {skills && (
+        <section aria-labelledby={skills.id} className="mt-8 border-t border-line pt-5">
+          <h2 id={skills.id} className={`${small} mb-3 text-muted`}>
+            {skills.title}
+          </h2>
+          <ul className="space-y-1.5 text-sm">
+            {skills.skills.map((skill) => (
+              <li
+                key={skill.id}
+                className="flex items-baseline gap-2.5 before:size-1.5 before:shrink-0 before:bg-accent before:content-[''] print:before:bg-black"
+              >
+                {skill.name}
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+    </aside>
+  );
+}
+
+function Section({ block, children }: { block: Block; children: ReactNode }) {
+  return (
+    <section aria-labelledby={block.id} className="mt-9 first:mt-0 print:break-inside-auto">
+      <h2
+        id={block.id}
+        className={`${display} relative mb-5 border-b border-line pb-2 text-xl font-semibold`}
+      >
+        {block.title}
+        <span aria-hidden="true" className="absolute -bottom-px start-0 h-0.5 w-12 bg-accent" />
+      </h2>
+      {children}
+    </section>
+  );
+}
+
+function BlockView({ block }: { block: Block }) {
+  switch (block.kind) {
+    case 'skills':
+      return null; // in the sidebar
+    case 'about':
+      return <p className="leading-relaxed whitespace-pre-line">{block.text}</p>;
+    case 'projects':
+      return (
+        <ul className="space-y-5">
+          {block.projects.map((project) => (
+            <li key={project.id} className="min-w-0 break-inside-avoid">
+              <h3 className="font-bold">
+                {project.href ? (
+                  <NewTabLink
+                    href={project.href}
+                    className={`inline-flex items-baseline gap-1 ${link}`}
+                  >
+                    {project.name}
+                    <ArrowUpRight
+                      aria-hidden="true"
+                      className="size-3.5 shrink-0 self-center print:hidden"
+                    />
+                  </NewTabLink>
+                ) : (
+                  project.name
+                )}
+              </h3>
+              {project.description && (
+                <p className="mt-1 leading-relaxed whitespace-pre-line">{project.description}</p>
+              )}
+              {project.tags.length > 0 && (
+                <p className="mt-1 text-sm text-muted">{project.tags.join(' · ')}</p>
+              )}
+            </li>
+          ))}
+        </ul>
+      );
+    case 'testimonials':
+      return (
+        <>
+          {block.testimonials.length > 0 ? (
+            <ul className="space-y-6">
+              {block.testimonials.map((item) => (
+                <li key={item.id} className="min-w-0 break-inside-avoid">
+                  <figure className="border-s-2 border-accent ps-4">
+                    <blockquote className={`${display} leading-relaxed whitespace-pre-line italic`}>
+                      {item.message}
+                    </blockquote>
+                    <figcaption className="mt-2 text-sm">
+                      <span className="font-bold">{item.name}</span>
+                      {item.detail && <span className="text-muted">, {item.detail}</span>}
+                    </figcaption>
+                  </figure>
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="text-muted">No testimonials yet.</p>
+          )}
+          {block.submitTo && (
+            <div className="mt-6 print:hidden">
+              <LeaveTestimonial
+                slug={block.submitTo}
+                buttonClassName={`inline-flex items-center rounded border border-ink px-4 py-1.5 text-sm font-semibold transition-colors hover:bg-page ${focusRing}`}
+              />
+            </div>
+          )}
+        </>
+      );
+    case 'entries':
+      return (
+        <ol className="space-y-6">
+          {block.entries.map((entry) => (
+            <li key={entry.id} className="min-w-0 break-inside-avoid">
+              {/* Role, company, dates: the role and the dates share the first line. */}
+              <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between sm:gap-6">
+                <h3 className={`${display} text-lg leading-snug font-semibold`}>{entry.title}</h3>
+                {entry.start && (
+                  <p className="text-sm font-semibold text-muted tabular-nums sm:shrink-0 sm:whitespace-nowrap">
+                    <DateRange
+                      start={entry.start}
+                      end={entry.end}
+                      openEnded={block.variant !== 'custom'}
+                    />
+                  </p>
+                )}
+              </div>
+              {entry.subtitle && <p className="font-semibold text-muted">{entry.subtitle}</p>}
+              {entry.description && (
+                <p className="mt-2 leading-relaxed whitespace-pre-line">{entry.description}</p>
+              )}
+              {entry.href && (
+                <p className="mt-2 text-sm">
+                  <NewTabLink href={entry.href} context={entry.title} className={link}>
+                    View
+                  </NewTabLink>
+                </p>
+              )}
+            </li>
+          ))}
+        </ol>
+      );
+  }
+}
+
+function Footer({ footer }: { footer: FooterModel }) {
+  return (
+    <footer className="mx-auto max-w-6xl px-5 pt-6 pb-10 text-center text-sm text-muted print:pt-3 print:pb-0">
+      <p>
+        © {footer.year} {footer.name}
+      </p>
+      <p className="mt-1">
+        Made {footer.message}{' '}
+        <a href={footer.cta.href} className={`font-semibold text-ink underline ${focusRing}`}>
+          {footer.cta.label}
+        </a>
+      </p>
+    </footer>
+  );
+}
+
+export default function ExecutiveTheme({ profile, idPrefix = '' }: ThemeProps) {
+  const blocks = buildBlocks(profile, idPrefix);
+  const skills = blocks.find((block) => block.kind === 'skills');
+  const main = blocks.filter((block) => block.kind !== 'skills');
+  return (
+    <ThemeWrapper
+      theme="executive"
+      profile={profile}
+      className={`${sans.className} ${serif.variable}`}
+    >
+      <div className="mx-auto max-w-6xl lg:px-6 lg:py-10 print:max-w-none print:p-0">
+        <div className="exec-sheet bg-surface lg:grid lg:grid-cols-[19rem_minmax(0,1fr)] lg:shadow-overlay print:grid print:grid-cols-[13rem_minmax(0,1fr)] print:shadow-none">
+          <Sidebar header={buildHeader(profile)} skills={skills} idPrefix={idPrefix} />
+          <main id={`${idPrefix}main`} className="min-w-0 p-7 sm:p-10 lg:p-12 print:p-5 print:pt-1">
+            {main.map((block) => (
+              <Section key={block.id} block={block}>
+                <BlockView block={block} />
+              </Section>
+            ))}
+            {main.length === 0 && <EmptyPage className="text-muted" />}
+          </main>
+        </div>
+        <Footer footer={buildFooter(profile)} />
+      </div>
+    </ThemeWrapper>
+  );
+}

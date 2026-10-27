@@ -12,7 +12,7 @@ const sample = fullProfileInputSchema.parse({
   about:
     'I am a full-stack developer with five years of experience building web apps with React, Node.js and PostgreSQL. I care about clean APIs, accessible interfaces and shipping.',
   location: 'Bengaluru, India',
-  theme: 'minimal',
+  theme: 'editorial',
   published: true,
   links: [
     { type: 'github', url: 'https://github.com/janedoe', visible: true },

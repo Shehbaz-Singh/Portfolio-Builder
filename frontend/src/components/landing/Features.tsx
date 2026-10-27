@@ -9,7 +9,7 @@ const FEATURES = [
   {
     Icon: Palette,
     title: 'Themes and accent colors',
-    text: 'Four themes and any accent color. Text colors adjust so your page stays readable.',
+    text: 'Five themes and any accent color. Text colors adjust so your page stays readable.',
   },
   {
     Icon: SquarePlus,
