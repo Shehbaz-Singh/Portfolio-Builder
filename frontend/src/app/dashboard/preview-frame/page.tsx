@@ -12,6 +12,9 @@ export default function PreviewFramePage() {
   const [profile, setProfile] = useState<PublicProfile | null>(null);
 
   useEffect(() => {
+    // The frame is drawn shrunk, so a scrollbar in it would look like a stray hairline. It still
+    // scrolls with the wheel and touch.
+    document.documentElement.style.scrollbarWidth = 'none';
     const onMessage = (e: MessageEvent) => {
       if (e.origin !== window.location.origin || e.source !== window.parent) return;
       if (e.data?.type === 'preview-profile') setProfile(e.data.profile as PublicProfile);

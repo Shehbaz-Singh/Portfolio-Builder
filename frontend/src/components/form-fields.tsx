@@ -2,6 +2,7 @@
 
 import { useId, type InputHTMLAttributes, type ReactNode } from 'react';
 import {
+  Controller,
   FormProvider,
   get,
   useFormContext,
@@ -171,22 +172,26 @@ export function SelectField({
   options,
   required,
 }: FieldProps & { options: { value: string; label: string }[] }) {
-  const { id, error, register } = useField(name);
+  const { id, error } = useField(name);
+  const { control } = useFormContext();
   return (
     <Field id={id} label={label} error={error} required={required}>
-      <Select
-        id={id}
-        aria-required={required || undefined}
-        aria-invalid={error ? true : undefined}
-        aria-describedby={error ? `${id}-note` : undefined}
-        {...register(name)}
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </Select>
+      <Controller
+        control={control}
+        name={name}
+        render={({ field }) => (
+          <Select
+            id={id}
+            value={field.value}
+            options={options}
+            onChange={field.onChange}
+            onBlur={field.onBlur}
+            aria-required={required || undefined}
+            aria-invalid={error ? true : undefined}
+            aria-describedby={error ? `${id}-note` : undefined}
+          />
+        )}
+      />
     </Field>
   );
 }

@@ -47,7 +47,7 @@ function Workspace({ children }: { children: ReactNode }) {
               onClick={() => setMode(id)}
               className={cx(
                 'inline-flex items-center gap-1.5 rounded-control px-4 py-1.5 text-sm font-medium',
-                mode === id ? 'bg-accent text-on-accent' : 'hover:bg-surface',
+                mode === id ? 'bg-accent text-on-accent' : 'hover:bg-surface active:bg-line',
               )}
             >
               <Icon aria-hidden="true" className="size-4" />
@@ -74,7 +74,7 @@ function Frame({ children }: { children: ReactNode }) {
   // Account settings have nothing to preview.
   const withPreview = usePathname() !== '/dashboard/settings';
   return (
-    <div className="min-h-screen lg:flex">
+    <div className="dashboard-root min-h-screen lg:flex">
       <Sidebar />
       <div className="min-w-0 flex-1 pb-20 lg:pb-0">
         <TopBar />

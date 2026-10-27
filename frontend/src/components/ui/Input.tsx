@@ -1,6 +1,5 @@
 'use client';
 
-import { ChevronDown } from 'lucide-react';
 import { useEffect, useRef, type ComponentProps } from 'react';
 import { cx } from './cx';
 
@@ -17,22 +16,6 @@ export function Input({ className, ...props }: ComponentProps<'input'>) {
 
 export function Textarea({ className, ...props }: ComponentProps<'textarea'>) {
   return <textarea className={cx(field, 'resize-y', className)} {...props} />;
-}
-
-// The list that opens is the browser's own (so it works with every keyboard and screen reader and
-// on phones); the closed control gets the same look as the other fields, with our own arrow.
-export function Select({ className, children, ...props }: ComponentProps<'select'>) {
-  return (
-    <div className="relative">
-      <select className={cx(field, 'cursor-pointer appearance-none pe-9', className)} {...props}>
-        {children}
-      </select>
-      <ChevronDown
-        aria-hidden="true"
-        className="pointer-events-none absolute end-3 top-1/2 size-4 -translate-y-1/2 text-muted"
-      />
-    </div>
-  );
 }
 
 // An input that takes focus when it appears. For a field the person has just opened (rename,
