@@ -11,7 +11,7 @@ import {
   TESTIMONIAL_ROLE_MAX,
   testimonialSubmissionSchema,
   type TestimonialSubmission,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import { api } from '@/lib/client-api';
 import { schemaResolver } from '@/lib/form';
 import { Form, TextArea, TextField } from '../form-fields';

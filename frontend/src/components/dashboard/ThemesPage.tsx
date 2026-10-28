@@ -3,7 +3,7 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
-import { profileUpdateSchema } from '@portfolio/shared';
+import { profileUpdateSchema } from '@parichay/shared';
 import { normalizeHex } from '@/lib/color';
 import { schemaResolver } from '@/lib/form';
 import { DEFAULT_THEME, getTheme } from '@/lib/themes';

@@ -1,5 +1,5 @@
 import type { RequestHandler, RequestParamHandler } from 'express';
-import { isSection, sectionInputSchemas, type Section } from '@portfolio/shared';
+import { isSection, sectionInputSchemas, type Section } from '@parichay/shared';
 import { AppError } from '../lib/errors';
 import { validateBody } from './validate';
 

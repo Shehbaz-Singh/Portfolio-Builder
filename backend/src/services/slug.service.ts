@@ -1,11 +1,11 @@
-import { isReservedSlug } from '@portfolio/shared';
+import { isReservedSlug } from '@parichay/shared';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
 import { slugify } from '../lib/slug';
 
 export const slugTaken = () => AppError.conflict('SLUG_TAKEN', 'This slug is already taken');
 
-// "jane-doe", then "jane-doe-2", "jane-doe-3", ... Reserved words count as taken.
+// "asha-rao", then "asha-rao-2", "asha-rao-3", ... Reserved words count as taken.
 // One query loads every slug starting with the base, then the first free number is picked.
 export async function generateUniqueSlug(fullName: string): Promise<string> {
   const base = slugify(fullName);

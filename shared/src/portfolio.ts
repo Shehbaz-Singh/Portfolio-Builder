@@ -46,17 +46,34 @@ export const RESERVED_SLUGS = [
   '_next',
 ] as const;
 
-export const isReservedSlug = (slug: string) =>
-  (RESERVED_SLUGS as readonly string[]).includes(slug);
+// The addresses of the sample profiles (samples.ts). Public like any other page, but nobody can
+// register one. Keep in step with SAMPLE_PROFILES (the seed script checks).
+export const SAMPLE_SLUGS = [
+  'tanisha-walia',
+  'ayush-gill',
+  'navjot-singh',
+  'sameer-bhatia',
+  'syed-abraar',
+] as const;
 
-export const slugSchema = z
+export const isReservedSlug = (slug: string) =>
+  (RESERVED_SLUGS as readonly string[]).includes(slug) ||
+  (SAMPLE_SLUGS as readonly string[]).includes(slug);
+
+// The shape of an address, for reading one (a public page may be a reserved sample address).
+export const slugFormatSchema = z
   .string()
   .trim()
   .toLowerCase()
   .min(3)
   .max(30)
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use lowercase letters, numbers and single hyphens')
-  .refine((s) => !isReservedSlug(s), 'This slug is reserved');
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use lowercase letters, numbers and single hyphens');
+
+// The address a person may choose: the right shape and not reserved.
+export const slugSchema = slugFormatSchema.refine(
+  (s) => !isReservedSlug(s),
+  'This slug is reserved',
+);
 
 // The themes a profile may choose. The frontend's theme registry has an entry for each key (its
 // type is a Record over this list), so adding a theme means adding the key here and the entry
@@ -104,7 +121,15 @@ export type ProfileInput = z.infer<typeof profileInputSchema>;
 // a profile field is a one-place change (the backend's Prisma select reads these keys too).
 // `theme` is a plain string when read: the whitelist applies to what is saved, and a stored value
 // that is no longer offered must not break the page (the frontend falls back to the default).
-export const profileSchema = profileInputSchema.extend({ id: z.string(), theme: z.string() });
+// A stored profile may hold a reserved address (the samples do), so it is read by shape only.
+export const profileSchema = profileInputSchema.extend({
+  slug: slugFormatSchema,
+  id: z.string(),
+  theme: z.string(),
+  // A made-up example profile (samples.ts). Set by the seed script only: it is not in
+  // profileInputSchema, so no request can change it.
+  isSample: z.boolean().default(false),
+});
 export type Profile = z.infer<typeof profileSchema>;
 
 // PUT /profile/me. Publishing has its own endpoint, and omitting the slug keeps the current one.

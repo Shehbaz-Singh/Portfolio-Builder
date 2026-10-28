@@ -5,9 +5,11 @@
    so components use these names and never raw values. The portfolio themes (further down) only
    change the colors; type, spacing, radius and shadows are shared. */
 @theme {
-  /* Type: one sans font for the app (Inter, loaded in app/layout.tsx with next/font). Themes that
+  /* Type: one sans font for the app (Hanken Grotesk, loaded in app/layout.tsx with next/font). Themes that
      want another face (themes with their own fonts set them in their own file) opt in with a font class. */
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  /* Headings of the app and the landing page (Fraunces, loaded in app/layout.tsx). */
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
 
   /* Type scale (size / line height). Use these; no arbitrary sizes. */
   --text-xs: 0.75rem; /* captions, hints, counts */
@@ -20,8 +22,10 @@
   --text-lg--line-height: 1.75rem;
   --text-2xl: 1.5rem; /* h1: page titles */
   --text-2xl--line-height: 2rem;
-  --text-4xl: 2.25rem; /* hero */
-  --text-4xl--line-height: 2.5rem;
+  --text-4xl: 2.5rem; /* hero (the landing page raises it on wide screens) */
+  --text-4xl--line-height: 1.1;
+  --text-6xl: 4rem; /* landing headline on wide screens */
+  --text-6xl--line-height: 1.02;
 
   /* Spacing: a 4px grid (p-1 = 4px). The named steps are what components use for the padding
      of boxes, so every card breathes the same. */
@@ -103,6 +107,37 @@
   overflow-wrap: anywhere;
   background-color: var(--bg);
   color: var(--text);
+}
+
+/* The Parichay brand: warm paper, deep ink, one terracotta accent (docs/brand.md). Only the body
+   wears it. A portfolio theme re-defines every variable on its own wrapper (.theme-root again), so a
+   visitor's page never inherits these. --accent-fg is the deeper shade used for accent-colored text:
+   it keeps 4.5:1 on the tinted --accent-soft as well. */
+.brand {
+  --bg: #fbf7f0;
+  --surface: #f4ede2;
+  --text: #1f1a17;
+  --muted: #665d54;
+  --border: #d8cdbd;
+  --accent: #b4492b;
+  --accent-fg: #9e3d21;
+  --accent-soft: #f6e4da;
+  --danger-bg: #fdf1ee;
+  --warning-bg: #fdf4e3;
+}
+/* The serif for the app's own headings. Not inside a portfolio theme or the Writing pages: those
+   set their own faces (data-portfolio is on every ThemeWrapper). */
+.brand :is(.type-hero, .type-page, .font-display):not([data-portfolio] *) {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+}
+.brand .type-hero:not([data-portfolio] *) {
+  font-weight: 600;
+  letter-spacing: -0.03em;
+}
+.brand .type-page:not([data-portfolio] *) {
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 /* Button labels are short and must not break mid-word when a flex row gets tight. */
@@ -502,4 +537,38 @@ html:has(.dashboard-root) {
     font-size: 1.25rem;
     overflow-wrap: anywhere;
   }
+}
+
+/* Landing page: the hero rises in once. Held back for people who ask for less motion. */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes landing-rise {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+  }
+  .landing-rise {
+    animation: landing-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) backwards;
+    animation-delay: var(--delay, 0ms);
+  }
+}
+
+/* The wordmark (components/Logo.tsx): Devanagari and Latin set as one word. Both parts are one
+   weight and share a baseline. Devanagari is drawn from a taller body than Latin x-height, so it
+   is scaled down a little and nudged down to match the Latin's size and weight by eye. Tune here. */
+.wordmark {
+  display: inline-flex;
+  align-items: baseline;
+  white-space: nowrap;
+  line-height: 1.15;
+  font-weight: 600;
+}
+.wordmark-latin {
+  font-family: var(--font-display);
+  font-optical-sizing: auto;
+  letter-spacing: -0.02em;
+}
+.wordmark-hi {
+  font-size: 0.98em;
+  line-height: 1;
 }

@@ -1,4 +1,4 @@
-import { normalizeSectionConfig, publicLayout } from '@portfolio/shared';
+import { normalizeSectionConfig, publicLayout } from '@parichay/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';

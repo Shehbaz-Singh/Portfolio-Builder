@@ -1,4 +1,4 @@
-import type { ProfileUpdateInput, PublishInput, SectionsUpdateInput } from '@portfolio/shared';
+import type { ProfileUpdateInput, PublishInput, SectionsUpdateInput } from '@parichay/shared';
 import { asyncHandler } from '../lib/async-handler';
 import { AppError } from '../lib/errors';
 import { getProfileId } from '../middleware/auth';

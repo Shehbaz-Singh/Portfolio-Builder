@@ -1,5 +1,5 @@
 import type { Request } from 'express';
-import type { PostInput } from '@portfolio/shared';
+import type { PostInput } from '@parichay/shared';
 import { asyncHandler } from '../lib/async-handler';
 import { AppError } from '../lib/errors';
 import { getProfileId } from '../middleware/auth';

@@ -1,4 +1,4 @@
-import { DEFAULT_THEME, THEME_KEYS, type ThemeKey } from '@portfolio/shared';
+import { DEFAULT_THEME, THEME_KEYS, type ThemeKey } from '@parichay/shared';
 import { PALETTES } from './palettes';
 
 export { DEFAULT_THEME };

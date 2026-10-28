@@ -9,7 +9,7 @@ import {
   SECTION_LIMITS,
   skillInputSchema,
   type ParsedResume,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 
 // The model's reply is untrusted: it can be malformed, contain extra keys, wrong types, or
 // text a resume tried to plant in it. Everything is rebuilt field by field from known keys and

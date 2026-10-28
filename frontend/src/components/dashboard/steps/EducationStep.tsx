@@ -2,7 +2,7 @@
 
 import { GraduationCap } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { educationInputSchema, type EducationInput } from '@portfolio/shared';
+import { educationInputSchema, type EducationInput } from '@parichay/shared';
 import { schemaResolver } from '@/lib/form';
 import { formatRange } from '@/lib/format';
 import { TextField } from '../../form-fields';

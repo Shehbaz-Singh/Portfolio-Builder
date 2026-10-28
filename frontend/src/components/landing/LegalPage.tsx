@@ -1,7 +1,7 @@
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import { LEGAL_VERSION } from '@portfolio/shared';
+import { LEGAL_VERSION } from '@parichay/shared';
 
 import { Footer } from './Footer';
 

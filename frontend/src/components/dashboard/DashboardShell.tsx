@@ -3,7 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { useState, type ReactNode } from 'react';
 import { Eye, Pencil } from 'lucide-react';
-import type { MyProfile } from '@portfolio/shared';
+import type { MyProfile } from '@parichay/shared';
 import { api } from '@/lib/client-api';
 import { useLoad, useMediaQuery } from '@/lib/hooks';
 import { ConfirmProvider } from '../ui';

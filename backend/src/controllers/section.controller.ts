@@ -1,5 +1,5 @@
 import type { Request } from 'express';
-import type { ReorderInput } from '@portfolio/shared';
+import type { ReorderInput } from '@parichay/shared';
 import { asyncHandler } from '../lib/async-handler';
 import { getProfileId } from '../middleware/auth';
 import { sectionOf } from '../middleware/section';

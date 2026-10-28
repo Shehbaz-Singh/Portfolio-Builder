@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { PublicProfile } from '@portfolio/shared';
+import type { PublicProfile } from '@parichay/shared';
 import { THEME_COMPONENTS } from '@/lib/theme-components';
 import { getTheme } from '@/lib/themes';
 

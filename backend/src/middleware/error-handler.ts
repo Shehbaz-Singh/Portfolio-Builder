@@ -1,5 +1,5 @@
 import type { ErrorRequestHandler, RequestHandler } from 'express';
-import type { ApiError } from '@portfolio/shared';
+import type { ApiError } from '@parichay/shared';
 import { ZodError } from 'zod';
 import { config } from '../lib/config';
 import { AppError } from '../lib/errors';

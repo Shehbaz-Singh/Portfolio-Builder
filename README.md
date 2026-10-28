@@ -1,6 +1,6 @@
-# Portfolio Generator
+# Parichay
 
-Fill in your details once and get a clean, shareable portfolio page at your own link, like `yoursite.com/jane-doe`. No design work and no hosting to set up.
+Fill in your details once and get a clean, shareable portfolio page at your own link, like `yoursite.com/ayush-gill`. No design work and no hosting to set up.
 
 ## What it does
 
@@ -41,3 +41,7 @@ Photos are stored on Cloudinary. Everything is a TypeScript npm workspace in one
 - **Built for a sleepy free-tier backend.** Slow responses show a "waking up" message, reads retry automatically, and a failed save keeps what you typed.
 - **Public pages are cached briefly** for speed, and the cache is cleared the moment you save, so edits and unpublishing show up at once.
 - **Safe by default:** links only accept http(s), email and phone formats, uploads are checked by their actual contents, and login and upload attempts are rate limited per visitor.
+
+## Sample profiles
+
+Five made-up profiles (Tanisha Walia, Ayush Gill, Navjot Singh, Sameer Bhatia and Syed Abraar) show what a page looks like, one in each theme. Their content is in `shared/src/samples.ts` and is used by the landing page and by the seed script. To put them in the database, run the migrations and then `npm run db:seed -w @parichay/backend`. Running it again replaces the samples and touches nothing else. Nobody can sign in as a sample, and their addresses are reserved.

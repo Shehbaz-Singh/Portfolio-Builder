@@ -1,4 +1,4 @@
-import { SECTION_LIMITS, type Section } from '@portfolio/shared';
+import { SECTION_LIMITS, type Section } from '@parichay/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';

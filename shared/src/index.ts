@@ -17,6 +17,7 @@ export * from './public';
 export * from './section-config';
 export * from './custom-sections';
 export * from './posts';
+export * from './samples';
 export * from './testimonials';
 export * from './auth';
 export * from './errors';

@@ -1,4 +1,4 @@
-import { MAX_POSTS, type PostInput } from '@portfolio/shared';
+import { MAX_POSTS, type PostInput } from '@parichay/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { coverPublicId, deleteImage, uploadCover } from '../lib/cloudinary';
 import { AppError } from '../lib/errors';

@@ -1,8 +1,9 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
-import type { PublicProfile } from '@portfolio/shared';
+import type { PublicProfile } from '@parichay/shared';
 import { loadThemeFonts } from '@/lib/theme-loader';
 import { getTheme } from '@/lib/themes';
+import { SampleBanner } from '../SampleBanner';
 import { ThemeWrapper } from '../themes/ThemeWrapper';
 
 // The frame of the Writing pages (the list and a single post): the owner's theme colors and accent,
@@ -23,6 +24,7 @@ export async function WritingShell({
     theme === 'creative' ? '' : '[&_.wr-display]:font-(family-name:--font-theme-display)';
   return (
     <ThemeWrapper theme={theme} profile={profile} className={`${fonts} ${display}`}>
+      {profile.isSample && <SampleBanner />}
       <header className="border-b border-line">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
           <Link

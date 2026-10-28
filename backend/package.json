@@ -1,5 +1,5 @@
 {
-  "name": "@portfolio/backend",
+  "name": "@parichay/backend",
   "version": "0.1.0",
   "private": true,
   "main": "dist/index.js",
@@ -14,7 +14,7 @@
     "db:seed": "prisma db seed"
   },
   "dependencies": {
-    "@portfolio/shared": "*",
+    "@parichay/shared": "*",
     "@prisma/adapter-pg": "^7.10.1",
     "@prisma/client": "^7.10.1",
     "bcrypt": "^6.0.0",

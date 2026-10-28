@@ -1,7 +1,7 @@
 'use client';
 
 import { ArrowRight, Check, Circle } from 'lucide-react';
-import type { MyProfile } from '@portfolio/shared';
+import type { MyProfile } from '@parichay/shared';
 import { Button, Card } from '../ui';
 import { useEditor } from './editor-context';
 import { useGo } from './navigation';

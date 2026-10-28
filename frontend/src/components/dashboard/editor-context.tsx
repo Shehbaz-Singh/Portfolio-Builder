@@ -20,7 +20,7 @@ import {
   type PublicProfile,
   type Section,
   type SectionConfig,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import { ApiError, api } from '@/lib/client-api';
 import { ToastRegion, type ToastData } from '../ui';
 import { saveProfile } from './save-profile';

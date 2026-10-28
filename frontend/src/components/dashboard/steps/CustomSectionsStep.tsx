@@ -13,7 +13,7 @@ import {
   customSectionInputSchema,
   type CustomItemInput,
   type MyCustomSection,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import { schemaResolver } from '@/lib/form';
 import { formatRange } from '@/lib/format';
 import { TextArea, TextField } from '../../form-fields';

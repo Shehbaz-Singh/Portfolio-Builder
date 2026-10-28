@@ -1,4 +1,4 @@
-import { apiErrorSchema } from '@portfolio/shared';
+import { apiErrorSchema } from '@parichay/shared';
 
 // Browser-side API client. It calls this site's /api proxy (which attaches the JWT from the
 // httpOnly cookie), parses the API's error format and sends the user to /login on a 401.

@@ -3,7 +3,7 @@ import {
   MAX_TESTIMONIALS,
   type TestimonialInput,
   type TestimonialStatus,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { WAIT, lockProfile } from '../lib/locks';

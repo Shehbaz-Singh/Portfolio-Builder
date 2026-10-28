@@ -1,4 +1,4 @@
-import type { ThemeKey } from '@portfolio/shared';
+import type { ThemeKey } from '@parichay/shared';
 
 // What the color math needs to know about each theme. The same values are the variables of
 // the theme's class in globals.css (--bg and --text), so change them together.

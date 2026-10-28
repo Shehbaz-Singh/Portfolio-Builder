@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Logo } from '@/components/Logo';
 import type { MouseEvent } from 'react';
 import {
   LayoutList,
@@ -121,7 +122,9 @@ export function Sidebar() {
   return (
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col justify-between border-e border-line p-4 lg:flex">
       <div className="space-y-6">
-        <p className="px-3 pt-1 font-semibold">Portfolio Generator</p>
+        <p className="px-3 pt-1">
+          <Logo />
+        </p>
         <nav aria-label="Dashboard">
           <NavLinks layout="side" />
         </nav>

@@ -24,7 +24,7 @@ import {
   type MyPostSummary,
   type PostStatus,
   type PostType,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import { api } from '@/lib/client-api';
 import { applyFormat, type Format } from '@/lib/markdown-format';
 import { Markdown } from '../../Markdown';

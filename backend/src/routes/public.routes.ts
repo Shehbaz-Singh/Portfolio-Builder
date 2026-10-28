@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { HONEYPOT_FIELD, testimonialSubmissionSchema } from '@portfolio/shared';
+import { HONEYPOT_FIELD, testimonialSubmissionSchema } from '@parichay/shared';
 import {
   getPublicPost,
   getPublicPosts,

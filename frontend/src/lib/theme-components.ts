@@ -1,4 +1,4 @@
-import type { ThemeKey } from '@portfolio/shared';
+import type { ThemeKey } from '@parichay/shared';
 import CreativeTheme from '@/components/themes/CreativeTheme';
 import BentoTheme from '@/components/themes/BentoTheme';
 import EditorialTheme from '@/components/themes/EditorialTheme';

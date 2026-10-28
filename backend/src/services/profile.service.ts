@@ -1,4 +1,4 @@
-import type { ProfileUpdateInput } from '@portfolio/shared';
+import type { ProfileUpdateInput } from '@parichay/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';

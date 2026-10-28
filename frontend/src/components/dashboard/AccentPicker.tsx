@@ -1,7 +1,7 @@
 'use client';
 
 import { useFormContext, useWatch } from 'react-hook-form';
-import { DEFAULT_ACCENT } from '@portfolio/shared';
+import { DEFAULT_ACCENT } from '@parichay/shared';
 import { ACCENT_PRESETS, normalizeHex, readableAccent } from '@/lib/color';
 import { PALETTES } from '@/lib/palettes';
 import { getTheme } from '@/lib/themes';

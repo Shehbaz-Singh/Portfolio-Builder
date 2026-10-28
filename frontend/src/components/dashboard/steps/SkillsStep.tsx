@@ -3,7 +3,7 @@
 import { Sparkles } from 'lucide-react';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { skillInputSchema, type SkillInput } from '@portfolio/shared';
+import { skillInputSchema, type SkillInput } from '@parichay/shared';
 import { schemaResolver, showApiError } from '@/lib/form';
 import { Button, Card, EmptyState, ErrorText, Input, SlowNotice } from '../../ui';
 import {

@@ -1,5 +1,5 @@
 import type { ReactElement } from 'react';
-import type { PublicProfile } from '@portfolio/shared';
+import type { PublicProfile } from '@parichay/shared';
 
 // Every theme is a component that receives the whole public profile and draws the page. It never
 // fetches anything: the profile arrives ready, and components/themes/blocks.ts turns it into the

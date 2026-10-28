@@ -2,13 +2,13 @@ import type { MetadataRoute } from 'next';
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Portfolio Generator',
-    short_name: 'Portfolio',
+    name: 'Parichay',
+    short_name: 'Parichay',
     description: 'Build and share your portfolio page.',
     start_url: '/',
     display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#2563eb',
+    background_color: '#fbf7f0',
+    theme_color: '#b4492b',
     icons: [
       { src: '/icon', sizes: '64x64', type: 'image/png' },
       { src: '/apple-icon', sizes: '180x180', type: 'image/png' },

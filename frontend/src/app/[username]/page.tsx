@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { SampleBanner } from '@/components/SampleBanner';
 import { notFound, permanentRedirect } from 'next/navigation';
 import { getPublicProfile } from '@/lib/api';
 import { truncate } from '@/lib/format';
@@ -47,9 +48,14 @@ export default async function ProfilePage({ params }: Props) {
   const profile = await getPublicProfile(username);
   if (!profile) notFound();
 
-  // /JANE-DOE and /jane-doe are the same profile: keep one canonical URL.
+  // /AYUSH-GILL and /ayush-gill are the same profile: keep one canonical URL.
   if (profile.slug !== username) permanentRedirect(`/${profile.slug}`);
 
   const Theme = await loadTheme(getTheme(profile.theme).key);
-  return <Theme profile={profile} />;
+  return (
+    <>
+      {profile.isSample && <SampleBanner />}
+      <Theme profile={profile} />
+    </>
+  );
 }

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
-import { profileUpdateSchema } from '@portfolio/shared';
+import { profileUpdateSchema } from '@parichay/shared';
 import { schemaResolver } from '@/lib/form';
 import { Form, TextArea } from '../../form-fields';
 import { useFormAutosave } from '../autosave';

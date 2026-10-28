@@ -1,4 +1,4 @@
-import { DEFAULT_ACCENT, accentColorSchema } from '@portfolio/shared';
+import { DEFAULT_ACCENT, accentColorSchema } from '@parichay/shared';
 import type { Palette } from './palettes';
 
 export const MIN_CONTRAST = 4.5; // WCAG AA for normal text

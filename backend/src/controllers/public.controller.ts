@@ -1,5 +1,5 @@
 import type { Request } from 'express';
-import { slugSchema, type TestimonialInput } from '@portfolio/shared';
+import { slugFormatSchema, type TestimonialInput } from '@parichay/shared';
 import { asyncHandler } from '../lib/async-handler';
 import { config } from '../lib/config';
 import { AppError } from '../lib/errors';
@@ -12,7 +12,7 @@ const CACHE_CONTROL = 'public, max-age=60, stale-while-revalidate=300';
 
 // Anything that cannot be a valid slug (including reserved words) cannot be a profile.
 function slugOf(req: Request) {
-  const slug = slugSchema.safeParse(req.params.slug as string);
+  const slug = slugFormatSchema.safeParse(req.params.slug as string);
   if (!slug.success) throw AppError.notFound('Profile not found');
   return slug.data;
 }

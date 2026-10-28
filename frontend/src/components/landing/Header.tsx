@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { Logo } from '@/components/Logo';
 import { buttonStyles } from '../ui';
 
 const LINKS = [
@@ -12,10 +13,10 @@ export function Header() {
   return (
     <header className="sticky top-0 z-30 border-b border-line bg-page/90 backdrop-blur">
       <div className="mx-auto flex max-w-6xl items-center gap-6 px-5 py-3 sm:px-8">
-        <Link href="/" className="text-sm font-semibold whitespace-nowrap sm:text-base">
-          Portfolio Generator
+        <Link href="/" aria-label="Parichay" className="whitespace-nowrap">
+          <Logo />
         </Link>
-        <nav aria-label="Sections of this page" className="ms-4 hidden md:block">
+        <nav aria-label="On this page" className="ms-4 hidden md:block">
           <ul className="flex gap-1">
             {LINKS.map((link) => (
               <li key={link.href}>
@@ -41,7 +42,7 @@ export function Header() {
             className={`${buttonStyles({ variant: 'primary' })} whitespace-nowrap`}
           >
             <span className="sm:hidden">Get started</span>
-            <span className="max-sm:hidden">Create your portfolio</span>
+            <span className="max-sm:hidden">Create your Parichay</span>
           </Link>
         </div>
       </div>

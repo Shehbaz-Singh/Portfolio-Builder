@@ -3,7 +3,7 @@ import type {
   DeleteAccountInput,
   LoginInput,
   RegisterInput,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import { asyncHandler } from '../lib/async-handler';
 import { AppError } from '../lib/errors';
 import * as authService from '../services/auth.service';

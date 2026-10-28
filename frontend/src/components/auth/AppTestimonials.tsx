@@ -49,7 +49,7 @@ export function AppTestimonials() {
       onBlur={() => setFocused(false)}
       className={`min-w-0 ${paused || focused ? 'marquee-paused' : ''}`}
     >
-      <section aria-label="What people say about Portfolio Generator">
+      <section aria-label="What people say about Parichay">
         <div className="mb-4 flex items-center gap-4">
           <h2 className="text-sm font-semibold tracking-wider text-muted uppercase">
             What people say

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { Logo } from '@/components/Logo';
 import { Check, CircleAlert, Copy, ExternalLink, LoaderCircle, QrCode } from 'lucide-react';
 import { api } from '@/lib/client-api';
 import { readFlag, writeFlag } from '@/lib/storage';
@@ -222,7 +223,9 @@ function PublishControls() {
 export function TopBar() {
   return (
     <header className="sticky top-0 z-30 flex flex-wrap items-center gap-x-5 gap-y-2 border-b border-line bg-page/95 px-4 py-2.5 backdrop-blur">
-      <p className="font-semibold lg:hidden">Portfolio Generator</p>
+      <p className="lg:hidden">
+        <Logo />
+      </p>
       <SaveIndicator />
       <div className="ms-auto flex flex-wrap items-center gap-x-5 gap-y-2">
         <PublishControls />

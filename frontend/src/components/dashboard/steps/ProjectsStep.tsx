@@ -2,7 +2,7 @@
 
 import { FolderKanban } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { projectInputSchema, type ProjectInput } from '@portfolio/shared';
+import { projectInputSchema, type ProjectInput } from '@parichay/shared';
 import { schemaResolver } from '@/lib/form';
 import { TextArea, TextField } from '../../form-fields';
 import { EditorForm } from '../EditorForm';

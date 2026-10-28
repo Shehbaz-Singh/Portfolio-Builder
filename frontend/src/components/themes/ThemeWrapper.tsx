@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react';
-import type { PublicProfile, ThemeKey } from '@portfolio/shared';
+import type { PublicProfile, ThemeKey } from '@parichay/shared';
 import { accentVars } from '@/lib/color';
 import { PALETTES } from '@/lib/palettes';
 
@@ -23,6 +23,7 @@ export function ThemeWrapper({
 }) {
   return (
     <div
+      data-portfolio=""
       className={`theme-root min-h-screen overflow-x-clip theme-${theme} ${className}`}
       style={{ ...accentVars(profile.accentColor, PALETTES[theme]), ...vars } as CSSProperties}
     >

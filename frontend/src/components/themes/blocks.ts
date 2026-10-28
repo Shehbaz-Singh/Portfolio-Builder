@@ -7,7 +7,7 @@ import {
   type PublicPostSummary,
   type PublicProfile,
   type SectionKey,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import { SITE_URL } from '@/lib/config';
 import { contactTarget, initials, linkTarget, safeHttpUrl } from '@/lib/format';
 

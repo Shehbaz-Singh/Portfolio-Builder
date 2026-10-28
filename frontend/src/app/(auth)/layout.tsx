@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { ArrowLeft, Check } from 'lucide-react';
+import { Logo } from '@/components/Logo';
 import { AppTestimonials } from '@/components/auth/AppTestimonials';
 import { Card } from '@/components/ui';
 
@@ -16,8 +17,8 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
     <main id="main" className="mx-auto min-h-screen max-w-6xl px-5 py-8 sm:px-8 sm:py-12">
       <div className="grid gap-8 lg:grid-cols-2 lg:gap-16">
         <aside className="hidden flex-col justify-center rounded-card bg-accent-soft p-card-lg lg:flex">
-          <Link href="/" className="font-semibold">
-            Portfolio Generator
+          <Link href="/" aria-label="Parichay" className="inline-block">
+            <Logo variant="hero" />
           </Link>
           <p className="type-page mt-10 text-balance">
             A portfolio page you can share with one link
@@ -35,10 +36,11 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
         <div className="mx-auto w-full max-w-md self-center">
           <Link
             href="/"
-            className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted hover:text-ink"
+            aria-label="Parichay"
+            className="mb-6 inline-flex items-center gap-2 text-muted hover:text-ink"
           >
             <ArrowLeft aria-hidden="true" className="size-4" />
-            Portfolio Generator
+            <Logo variant="auth" />
           </Link>
           <Card padding="lg" className="shadow-raised">
             {children}

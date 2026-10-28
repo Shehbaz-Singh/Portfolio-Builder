@@ -6,7 +6,7 @@ import {
   LoginInput,
   RegisterInput,
   SessionResponse,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { signToken } from '../lib/jwt';

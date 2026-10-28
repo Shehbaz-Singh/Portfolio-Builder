@@ -1,5 +1,5 @@
 import type { Request } from 'express';
-import type { CustomItemInput, CustomSectionInput, ReorderInput } from '@portfolio/shared';
+import type { CustomItemInput, CustomSectionInput, ReorderInput } from '@parichay/shared';
 import { asyncHandler } from '../lib/async-handler';
 import { getProfileId } from '../middleware/auth';
 import * as service from '../services/custom-section.service';

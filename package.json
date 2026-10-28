@@ -1,5 +1,5 @@
 {
-  "name": "portfolio-generator",
+  "name": "parichay",
   "private": true,
   "workspaces": [
     "shared",
@@ -10,14 +10,14 @@
     "node": ">=20"
   },
   "scripts": {
-    "build:shared": "npm run build -w @portfolio/shared",
-    "dev:shared": "npm run dev -w @portfolio/shared",
-    "dev:backend": "npm run dev -w @portfolio/backend",
-    "dev:frontend": "npm run dev -w @portfolio/frontend",
+    "build:shared": "npm run build -w @parichay/shared",
+    "dev:shared": "npm run dev -w @parichay/shared",
+    "dev:backend": "npm run dev -w @parichay/backend",
+    "dev:frontend": "npm run dev -w @parichay/frontend",
     "dev": "npm run build:shared && concurrently -n shared,backend,frontend -c gray,cyan,magenta \"npm:dev:shared\" \"npm:dev:backend\" \"npm:dev:frontend\"",
-    "build:backend": "npm run build:shared && npm run build -w @portfolio/backend",
-    "build": "npm run build:backend && npm run build -w @portfolio/frontend",
-    "typecheck": "npm run build:shared && npm run typecheck -w @portfolio/backend && npm run typecheck -w @portfolio/frontend",
+    "build:backend": "npm run build:shared && npm run build -w @parichay/backend",
+    "build": "npm run build:backend && npm run build -w @parichay/frontend",
+    "typecheck": "npm run build:shared && npm run typecheck -w @parichay/backend && npm run typecheck -w @parichay/frontend",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check ."

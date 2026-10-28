@@ -1,4 +1,4 @@
-import type { ApiError } from '@portfolio/shared';
+import type { ApiError } from '@parichay/shared';
 
 type ErrorDetails = NonNullable<ApiError['error']['details']>;
 

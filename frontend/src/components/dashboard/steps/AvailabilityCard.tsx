@@ -11,7 +11,7 @@ import {
   profileUpdateSchema,
   type AvailabilityStatus,
   type MyProfile,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import { schemaResolver } from '@/lib/form';
 import { contactTarget } from '@/lib/format';
 import { Form, SelectField } from '../../form-fields';

@@ -1,4 +1,4 @@
-import type { PublicLink } from '@portfolio/shared';
+import type { PublicLink } from '@parichay/shared';
 
 // UTC, so "2022-03-01" shows as Mar 2022 in every timezone.
 const monthYear = new Intl.DateTimeFormat('en-US', {
@@ -17,7 +17,7 @@ export const formatRange = (start: string, end: string | null, openEnded = true)
       ? `${formatMonthYear(start)} – Present`
       : formatMonthYear(start);
 
-// "Jane Q. Doe" -> "JD"
+// "Asha Q. Rao" -> "AR"
 export function initials(name: string): string {
   const words = name.split(/\s+/).filter(Boolean);
   const first = words[0]?.[0] ?? '?';

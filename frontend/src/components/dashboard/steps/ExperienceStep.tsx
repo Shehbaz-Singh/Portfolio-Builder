@@ -2,7 +2,7 @@
 
 import { Briefcase } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { experienceInputSchema, type ExperienceInput } from '@portfolio/shared';
+import { experienceInputSchema, type ExperienceInput } from '@parichay/shared';
 import { schemaResolver } from '@/lib/form';
 import { formatRange } from '@/lib/format';
 import { TextArea, TextField } from '../../form-fields';

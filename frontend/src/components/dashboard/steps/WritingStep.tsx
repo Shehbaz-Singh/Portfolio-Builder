@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { FileText, Link2, PenLine, Plus } from 'lucide-react';
-import { MAX_POSTS, type MyPostSummary } from '@portfolio/shared';
+import { MAX_POSTS, type MyPostSummary } from '@parichay/shared';
 import { api } from '@/lib/client-api';
 import { formatDate } from '@/lib/format';
 import { Badge, Button, Card, EmptyState, useConfirm } from '../../ui';

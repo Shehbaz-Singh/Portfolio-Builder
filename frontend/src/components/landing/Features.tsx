@@ -1,5 +1,15 @@
-import { FileUp, LayoutList, Link2, MessageSquareQuote, Palette, SquarePlus } from 'lucide-react';
+import {
+  BadgeCheck,
+  FileUp,
+  LayoutList,
+  MessageSquareQuote,
+  Palette,
+  PenLine,
+  QrCode,
+  ShieldCheck,
+} from 'lucide-react';
 
+// Only what exists today.
 const FEATURES = [
   {
     Icon: FileUp,
@@ -12,14 +22,14 @@ const FEATURES = [
     text: 'Five themes and any accent color. Text colors adjust so your page stays readable.',
   },
   {
-    Icon: SquarePlus,
+    Icon: LayoutList,
     title: 'Custom sections',
-    text: 'Add sections of your own, such as certifications or talks, with their own items.',
+    text: 'Add sections of your own, such as certifications or talks. Show, hide, rename and reorder any section.',
   },
   {
-    Icon: LayoutList,
-    title: 'Sections you control',
-    text: 'Show, hide, rename and reorder sections. Hiding one keeps what you wrote in it.',
+    Icon: PenLine,
+    title: 'Writing',
+    text: 'Publish short posts in Markdown, or link to articles you wrote elsewhere. Each post gets its own page.',
   },
   {
     Icon: MessageSquareQuote,
@@ -27,9 +37,19 @@ const FEATURES = [
     text: 'Let visitors leave a testimonial and approve each one before it appears. Their email is never shown.',
   },
   {
-    Icon: Link2,
-    title: 'A link to share',
-    text: 'Your page lives at its own address, with a copy button and a share menu.',
+    Icon: QrCode,
+    title: 'QR code and share link',
+    text: 'Your page has its own address, a copy button and a share menu. Download a QR code for a printed resume.',
+  },
+  {
+    Icon: BadgeCheck,
+    title: 'Availability badge',
+    text: 'Say you are open to work, freelance or collaboration, with a short message of your own. Switch it off any time.',
+  },
+  {
+    Icon: ShieldCheck,
+    title: 'Your data',
+    text: 'Export everything you have added as a file, or delete your account and all of it, at any time.',
   },
 ];
 
@@ -38,19 +58,17 @@ export function Features() {
     <section
       id="features"
       aria-labelledby="features-heading"
-      className="scroll-mt-20 border-y border-line bg-surface/50 py-16"
+      className="scroll-mt-20 border-y border-line bg-surface py-20"
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
-        <h2 id="features-heading" className="type-page">
+        <h2 id="features-heading" className="type-page text-3xl sm:text-4xl">
           What you get
         </h2>
-        <ul className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <ul className="mt-12 grid gap-x-8 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map(({ Icon, title, text }) => (
-            <li key={title} className="rounded-card border border-line bg-page p-card">
-              <span className="flex size-10 items-center justify-center rounded-full bg-accent-soft text-accent-fg">
-                <Icon aria-hidden="true" className="size-5" />
-              </span>
-              <h3 className="type-subsection mt-4">{title}</h3>
+            <li key={title}>
+              <Icon aria-hidden="true" className="size-6 text-accent-fg" />
+              <h3 className="type-subsection mt-3 text-lg">{title}</h3>
               <p className="mt-2 text-muted">{text}</p>
             </li>
           ))}

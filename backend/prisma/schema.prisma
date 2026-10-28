@@ -65,6 +65,8 @@ model Profile {
   theme               String             @default("editorial")
   accentColor         String             @default("#2563eb")
   published           Boolean            @default(false)
+  // A made-up example profile (shared/src/samples.ts). Seeded without a usable login.
+  isSample            Boolean            @default(false)
   // Whether visitors may submit testimonials (POST /public/:slug/testimonials).
   acceptTestimonials  Boolean            @default(false)
   // The availability badge on the public page (see shared/src/availability.ts).

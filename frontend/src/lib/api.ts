@@ -7,7 +7,7 @@ import {
   type PublicPost,
   type PublicPostSummary,
   type PublicProfile,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import { API_URL } from './config';
 
 // Edits made in the dashboard drop the cached copies at once (the /api proxy calls

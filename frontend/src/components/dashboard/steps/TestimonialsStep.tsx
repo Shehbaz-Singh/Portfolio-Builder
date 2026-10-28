@@ -14,7 +14,7 @@ import {
   type MyTestimonial,
   type SectionConfig,
   type TestimonialInput,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import { api } from '@/lib/client-api';
 import { schemaResolver } from '@/lib/form';
 import { TextArea, TextField } from '../../form-fields';

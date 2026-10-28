@@ -11,7 +11,7 @@ import {
   type MyProfile,
   type SectionConfig,
   type SectionKey,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import { api } from '@/lib/client-api';
 import { Button, Card, Input, Switch } from '../../ui';
 import { useAutosave } from '../autosave';

@@ -1,7 +1,7 @@
 import type { ComponentType, ReactNode } from 'react';
 import Link from 'next/link';
 import { Globe, Link2, Mail, Phone } from 'lucide-react';
-import type { PublicLink } from '@portfolio/shared';
+import type { PublicLink } from '@parichay/shared';
 import { formatDate, formatMonthYear, initials } from '@/lib/format';
 import type { Block, Entry, HeaderModel, Role } from './blocks';
 

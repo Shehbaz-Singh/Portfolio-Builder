@@ -1,6 +1,6 @@
 const MAX_BASE_LENGTH = 24; // leaves room for a "-NNNNN" counter inside the 30 char slug limit
 
-// "Jane O'Doe!" -> "jane-o-doe": lowercase, hyphenated, accents and special characters removed.
+// "Asha O'Rao!" -> "asha-o-rao": lowercase, hyphenated, accents and special characters removed.
 // Always at least 3 characters. Uniqueness and reserved words are handled by slug.service.
 export function slugify(input: string): string {
   let base = input

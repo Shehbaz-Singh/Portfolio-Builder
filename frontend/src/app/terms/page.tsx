@@ -14,9 +14,9 @@ const sections: LegalSection[] = [
     content: (
       <>
         <p>
-          Portfolio Generator (“the service”) lets you build a portfolio page and publish it at your
-          own link. It is run by Shehbaz Singh, an individual based in India. By creating an account
-          or using the service you agree to these Terms and to our{' '}
+          Parichay (“the service”) lets you build a portfolio page and publish it at your own link.
+          It is run by Shehbaz Singh, an individual based in India. By creating an account or using
+          the service you agree to these Terms and to our{' '}
           <Link href="/privacy">Privacy Policy</Link>. If you do not agree, please do not use it.
         </p>
         <p>You must be at least 16 to use the service.</p>

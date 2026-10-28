@@ -11,7 +11,7 @@ import {
   type ChangePasswordInput,
   type DeleteAccountInput,
   type SessionResponse,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import { api } from '@/lib/client-api';
 import { schemaResolver } from '@/lib/form';
 import { useLoad } from '@/lib/hooks';

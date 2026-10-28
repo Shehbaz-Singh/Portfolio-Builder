@@ -1,4 +1,4 @@
-import type { ResumeResponse } from '@portfolio/shared';
+import type { ResumeResponse } from '@parichay/shared';
 import { AppError } from '../lib/errors';
 import { getLlmProvider, LlmError } from '../lib/llm';
 import { extractPdfText, looksLikePdf } from '../lib/pdf';

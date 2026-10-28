@@ -12,7 +12,7 @@ import {
   type LinkType,
   type MyLink,
   type MyProfile,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import { Link2 } from 'lucide-react';
 import { ApiError, api } from '@/lib/client-api';
 import { schemaResolver } from '@/lib/form';

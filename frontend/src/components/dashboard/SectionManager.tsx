@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState, type ComponentType, type ReactNode } from 'react';
 import { ChevronDown, Trash2, Undo2 } from 'lucide-react';
-import type { Section } from '@portfolio/shared';
+import type { Section } from '@parichay/shared';
 import type { LucideIcon } from 'lucide-react';
 import { Button, Card, EmptyState } from '../ui';
 import { cx } from '../ui/cx';

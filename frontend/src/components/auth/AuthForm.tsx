@@ -4,12 +4,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm, useFormContext } from 'react-hook-form';
-import {
-  loginSchema,
-  registerSchema,
-  type LoginInput,
-  type RegisterInput,
-} from '@portfolio/shared';
+import { loginSchema, registerSchema, type LoginInput, type RegisterInput } from '@parichay/shared';
 import { api } from '@/lib/client-api';
 import { schemaResolver } from '@/lib/form';
 import { Form, TextField } from '../form-fields';

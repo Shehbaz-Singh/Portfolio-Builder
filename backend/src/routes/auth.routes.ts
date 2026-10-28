@@ -4,7 +4,7 @@ import {
   deleteAccountSchema,
   loginSchema,
   registerSchema,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import { changePassword, deleteAccount, login, me, register } from '../controllers/auth.controller';
 import { requireAuth } from '../middleware/auth';
 import { loginLimiter, registerLimiter } from '../middleware/rate-limit';

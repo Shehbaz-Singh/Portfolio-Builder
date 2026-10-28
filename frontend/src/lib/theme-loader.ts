@@ -1,4 +1,4 @@
-import type { ThemeKey } from '@portfolio/shared';
+import type { ThemeKey } from '@parichay/shared';
 import type { ThemeComponent } from '@/components/themes/types';
 
 // Loads one theme on demand. Each theme brings its own fonts (next/font), and importing only the

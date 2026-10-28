@@ -9,7 +9,7 @@ import {
   sectionsUpdateSchema,
   testimonialInputSchema,
   testimonialSettingsSchema,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import {
   createCustomItem,
   createCustomSection,

@@ -35,8 +35,8 @@ export default async function PrivacyPage() {
       content: (
         <>
           <p>
-            Portfolio Generator (“we”, “us”) lets you build a portfolio page and publish it at your
-            own link. The service is run by Shehbaz Singh, an individual based in India.
+            Parichay (“we”, “us”) lets you build a portfolio page and publish it at your own link.
+            The service is run by Shehbaz Singh, an individual based in India.
           </p>
           <p>
             This is a demo project, so there is no support email yet. See “Contact” at the end of

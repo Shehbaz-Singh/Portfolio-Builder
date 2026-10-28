@@ -1,4 +1,4 @@
-import { profileSchema } from '@portfolio/shared';
+import { profileSchema } from '@parichay/shared';
 import type { Prisma } from '../generated/prisma/client';
 
 // The profile columns come from the shared schema's keys, so there is one field list.

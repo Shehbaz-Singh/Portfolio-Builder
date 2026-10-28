@@ -4,7 +4,7 @@ import type {
   TestimonialInput,
   TestimonialSettings,
   TestimonialStatus,
-} from '@portfolio/shared';
+} from '@parichay/shared';
 import { asyncHandler } from '../lib/async-handler';
 import { getProfileId } from '../middleware/auth';
 import * as service from '../services/testimonial.service';

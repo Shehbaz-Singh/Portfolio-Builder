@@ -1,7 +1,7 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import type { ResumeResponse } from '@portfolio/shared';
+import type { ResumeResponse } from '@parichay/shared';
 import { ApiError, api } from '@/lib/client-api';
 import { Button, Card, ErrorText, SlowNotice, useConfirm } from '../../ui';
 import { useEditor } from '../editor-context';

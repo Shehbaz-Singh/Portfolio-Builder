@@ -1,4 +1,4 @@
-import type { MyProfile, ProfileUpdateInput } from '@portfolio/shared';
+import type { MyProfile, ProfileUpdateInput } from '@parichay/shared';
 import { api } from '@/lib/client-api';
 
 // PUT /profile/me replaces every field it is given and clears the ones it is not, so a
