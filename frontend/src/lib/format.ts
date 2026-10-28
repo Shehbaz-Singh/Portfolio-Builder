@@ -73,3 +73,20 @@ export function linkTarget(
     }
   }
 }
+
+// The way to get in touch that the owner has made visible, for the availability badge: an email
+// first, then a phone number, then LinkedIn, then their website. null when there is none.
+const CONTACT_ORDER: PublicLink['type'][] = ['email', 'phone', 'linkedin', 'website'];
+
+export function contactTarget(
+  links: PublicLink[],
+): { href: string; label: string; external: boolean } | null {
+  for (const type of CONTACT_ORDER) {
+    for (const link of links) {
+      if (link.type !== type) continue;
+      const target = linkTarget(link);
+      if (target) return target;
+    }
+  }
+  return null;
+}

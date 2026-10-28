@@ -15,6 +15,7 @@ import {
   Avatar,
   DateRange,
   EmptyPage,
+  AvailabilityBadge,
   HeaderLink,
   NewTabLink,
   RoleList,
@@ -69,6 +70,12 @@ function Sidebar({
       {header.tagline && (
         <p className="mt-2 leading-snug text-pretty text-muted">{header.tagline}</p>
       )}
+      <AvailabilityBadge
+        availability={header.availability}
+        className="mt-5 rounded-md border border-line bg-surface px-3 py-2.5 text-sm"
+        dotClassName="bg-accent-fg"
+        linkClassName={`font-semibold underline underline-offset-2 hover:no-underline ${focusRing}`}
+      />
 
       <section
         aria-labelledby={`${idPrefix}exec-contact`}

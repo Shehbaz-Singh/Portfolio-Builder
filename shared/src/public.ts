@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { availabilityStatusSchema } from './availability';
 import { linkTypeSchema, profileSchema } from './portfolio';
 import { myTestimonialSchema, publicTestimonialSchema } from './testimonials';
 import {
@@ -92,15 +93,27 @@ const sectionLists = {
 
 // `sections` is the visible sections in page order. It defaults to everything so a page keeps
 // working against an API that predates it. The content of a hidden section is left out by the API.
-export const publicProfileSchema = profileSchema.omit({ id: true, published: true }).extend({
-  sections: z.array(publicSectionSchema).default(() => SECTION_KEYS.map((key) => ({ key }))),
-  // The visible custom sections that have items, in page order. Each has an entry in `sections`.
-  customSections: z.array(publicCustomSectionSchema).default([]),
-  // Approved testimonials only, in the owner's order.
-  testimonials: z.array(publicTestimonialSchema).default([]),
-  links: z.array(publicLinkSchema),
-  ...sectionLists,
-});
+export const publicProfileSchema = profileSchema
+  .omit({
+    id: true,
+    published: true,
+    availabilityEnabled: true,
+    availabilityStatus: true,
+    availabilityMessage: true,
+  })
+  .extend({
+    // Present only while the owner has the badge switched on; the API leaves all three out otherwise.
+    availabilityEnabled: z.literal(true).optional(),
+    availabilityStatus: availabilityStatusSchema.optional(),
+    availabilityMessage: z.string().nullable().optional(),
+    sections: z.array(publicSectionSchema).default(() => SECTION_KEYS.map((key) => ({ key }))),
+    // The visible custom sections that have items, in page order. Each has an entry in `sections`.
+    customSections: z.array(publicCustomSectionSchema).default([]),
+    // Approved testimonials only, in the owner's order.
+    testimonials: z.array(publicTestimonialSchema).default([]),
+    links: z.array(publicLinkSchema),
+    ...sectionLists,
+  });
 
 // The body of GET /profile/me: what the editor needs. Unlike the public view it keeps the
 // profile id and published flag, and hidden links (with their visible flag).

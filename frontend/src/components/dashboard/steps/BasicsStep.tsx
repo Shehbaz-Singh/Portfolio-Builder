@@ -23,6 +23,7 @@ import { useFormAutosave } from '../autosave';
 import { EditorForm } from '../EditorForm';
 import { errorText, useEditor, useReportDirty, useSection } from '../editor-context';
 import { SectionManager, type ItemFormProps } from '../SectionManager';
+import { AvailabilityCard } from './AvailabilityCard';
 
 const AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
@@ -347,6 +348,13 @@ export function BasicsStep() {
           Details
         </h2>
         <DetailsForm />
+      </section>
+
+      <section aria-labelledby="availability-heading" className="space-y-4">
+        <h2 id="availability-heading" className="type-section">
+          Availability
+        </h2>
+        <AvailabilityCard />
       </section>
 
       <section aria-labelledby="address-heading" className="space-y-4">

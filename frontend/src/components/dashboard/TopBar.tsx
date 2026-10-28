@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, CircleAlert, Copy, ExternalLink, LoaderCircle } from 'lucide-react';
+import { Check, CircleAlert, Copy, ExternalLink, LoaderCircle, QrCode } from 'lucide-react';
 import { api } from '@/lib/client-api';
 import { readFlag, writeFlag } from '@/lib/storage';
 import { SITE_URL } from '@/lib/config';
@@ -10,6 +10,7 @@ import { Button, Modal, Switch, buttonStyles } from '../ui';
 import { errorText, useEditor, type SaveStatus } from './editor-context';
 import { useGo } from './navigation';
 import { PublishCelebration } from './PublishCelebration';
+import { QrCodeDialog } from './QrCodeDialog';
 
 // The fields a portfolio is not much use without, and the Profile tab that fills each in.
 const REQUIRED: {
@@ -72,6 +73,7 @@ function PublishControls() {
   const [asking, setAsking] = useState(false);
   const [copied, setCopied] = useState(false);
   const [celebrating, setCelebrating] = useState(false);
+  const [showQr, setShowQr] = useState(false);
 
   const missing = REQUIRED.filter((field) => field.isEmpty(profile));
   const url = `${SITE_URL}/${profile.slug}`; // the canonical address, not whatever host this tab is on
@@ -147,6 +149,10 @@ function PublishControls() {
           <span className="max-sm:sr-only">{copied ? 'Copied' : 'Copy link'}</span>
           <span className="sr-only md:hidden"> to {url.replace(/^https?:\/\//, '')}</span>
         </Button>
+        <Button size="sm" onClick={() => setShowQr(true)}>
+          <QrCode aria-hidden="true" className="size-4" />
+          <span className="max-sm:sr-only">QR code</span>
+        </Button>
         {profile.published && (
           <>
             <a
@@ -165,6 +171,15 @@ function PublishControls() {
           </>
         )}
       </div>
+
+      <QrCodeDialog
+        open={showQr}
+        onClose={() => setShowQr(false)}
+        url={url}
+        slug={profile.slug}
+        name={profile.fullName}
+        published={profile.published}
+      />
 
       <PublishCelebration
         open={celebrating}

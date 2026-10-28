@@ -1,5 +1,6 @@
 import {
   SECTION_LABELS,
+  availabilityText,
   customIdOf,
   isCustomKey,
   type PublicLink,
@@ -7,7 +8,7 @@ import {
   type SectionKey,
 } from '@portfolio/shared';
 import { SITE_URL } from '@/lib/config';
-import { initials, linkTarget, safeHttpUrl } from '@/lib/format';
+import { contactTarget, initials, linkTarget, safeHttpUrl } from '@/lib/format';
 
 // Everything a theme needs from a profile, worked out in one place. A theme never looks at the
 // raw section list, the custom sections, empty content or URL safety: it draws the header and
@@ -292,6 +293,13 @@ export interface HeaderModel {
   avatar: { src: string | null; alt: string; initials: string };
   links: { id: string; type: PublicLink['type']; href: string; label: string; external: boolean }[];
   share: { url: string; title: string };
+  // The "open to work" badge: what it says, and the contact option the owner has made visible (an
+  // email first, then phone, LinkedIn or website) for its link. null while it is switched off.
+  availability: {
+    label: string;
+    detail: string | null;
+    contact: { href: string; label: string; external: boolean } | null;
+  } | null;
 }
 
 // The top of the page. Links that cannot be shown (an unsafe address) are dropped here.
@@ -310,6 +318,15 @@ export function buildHeader(profile: PublicProfile): HeaderModel {
       return target ? [{ id: link.id, type: link.type, ...target }] : [];
     }),
     share: { url: `${SITE_URL}/${profile.slug}`, title: `${profile.fullName}'s portfolio` },
+    availability: profile.availabilityEnabled
+      ? {
+          ...availabilityText(
+            profile.availabilityStatus ?? 'open_to_work',
+            profile.availabilityMessage,
+          ),
+          contact: contactTarget(profile.links),
+        }
+      : null,
   };
 }
 

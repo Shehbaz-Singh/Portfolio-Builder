@@ -46,8 +46,11 @@ export async function getPublicProfile(slug: string) {
   );
   const { sections, customSections } = publicLayout(layout, own);
   const has = (key: string) => sections.some((section) => section.key === key);
+  // The badge is only part of the page while it is switched on.
+  const { availabilityEnabled, availabilityStatus, availabilityMessage, ...visible } = rest;
   return {
-    ...rest,
+    ...visible,
+    ...(availabilityEnabled && { availabilityEnabled, availabilityStatus, availabilityMessage }),
     about: has('about') ? rest.about : null,
     skills: has('skills') ? rest.skills : [],
     experience: has('experience') ? rest.experience : [],

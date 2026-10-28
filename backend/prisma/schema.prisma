@@ -15,6 +15,13 @@ enum TestimonialStatus {
   rejected
 }
 
+enum AvailabilityStatus {
+  open_to_work
+  open_to_freelance
+  open_to_collaborate
+  custom
+}
+
 enum LinkType {
   linkedin
   github
@@ -33,22 +40,26 @@ model User {
 }
 
 model Profile {
-  id                 String  @id @default(cuid())
-  userId             String  @unique
-  slug               String  @unique
-  fullName           String
-  tagline            String?
-  about              String?
-  location           String?
-  avatarUrl          String?
-  theme              String  @default("editorial")
-  accentColor        String  @default("#2563eb")
-  published          Boolean @default(false)
+  id                  String             @id @default(cuid())
+  userId              String             @unique
+  slug                String             @unique
+  fullName            String
+  tagline             String?
+  about               String?
+  location            String?
+  avatarUrl           String?
+  theme               String             @default("editorial")
+  accentColor         String             @default("#2563eb")
+  published           Boolean            @default(false)
   // Whether visitors may submit testimonials (POST /public/:slug/testimonials).
-  acceptTestimonials Boolean @default(false)
+  acceptTestimonials  Boolean            @default(false)
+  // The availability badge on the public page (see shared/src/availability.ts).
+  availabilityEnabled Boolean            @default(false)
+  availabilityStatus  AvailabilityStatus @default(open_to_work)
+  availabilityMessage String?            @db.VarChar(140)
   // Order, visibility and headings of the page sections (see shared/src/section-config.ts).
   // The default must match defaultSectionConfig(); existing rows get it when the column is added.
-  sectionConfig      Json    @default("[{\"key\":\"about\",\"visible\":true},{\"key\":\"skills\",\"visible\":true},{\"key\":\"experience\",\"visible\":true},{\"key\":\"projects\",\"visible\":true},{\"key\":\"education\",\"visible\":true},{\"key\":\"testimonials\",\"visible\":false}]")
+  sectionConfig       Json               @default("[{\"key\":\"about\",\"visible\":true},{\"key\":\"skills\",\"visible\":true},{\"key\":\"experience\",\"visible\":true},{\"key\":\"projects\",\"visible\":true},{\"key\":\"education\",\"visible\":true},{\"key\":\"testimonials\",\"visible\":false}]")
 
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   links          Link[]

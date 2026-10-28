@@ -471,3 +471,35 @@ html:has(.dashboard-root) {
     background: var(--color-gray-400);
   }
 }
+
+/* The QR print sheet (QrCodeDialog): hidden on screen; when printing it is all there is. */
+.qr-print {
+  display: none;
+}
+@media print {
+  body > *:not(.qr-print) {
+    display: none !important;
+  }
+  .qr-print {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding: 2rem;
+    text-align: center;
+    color: #000;
+    background: #fff;
+  }
+  .qr-print img {
+    width: 14cm;
+    height: 14cm;
+  }
+  .qr-print-name {
+    font-size: 1.75rem;
+    font-weight: 600;
+  }
+  .qr-print-url {
+    font-size: 1.25rem;
+    overflow-wrap: anywhere;
+  }
+}

@@ -17,6 +17,7 @@ import {
   Avatar,
   DateRange,
   EmptyPage,
+  AvailabilityBadge,
   HeaderLink,
   InitialsBadge,
   NewTabLink,
@@ -217,6 +218,12 @@ function identityTile(header: HeaderModel): Tile {
               {header.tagline}
             </p>
           )}
+          <AvailabilityBadge
+            availability={header.availability}
+            className="mt-5 w-fit rounded-2xl bg-surface px-3.5 py-2.5 text-sm text-ink"
+            dotClassName="bg-accent-fg"
+            linkClassName={`font-semibold text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`}
+          />
         </div>
       </div>
     ),

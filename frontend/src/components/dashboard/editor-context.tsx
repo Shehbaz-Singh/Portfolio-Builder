@@ -29,7 +29,16 @@ import { saveProfile } from './save-profile';
 export type Draft = Partial<
   Pick<
     MyProfile,
-    'fullName' | 'tagline' | 'location' | 'about' | 'theme' | 'accentColor' | 'sectionConfig'
+    | 'fullName'
+    | 'tagline'
+    | 'location'
+    | 'about'
+    | 'theme'
+    | 'accentColor'
+    | 'sectionConfig'
+    | 'availabilityEnabled'
+    | 'availabilityStatus'
+    | 'availabilityMessage'
   >
 >;
 
@@ -83,7 +92,9 @@ interface EditorContextValue {
   // Saves profile fields (PUT /profile/me), one request at a time and always on top of the latest
   // saved profile, so two autosaves can never overwrite each other's fields.
   saveFields: (changes: Partial<ProfileUpdateInput>) => Promise<MyProfile>;
-  setDraft: (draft: Draft | null) => void;
+  // Each form hands in its own draft under its own `source`, so two forms on one screen (Details and
+  // Availability) do not wipe each other's. null clears that source's draft.
+  setDraft: (draft: Draft | null, source?: string) => void;
   notify: (kind: ToastData['kind'], text: string) => void;
   markDirty: () => () => void;
   hasUnsaved: () => boolean; // edits that would be lost by leaving (not an autosave still waiting)
@@ -127,7 +138,19 @@ export const isBlank = (p: MyProfile) =>
 
 export function EditorProvider({ initial, children }: { initial: MyProfile; children: ReactNode }) {
   const [profile, setProfile] = useState(initial);
-  const [draft, setDraft] = useState<Draft | null>(null);
+  const [drafts, setDrafts] = useState<Record<string, Draft>>({});
+  const setDraft = useCallback((next: Draft | null, source = 'form') => {
+    setDrafts((all) => {
+      if (next) return { ...all, [source]: next };
+      const rest = { ...all };
+      delete rest[source];
+      return rest;
+    });
+  }, []);
+  const draft = useMemo<Draft | null>(
+    () => (Object.keys(drafts).length > 0 ? Object.assign({}, ...Object.values(drafts)) : null),
+    [drafts],
+  );
   const [toasts, setToasts] = useState<ToastData[]>([]);
   const nextToast = useRef(0);
   const [tab, setTab] = useState(() => (isBlank(initial) ? 'import' : 'basics'));
@@ -286,6 +309,14 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
     () => ({
       ...profile,
       ...draft,
+      // Like the public API, the badge is only there while it is switched on.
+      ...((draft?.availabilityEnabled ?? profile.availabilityEnabled)
+        ? { availabilityEnabled: true as const }
+        : {
+            availabilityEnabled: undefined,
+            availabilityStatus: undefined,
+            availabilityMessage: undefined,
+          }),
       links: profile.links.filter((link) => link.visible),
       // The same layout the public API returns (visible sections in order, custom sections with
       // items), worked out from the unsaved config too.

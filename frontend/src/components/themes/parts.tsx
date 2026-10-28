@@ -212,3 +212,56 @@ export function HeaderLink({
 export function EmptyPage({ className }: { className?: string }) {
   return <p className={className}>This portfolio is still being put together.</p>;
 }
+
+// "Open to new opportunities", with a dot and a link to the best way to get in touch. A plain group
+// the screen reader announces as "Availability": the status is in the words, the dot only decorates
+// them, so it does not rely on color. Long messages wrap instead of stretching the page. Each theme
+// gives it its own look through the class names; `className` must set the text color the dot and
+// the link inherit.
+export function AvailabilityBadge({
+  availability,
+  className,
+  dotClassName,
+  linkClassName,
+}: {
+  availability: HeaderModel['availability'];
+  className: string;
+  dotClassName: string;
+  linkClassName: string;
+}) {
+  if (!availability) return null;
+  const { label, detail, contact } = availability;
+  return (
+    <div
+      role="group"
+      aria-label="Availability"
+      className={`flex max-w-full flex-wrap items-start gap-x-3 gap-y-1 ${className}`}
+    >
+      <span className="flex min-w-0 items-start gap-2.5">
+        <span
+          aria-hidden="true"
+          className={`mt-[0.45em] size-2.5 shrink-0 rounded-full ${dotClassName}`}
+        />
+        <span className="min-w-0 [overflow-wrap:anywhere]">
+          <span className="font-semibold">{label}</span>
+          {detail && <span className="mt-0.5 block opacity-90">{detail}</span>}
+        </span>
+      </span>
+      {contact &&
+        (contact.external ? (
+          <NewTabLink
+            href={contact.href}
+            className={linkClassName}
+            context={`via ${contact.label}`}
+          >
+            Get in touch
+          </NewTabLink>
+        ) : (
+          <a href={contact.href} className={linkClassName}>
+            Get in touch
+            <span className="sr-only"> via {contact.label}</span>
+          </a>
+        ))}
+    </div>
+  );
+}

@@ -5,8 +5,21 @@ import { api } from '@/lib/client-api';
 // step that edits two fields must send the others back as they are.
 export function saveProfile(profile: MyProfile, changes: Partial<ProfileUpdateInput>) {
   const { fullName, tagline, about, location, avatarUrl, theme, accentColor } = profile;
+  const { availabilityEnabled, availabilityStatus, availabilityMessage } = profile;
   return api<MyProfile>('/profile/me', {
     method: 'PUT',
-    body: { fullName, tagline, about, location, avatarUrl, theme, accentColor, ...changes },
+    body: {
+      fullName,
+      tagline,
+      about,
+      location,
+      avatarUrl,
+      theme,
+      accentColor,
+      availabilityEnabled,
+      availabilityStatus,
+      availabilityMessage,
+      ...changes,
+    },
   });
 }

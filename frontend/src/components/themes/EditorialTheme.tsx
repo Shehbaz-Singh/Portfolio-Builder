@@ -15,6 +15,7 @@ import {
   Avatar,
   DateRange,
   EmptyPage,
+  AvailabilityBadge,
   HeaderLink,
   NewTabLink,
   RoleList,
@@ -103,6 +104,12 @@ function Masthead({ header }: { header: HeaderModel }) {
           {header.tagline}
         </p>
       )}
+      <AvailabilityBadge
+        availability={header.availability}
+        className="mx-auto mt-6 w-fit justify-center border border-line px-4 py-2.5 text-start text-sm text-ink"
+        dotClassName="bg-accent-fg"
+        linkClassName={`text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`}
+      />
       <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 border-y border-line py-4 text-sm">
         {header.links.map((item) => (
           <li key={item.id} className="max-w-full">

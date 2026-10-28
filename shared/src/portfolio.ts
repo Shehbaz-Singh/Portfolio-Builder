@@ -1,4 +1,10 @@
 import { z } from 'zod';
+import {
+  AVAILABILITY_MESSAGE_MAX,
+  DEFAULT_AVAILABILITY_STATUS,
+  availabilityStatusSchema,
+} from './availability';
+import { optionalLine } from './text';
 
 // Request-body schemas for the portfolio models. Dates are accepted as ISO strings
 // (e.g. "2024-06-01") and coerced to Date objects.
@@ -86,6 +92,10 @@ export const profileInputSchema = z.object({
   published: z.boolean().default(false),
   // Whether visitors may submit testimonials (see testimonials.ts). Changed by its own endpoint.
   acceptTestimonials: z.boolean().default(false),
+  // The availability badge (see availability.ts). The message is one line of plain text.
+  availabilityEnabled: z.boolean().default(false),
+  availabilityStatus: availabilityStatusSchema.default(DEFAULT_AVAILABILITY_STATUS),
+  availabilityMessage: optionalLine(AVAILABILITY_MESSAGE_MAX),
 });
 export type ProfileInput = z.infer<typeof profileInputSchema>;
 
