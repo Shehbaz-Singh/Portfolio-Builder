@@ -53,6 +53,17 @@ export default function HomePage() {
             <Link href="/register" className={`${buttonStyles({ variant: 'primary' })} mt-6`}>
               Create your portfolio
             </Link>
+            <p className="mt-4 text-xs text-muted">
+              By creating an account you agree to the{' '}
+              <Link href="/terms" className="underline hover:text-ink">
+                Terms
+              </Link>{' '}
+              and{' '}
+              <Link href="/privacy" className="underline hover:text-ink">
+                Privacy Policy
+              </Link>
+              .
+            </p>
           </div>
         </section>
       </main>

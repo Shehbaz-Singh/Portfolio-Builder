@@ -70,3 +70,13 @@ export function avatarPublicId(url: string, profileId: string): string | null {
 export async function deleteImage(publicId: string): Promise<void> {
   await cloudinary.uploader.destroy(publicId, { resource_type: 'image', invalidate: true });
 }
+
+// Removes every image stored under a profile, including any left behind by an earlier failed delete.
+// Used when the account is deleted. Names carry the profile id (see uploadAvatar), so this cannot
+// touch anyone else's images.
+export async function deleteImagesOf(profileId: string): Promise<void> {
+  await cloudinary.api.delete_resources_by_prefix(`${AVATAR_FOLDER}/${profileId}-`, {
+    resource_type: 'image',
+    invalidate: true,
+  });
+}

@@ -32,11 +32,15 @@ enum LinkType {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  email        String   @unique
-  passwordHash String
-  createdAt    DateTime @default(now())
-  profile      Profile?
+  id              String    @id @default(cuid())
+  email           String    @unique
+  passwordHash    String
+  createdAt       DateTime  @default(now())
+  // When they agreed to the Terms and Privacy Policy, and which version (shared/src/legal.ts).
+  // Null for accounts made before consent was recorded.
+  termsAcceptedAt DateTime?
+  termsVersion    String?
+  profile         Profile?
 }
 
 model Profile {

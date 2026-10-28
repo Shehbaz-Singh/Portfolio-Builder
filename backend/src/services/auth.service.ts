@@ -1,5 +1,6 @@
-import type {
-  AuthResponse,
+import {
+  LEGAL_VERSION,
+  type AuthResponse,
   ChangePasswordInput,
   DeleteAccountInput,
   LoginInput,
@@ -13,7 +14,7 @@ import { hashPassword, verifyPassword } from '../lib/password';
 import { prisma } from '../lib/prisma';
 import { isUniqueViolation } from '../lib/prisma-errors';
 import { profileSelect } from '../lib/selects';
-import { deleteAvatarImage } from './avatar.service';
+import { deleteAllImagesOf } from './avatar.service';
 import { generateUniqueSlug } from './slug.service';
 
 // Explicit selects mean passwordHash is never loaded unless login needs it, and the
@@ -53,7 +54,13 @@ export async function register(input: RegisterInput): Promise<AuthResponse> {
     const slug = await generateUniqueSlug(fullName);
     try {
       const user = await prisma.user.create({
-        data: { email, passwordHash, profile: { create: { slug, fullName } } },
+        data: {
+          email,
+          passwordHash,
+          termsAcceptedAt: new Date(),
+          termsVersion: LEGAL_VERSION,
+          profile: { create: { slug, fullName } },
+        },
         select: sessionSelect,
       });
       return { token: signToken(user.id), ...toSession(user) };
@@ -113,10 +120,30 @@ export async function changePassword(userId: string, input: ChangePasswordInput)
   });
 }
 
-// The profile and everything under it go with the user (cascade). The photo is removed from
-// Cloudinary afterwards; a failure there only leaves an unused image behind.
+// Removes the account and everything under it in one transaction, so it is all gone or nothing is.
+// The cascade on the foreign keys would do the same; the explicit deletes keep this true if a
+// table is ever added without one. There are no session rows: a login is a signed token, and once
+// the user is gone every token for them is refused. The photo is removed from Cloudinary after the
+// commit; a failure there only leaves an unused image behind. The page returns 404 from the moment
+// the commit lands, and the frontend drops its cached copies (see the /api proxy).
 export async function deleteAccount(userId: string, { password }: DeleteAccountInput) {
   const user = await confirmPassword(userId, password);
-  await prisma.user.delete({ where: { id: userId } });
-  if (user.profile) await deleteAvatarImage(user.profile.avatarUrl, user.profile.id);
+  const profileId = user.profile?.id;
+  await prisma.$transaction([
+    ...(profileId
+      ? [
+          prisma.customSectionItem.deleteMany({ where: { section: { profileId } } }),
+          prisma.customSection.deleteMany({ where: { profileId } }),
+          prisma.testimonial.deleteMany({ where: { profileId } }),
+          prisma.link.deleteMany({ where: { profileId } }),
+          prisma.skill.deleteMany({ where: { profileId } }),
+          prisma.experience.deleteMany({ where: { profileId } }),
+          prisma.project.deleteMany({ where: { profileId } }),
+          prisma.education.deleteMany({ where: { profileId } }),
+          prisma.profile.delete({ where: { id: profileId } }),
+        ]
+      : []),
+    prisma.user.delete({ where: { id: userId } }),
+  ]);
+  if (user.profile) await deleteAllImagesOf(user.profile.avatarUrl, user.profile.id);
 }

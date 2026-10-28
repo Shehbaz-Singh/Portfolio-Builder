@@ -1,8 +1,11 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import Link from 'next/link';
+import { Download } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import {
+  DELETE_CONFIRMATION,
   changePasswordSchema,
   deleteAccountSchema,
   type ChangePasswordInput,
@@ -88,14 +91,82 @@ function ChangePassword() {
   );
 }
 
+// What is stored, what is public, and the way to take a copy. The policy has the full picture.
+function YourData() {
+  const [state, setState] = useState<'idle' | 'working' | 'done' | 'failed'>('idle');
+
+  // A plain fetch, not api(): the answer is a file, not JSON. The cookie goes along by itself.
+  async function download() {
+    setState('working');
+    try {
+      const res = await fetch('/api/profile/me/export', { credentials: 'same-origin' });
+      if (!res.ok) throw new Error(String(res.status));
+      const name =
+        /filename="([^"]+)"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ??
+        'portfolio-data.json';
+      const url = URL.createObjectURL(await res.blob());
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = name;
+      a.click();
+      URL.revokeObjectURL(url);
+      setState('done');
+    } catch {
+      setState('failed');
+    }
+  }
+
+  return (
+    <section aria-labelledby="data-heading" className="space-y-4">
+      <h2 id="data-heading" className="type-section">
+        Your data
+      </h2>
+      <div className="space-y-2 text-sm text-muted">
+        <p>
+          We keep your email, your portfolio content and your photo, and nothing more. We don’t
+          track your visitors. A resume you upload for import is read and not stored.
+        </p>
+        <p>
+          Your page is private until you publish it. Once it’s live, the parts you haven’t hidden
+          are public. You can download a copy of everything we hold, or delete it all, here. The{' '}
+          <Link href="/privacy" className="font-medium text-accent-fg underline">
+            Privacy Policy
+          </Link>{' '}
+          has the details.
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center gap-3">
+        <Button onClick={download} disabled={state === 'working'}>
+          <Download aria-hidden="true" className="size-4" />
+          {state === 'working' ? 'Preparing…' : 'Download my data'}
+        </Button>
+        <p role="status" className="text-sm">
+          {state === 'done' && (
+            <span className="font-medium text-green-700">Your file has been downloaded.</span>
+          )}
+          {state === 'failed' && (
+            <span className="font-medium text-danger">
+              We couldn’t prepare your file. Please try again in a moment.
+            </span>
+          )}
+        </p>
+      </div>
+      <p className="text-xs text-muted">
+        A JSON file with your account email, profile, every section, custom sections, testimonials
+        and settings. Your password is never included.
+      </p>
+    </section>
+  );
+}
+
 function DeleteAccount() {
   const [confirming, setConfirming] = useState(false);
   const panel = useRef<HTMLDivElement>(null);
   const openButton = useRef<HTMLButtonElement>(null);
   const wasConfirming = useRef(false);
-  const form = useForm<DeleteAccountInput, unknown, DeleteAccountInput>({
+  const form = useForm<{ password: string; confirmation: string }, unknown, DeleteAccountInput>({
     resolver: schemaResolver(deleteAccountSchema),
-    defaultValues: { password: '' },
+    defaultValues: { password: '', confirmation: '' },
   });
 
   // Opening the confirmation moves the keyboard into it; cancelling brings it back to the button.
@@ -107,26 +178,30 @@ function DeleteAccount() {
 
   async function onSubmit(values: DeleteAccountInput) {
     await api('/auth/me', { method: 'DELETE', body: values });
-    window.location.assign('/'); // the session is gone; start from the front page
+    window.location.assign('/account-deleted'); // the session is gone; say so on a page of its own
   }
 
   return (
     <Card as="section" tone="danger" aria-labelledby="delete-heading" className="space-y-4">
       <h2 id="delete-heading" className="type-section text-danger">
-        Delete account
+        Delete account and data
       </h2>
       <p className="text-sm text-ink">
-        This permanently deletes your account, your portfolio and your photo, and your page address
-        stops working. It cannot be undone.
+        This permanently deletes your account, your portfolio, your testimonials and your photo.
+        Your page address stops working right away. It cannot be undone, so download your data first
+        if you want a copy.
       </p>
       {confirming ? (
         <Card ref={panel} tone="danger-soft" className="space-y-4">
-          <p className="text-sm font-medium">Enter your password to confirm.</p>
+          <p className="text-sm font-medium">
+            To confirm, enter your password and type {DELETE_CONFIRMATION}.
+          </p>
           <Form
             form={form}
             onSubmit={onSubmit}
             codeFields={{ INVALID_PASSWORD: 'password' }}
             submitLabel="Yes, delete everything"
+            pendingLabel="Deleting…"
             danger
             onCancel={() => {
               setConfirming(false);
@@ -140,11 +215,20 @@ function DeleteAccount() {
               type="password"
               autoComplete="current-password"
             />
+            <TextField
+              name="confirmation"
+              label={`Type ${DELETE_CONFIRMATION} to confirm`}
+              required
+              autoComplete="off"
+              autoCapitalize="characters"
+              spellCheck={false}
+              placeholder={DELETE_CONFIRMATION}
+            />
           </Form>
         </Card>
       ) : (
         <Button ref={openButton} variant="danger" onClick={() => setConfirming(true)}>
-          Delete my account
+          Delete my account and data
         </Button>
       )}
     </Card>
@@ -173,6 +257,7 @@ export function AccountSettings() {
           Signed in as <span className="font-medium">{state.data.user.email}</span>
         </p>
       </div>
+      <YourData />
       <ChangePassword />
       <section aria-labelledby="session-heading" className="space-y-3">
         <h2 id="session-heading" className="type-section">

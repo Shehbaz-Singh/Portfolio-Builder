@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { DELETE_CONFIRMATION } from './legal';
 import { profileSchema } from './portfolio';
 
 // bcrypt only uses the first 72 bytes of a password, so reject anything longer instead of
@@ -15,6 +16,10 @@ export const registerSchema = z.object({
   password: passwordSchema,
   // Optional: defaults to the part of the email before the @.
   fullName: z.string().trim().min(1).max(100).optional(),
+  // Must be true: the box on the sign-up form. The API records when and which version.
+  acceptTerms: z.literal(true, {
+    errorMap: () => ({ message: 'Please agree to the Terms and Privacy Policy to continue' }),
+  }),
 });
 export type RegisterInput = z.infer<typeof registerSchema>;
 
@@ -37,9 +42,17 @@ export const changePasswordSchema = z
   });
 export type ChangePasswordInput = z.infer<typeof changePasswordSchema>;
 
-// DELETE /auth/me: the password is the confirmation, so a stolen session alone cannot do it.
+// DELETE /auth/me: the password and the typed word are the confirmation, so neither a stolen session
+// nor a stray click can do it.
 export const deleteAccountSchema = z.object({
   password: z.string().min(1, 'Password is required').max(1024),
+  confirmation: z
+    .string()
+    .trim()
+    .refine(
+      (v) => v === DELETE_CONFIRMATION,
+      `Type ${DELETE_CONFIRMATION} in capital letters to confirm`,
+    ),
 });
 export type DeleteAccountInput = z.infer<typeof deleteAccountSchema>;
 

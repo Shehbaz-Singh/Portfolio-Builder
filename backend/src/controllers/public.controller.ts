@@ -1,6 +1,7 @@
 import type { Request } from 'express';
 import { slugSchema, type TestimonialInput } from '@portfolio/shared';
 import { asyncHandler } from '../lib/async-handler';
+import { config } from '../lib/config';
 import { AppError } from '../lib/errors';
 import * as publicService from '../services/public.service';
 import * as testimonialService from '../services/testimonial.service';
@@ -26,4 +27,17 @@ export const getPublicProfile = asyncHandler(async (req, res) => {
 export const submitTestimonial = asyncHandler(async (req, res) => {
   await testimonialService.submit(slugOf(req), req.body as TestimonialInput);
   res.status(201).json({ received: true });
+});
+
+// Which AI service reads uploaded resumes, for the privacy page to name. null when resume import is
+// not set up (no API key), so the page does not claim a provider that is not in use.
+export const getSiteInfo = asyncHandler(async (_req, res) => {
+  const provider = !config.LLM_API_KEY
+    ? null
+    : config.LLM_PROVIDER === 'gemini'
+      ? 'Google (Gemini API)'
+      : config.LLM_BASE_URL
+        ? 'an OpenAI-compatible AI service'
+        : 'OpenAI';
+  res.json({ aiProvider: provider });
 });

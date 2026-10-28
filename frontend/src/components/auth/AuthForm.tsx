@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useFormContext } from 'react-hook-form';
 import {
   loginSchema,
   registerSchema,
@@ -16,7 +16,45 @@ import { Form, TextField } from '../form-fields';
 import { Button, Card } from '../ui';
 
 type Mode = 'login' | 'register';
-type Fields = { email: string; password: string; fullName: string };
+type Fields = { email: string; password: string; fullName: string; acceptTerms: boolean };
+
+// The required box on the sign-up form. Both documents open in a new tab, so nothing typed is lost.
+function ConsentField() {
+  const { register, formState } = useFormContext<Fields>();
+  const error = formState.errors.acceptTerms?.message;
+  const link = 'font-medium text-accent-fg underline';
+  return (
+    <div>
+      <div className="flex items-start gap-2">
+        <input
+          id="acceptTerms"
+          type="checkbox"
+          className="mt-0.5 size-4 rounded border-line accent-accent"
+          aria-required="true"
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? 'acceptTerms-error' : undefined}
+          {...register('acceptTerms')}
+        />
+        <label htmlFor="acceptTerms" className="text-sm">
+          I agree to the{' '}
+          <Link href="/terms" target="_blank" rel="noopener noreferrer" className={link}>
+            Terms<span className="sr-only"> (opens in a new tab)</span>
+          </Link>{' '}
+          and{' '}
+          <Link href="/privacy" target="_blank" rel="noopener noreferrer" className={link}>
+            Privacy Policy<span className="sr-only"> (opens in a new tab)</span>
+          </Link>
+          <span className="font-normal text-muted"> (required)</span>
+        </label>
+      </div>
+      {error && (
+        <p id="acceptTerms-error" role="alert" className="mt-1 text-sm text-danger">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}
 
 const copy = {
   login: {
@@ -40,7 +78,7 @@ export function AuthForm({ mode, expired = false }: { mode: Mode; expired?: bool
 
   const form = useForm<Fields, unknown, LoginInput | RegisterInput>({
     resolver: schemaResolver(mode === 'login' ? loginSchema : registerSchema),
-    defaultValues: { email: '', password: '', fullName: '' },
+    defaultValues: { email: '', password: '', fullName: '', acceptTerms: false },
   });
 
   async function onSubmit(values: LoginInput | RegisterInput) {
@@ -105,6 +143,7 @@ export function AuthForm({ mode, expired = false }: { mode: Mode; expired?: bool
               {showPassword ? 'Hide password' : 'Show password'}
             </Button>
           </div>
+          {mode === 'register' && <ConsentField />}
         </Form>
       </div>
       <p className="mt-6 text-sm text-muted">

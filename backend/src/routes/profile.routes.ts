@@ -23,6 +23,7 @@ import {
 } from '../controllers/custom-section.controller';
 import {
   deleteMyAvatar,
+  exportMyData,
   getMyProfile,
   getMySections,
   parseMyResume,
@@ -64,6 +65,7 @@ profileRouter.param('section', sectionParam);
 profileRouter.get('/me', getMyProfile);
 profileRouter.put('/me', validateBody(profileUpdateSchema), updateMyProfile);
 // Declared before /me/:section so "publish" and "avatar" are not read as section names.
+profileRouter.get('/me/export', exportMyData);
 profileRouter.post('/me/publish', validateBody(publishSchema), publishMyProfile);
 // Auth has already run (router-level), so unauthenticated uploads are rejected before any
 // bytes are read. Then: rate limit, multipart parse (2 MB, jpg/png/webp), upload.

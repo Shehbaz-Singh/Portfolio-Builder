@@ -1,5 +1,5 @@
 import { AppError } from '../lib/errors';
-import { avatarPublicId, deleteImage, uploadAvatar } from '../lib/cloudinary';
+import { avatarPublicId, deleteImage, deleteImagesOf, uploadAvatar } from '../lib/cloudinary';
 import { detectImageType } from '../lib/image';
 import { prisma } from '../lib/prisma';
 
@@ -9,7 +9,11 @@ async function deleteQuietly(publicId: string) {
   try {
     await deleteImage(publicId);
   } catch (err) {
-    console.warn(`Could not delete Cloudinary image ${publicId}:`, err);
+    // No id in the message: the log should not say whose image it was.
+    console.warn(
+      'Could not delete a Cloudinary image:',
+      err instanceof Error ? err.message : 'unknown error',
+    );
   }
 }
 
@@ -17,6 +21,19 @@ async function deleteQuietly(publicId: string) {
 export async function deleteAvatarImage(avatarUrl: string | null, profileId: string) {
   const publicId = avatarUrl && avatarPublicId(avatarUrl, profileId);
   if (publicId) await deleteQuietly(publicId);
+}
+
+// For a deleted account: the current avatar, then anything else stored under the profile.
+export async function deleteAllImagesOf(avatarUrl: string | null, profileId: string) {
+  await deleteAvatarImage(avatarUrl, profileId);
+  try {
+    await deleteImagesOf(profileId);
+  } catch (err) {
+    console.warn(
+      'Could not clear a deleted account’s images:',
+      err instanceof Error ? err.message : 'unknown error',
+    );
+  }
 }
 
 export async function replaceAvatar(profileId: string, file: Buffer) {

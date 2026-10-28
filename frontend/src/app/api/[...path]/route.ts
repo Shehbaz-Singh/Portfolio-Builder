@@ -109,11 +109,14 @@ async function handle(req: NextRequest, { params }: Context) {
     revalidateTag(PUBLIC_PROFILES_TAG, { expire: 0 });
   }
 
+  // The data export is a file download: its name travels in this header.
+  const disposition = upstream.headers.get('content-disposition');
   const res = new NextResponse(upstream.status === 204 ? null : upstream.body, {
     status: upstream.status,
     headers: {
       'content-type': upstream.headers.get('content-type') ?? 'application/json',
       'cache-control': 'no-store',
+      ...(disposition && { 'content-disposition': disposition }),
     },
   });
   // An expired or revoked token, or a deleted account: forget the cookie, so the route guard
