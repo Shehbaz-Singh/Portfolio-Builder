@@ -1,6 +1,6 @@
 import type { ComponentType, ReactNode } from 'react';
 import Link from 'next/link';
-import { Globe, Link2, Mail, Phone } from 'lucide-react';
+import { FileDown, Globe, Link2, Mail, Phone } from 'lucide-react';
 import type { PublicLink } from '@parichay/shared';
 import { formatDate, formatMonthYear, initials } from '@/lib/format';
 import type { Block, Entry, HeaderModel, Role } from './blocks';
@@ -182,6 +182,29 @@ const LINK_ICONS: Record<PublicLink['type'], ComponentType<IconProps>> = {
 
 // A header link: its icon, then its label. The look (pill, plain text) comes from `className`.
 // The icon is decoration; the label is what is read out.
+// "Download resume (PDF)": a link to the generated resume, styled by the theme (`className` is the
+// same string the theme gives its other header links). The file type is in the visible text, so
+// it is read out as part of the name.
+export function ResumeLink({
+  resume,
+  className,
+}: {
+  resume: NonNullable<HeaderModel['resume']>;
+  className: string;
+}) {
+  return (
+    <a href={resume.href} download className={className}>
+      <span aria-hidden="true" className="inline-flex shrink-0">
+        <FileDown className="size-4" />
+      </span>
+      Download resume
+      <span className="rounded-sm border border-current px-1 text-[0.65rem] leading-4 font-semibold">
+        PDF
+      </span>
+    </a>
+  );
+}
+
 export function HeaderLink({
   link,
   className,

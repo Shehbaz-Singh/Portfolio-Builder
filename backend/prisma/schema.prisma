@@ -67,6 +67,8 @@ model Profile {
   published           Boolean            @default(false)
   // A made-up example profile (shared/src/samples.ts). Seeded without a usable login.
   isSample            Boolean            @default(false)
+  // Whether the public page offers a PDF resume generated from it (/<slug>/resume.pdf).
+  resumeEnabled       Boolean            @default(true)
   // Whether visitors may submit testimonials (POST /public/:slug/testimonials).
   acceptTestimonials  Boolean            @default(false)
   // The availability badge on the public page (see shared/src/availability.ts).

@@ -114,6 +114,8 @@ export const profileInputSchema = z.object({
   availabilityEnabled: z.boolean().default(false),
   availabilityStatus: availabilityStatusSchema.default(DEFAULT_AVAILABILITY_STATUS),
   availabilityMessage: optionalLine(AVAILABILITY_MESSAGE_MAX),
+  // Whether the public page offers a "Download resume" PDF made from it (/<slug>/resume.pdf).
+  resumeEnabled: z.boolean().default(true),
 });
 export type ProfileInput = z.infer<typeof profileInputSchema>;
 

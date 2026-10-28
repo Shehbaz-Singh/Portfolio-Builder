@@ -24,6 +24,7 @@ import { EditorForm } from '../EditorForm';
 import { errorText, useEditor, useReportDirty, useSection } from '../editor-context';
 import { SectionManager, type ItemFormProps } from '../SectionManager';
 import { AvailabilityCard } from './AvailabilityCard';
+import { ResumeCard } from './ResumeCard';
 
 const AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
@@ -355,6 +356,13 @@ export function BasicsStep() {
           Availability
         </h2>
         <AvailabilityCard />
+      </section>
+
+      <section aria-labelledby="resume-heading" className="space-y-4">
+        <h2 id="resume-heading" className="type-section">
+          Resume download
+        </h2>
+        <ResumeCard />
       </section>
 
       <section aria-labelledby="address-heading" className="space-y-4">

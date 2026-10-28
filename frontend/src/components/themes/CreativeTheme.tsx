@@ -17,6 +17,7 @@ import {
   EmptyPage,
   AvailabilityBadge,
   HeaderLink,
+  ResumeLink,
   WritingList,
   NewTabLink,
   RoleList,
@@ -81,6 +82,11 @@ function Header({ header }: { header: HeaderModel }) {
                 <HeaderLink link={link} className={pill} />
               </li>
             ))}
+            {header.resume && (
+              <li>
+                <ResumeLink resume={header.resume} className={pill} />
+              </li>
+            )}
             <li>
               <ShareButton url={header.share.url} title={header.share.title} variant="inverse" />
             </li>

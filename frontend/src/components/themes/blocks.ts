@@ -346,6 +346,8 @@ export interface HeaderModel {
   avatar: { src: string | null; alt: string; initials: string };
   links: { id: string; type: PublicLink['type']; href: string; label: string; external: boolean }[];
   share: { url: string; title: string };
+  // The "Download resume" link, while the owner has it switched on.
+  resume: { href: string } | null;
   // The "open to work" badge: what it says, and the contact option the owner has made visible (an
   // email first, then phone, LinkedIn or website) for its link. null while it is switched off.
   availability: {
@@ -371,6 +373,7 @@ export function buildHeader(profile: PublicProfile): HeaderModel {
       return target ? [{ id: link.id, type: link.type, ...target }] : [];
     }),
     share: { url: `${SITE_URL}/${profile.slug}`, title: `${profile.fullName}'s portfolio` },
+    resume: profile.resumeEnabled ? { href: `/${profile.slug}/resume.pdf` } : null,
     availability: profile.availabilityEnabled
       ? {
           ...availabilityText(

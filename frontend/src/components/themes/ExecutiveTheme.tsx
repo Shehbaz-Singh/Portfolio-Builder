@@ -17,6 +17,7 @@ import {
   EmptyPage,
   AvailabilityBadge,
   HeaderLink,
+  ResumeLink,
   WritingList,
   NewTabLink,
   RoleList,
@@ -100,6 +101,11 @@ function Sidebar({
               <HeaderLink link={item} className={contact} />
             </li>
           ))}
+          {header.resume && (
+            <li className="print:hidden">
+              <ResumeLink resume={header.resume} className={contact} />
+            </li>
+          )}
         </ul>
         <div className="mt-4 print:hidden">
           <ShareButton url={header.share.url} title={header.share.title} variant="outline" />

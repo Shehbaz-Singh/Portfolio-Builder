@@ -51,6 +51,7 @@ function toPublic(sample: SampleProfile): PublicProfile {
     accentColor: sample.accentColor,
     isSample: true,
     acceptTestimonials: false,
+    resumeEnabled: true,
     ...(sample.availability && {
       availabilityEnabled: true as const,
       availabilityStatus: sample.availability.status,

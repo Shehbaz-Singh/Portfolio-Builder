@@ -19,6 +19,7 @@ import {
   EmptyPage,
   AvailabilityBadge,
   HeaderLink,
+  ResumeLink,
   WritingList,
   InitialsBadge,
   NewTabLink,
@@ -248,6 +249,11 @@ function linksTile(header: HeaderModel, idPrefix: string): Tile {
               <HeaderLink link={item} className={link} />
             </li>
           ))}
+          {header.resume && (
+            <li>
+              <ResumeLink resume={header.resume} className={link} />
+            </li>
+          )}
         </ul>
         <div className="mt-auto pt-4">
           <ShareButton url={header.share.url} title={header.share.title} variant="inverse" />

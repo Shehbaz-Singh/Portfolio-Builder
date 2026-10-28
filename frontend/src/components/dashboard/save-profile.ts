@@ -6,6 +6,7 @@ import { api } from '@/lib/client-api';
 export function saveProfile(profile: MyProfile, changes: Partial<ProfileUpdateInput>) {
   const { fullName, tagline, about, location, avatarUrl, theme, accentColor } = profile;
   const { availabilityEnabled, availabilityStatus, availabilityMessage } = profile;
+  const { resumeEnabled } = profile;
   return api<MyProfile>('/profile/me', {
     method: 'PUT',
     body: {
@@ -19,6 +20,7 @@ export function saveProfile(profile: MyProfile, changes: Partial<ProfileUpdateIn
       availabilityEnabled,
       availabilityStatus,
       availabilityMessage,
+      resumeEnabled,
       ...changes,
     },
   });

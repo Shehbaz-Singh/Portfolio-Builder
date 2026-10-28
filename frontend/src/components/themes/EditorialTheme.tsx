@@ -17,6 +17,7 @@ import {
   EmptyPage,
   AvailabilityBadge,
   HeaderLink,
+  ResumeLink,
   WritingList,
   NewTabLink,
   RoleList,
@@ -134,6 +135,14 @@ function Masthead({ header }: { header: HeaderModel }) {
                 <HeaderLink link={item} className={`inline-flex items-center gap-2 ${link}`} />
               </li>
             ))}
+            {header.resume && (
+              <li>
+                <ResumeLink
+                  resume={header.resume}
+                  className={`inline-flex items-center gap-2 ${link}`}
+                />
+              </li>
+            )}
             <li>
               <ShareButton url={header.share.url} title={header.share.title} variant="outline" />
             </li>

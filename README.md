@@ -37,6 +37,7 @@ It is a full-stack TypeScript project: a Next.js frontend, an Express API, a Pos
 **Share it**
 
 - One link to copy, a share menu, and a downloadable **QR code** for a printed resume.
+- A **Download resume (PDF)** button, made from your page in the look of your theme: real selectable text, your section order, and only the links you show. You can switch it off.
 - Proper link previews when the page is shared, and a sitemap for posts.
 
 **Stay in control**
