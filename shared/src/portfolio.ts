@@ -42,6 +42,7 @@ export const RESERVED_SLUGS = [
   'about',
   'privacy',
   'terms',
+  'writing',
   '_next',
 ] as const;
 

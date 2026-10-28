@@ -15,3 +15,19 @@ export function slugify(input: string): string {
   if (base.length < 3) base = `user-${base}`.replace(/-+$/g, '');
   return base;
 }
+
+const MAX_TITLE_SLUG = 60; // the column holds 80, leaving room for a "-NN" counter
+
+// "Why I stopped using Redux!" -> "why-i-stopped-using-redux": for a post. Falls back to "post" when
+// the title has no letters or digits (say, only emoji). Uniqueness is handled by post.service.
+export function slugifyTitle(title: string): string {
+  const base = title
+    .normalize('NFKD')
+    .replace(/[̀-ͯ]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, MAX_TITLE_SLUG)
+    .replace(/-+$/g, '');
+  return base || 'post';
+}

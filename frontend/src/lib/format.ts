@@ -90,3 +90,13 @@ export function contactTarget(
   }
   return null;
 }
+
+// "Mar 12, 2026". UTC, like formatMonthYear, so a date reads the same in every timezone.
+const fullDate = new Intl.DateTimeFormat('en-US', {
+  month: 'short',
+  day: 'numeric',
+  year: 'numeric',
+  timeZone: 'UTC',
+});
+
+export const formatDate = (iso: string) => fullDate.format(new Date(iso));

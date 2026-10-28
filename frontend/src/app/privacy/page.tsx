@@ -62,12 +62,14 @@ export default async function PrivacyPage() {
             <li>
               <strong>Your portfolio content:</strong> everything you type into the dashboard: your
               name, tagline, About text, location, links (including any email address or phone
-              number you add), skills, jobs, projects, education, your own custom sections, your
-              page address, and your choices of theme, accent color and availability badge.
+              number you add), skills, jobs, projects, education, your own custom sections, the
+              posts and article links you write (drafts included), your page address, and your
+              choices of theme, accent color and availability badge.
             </li>
             <li>
               <strong>Your photo,</strong> if you upload one (JPG, PNG or WebP, up to 2 MB). We crop
-              it to a square and keep a 400 × 400 pixel copy.
+              it to a square and keep a 400 × 400 pixel copy. The same goes for the optional cover
+              image of a post (cropped to 1200 × 630).
             </li>
             <li>
               <strong>Testimonials,</strong> if you let visitors send them: the name, role, company
@@ -139,7 +141,8 @@ export default async function PrivacyPage() {
               show one);
             </li>
             <li>
-              your skills, jobs, projects, education and custom sections, unless you hide them;
+              your skills, jobs, projects, education, custom sections and the posts you have
+              published, unless you hide them (drafts are never shown);
             </li>
             <li>your availability badge, if you switch it on;</li>
             <li>
@@ -172,9 +175,9 @@ export default async function PrivacyPage() {
               database runs in Singapore (AWS region ap-southeast-1).
             </li>
             <li>
-              <strong>Cloudinary</strong> (images): stores and delivers your photo. Visitors’
-              browsers load the photo from Cloudinary, so Cloudinary sees their IP address when they
-              do.
+              <strong>Cloudinary</strong> (images): stores and delivers your photo and post cover
+              images. Visitors’ browsers load the photo from Cloudinary, so Cloudinary sees their IP
+              address when they do.
             </li>
             <li>
               <strong>{provider ?? 'The AI provider'}</strong> (resume reading): receives resume
@@ -241,8 +244,8 @@ export default async function PrivacyPage() {
           </li>
           <li>
             <strong>Deleting your account</strong> (Settings → Delete account) removes your account
-            and everything under it from our database straight away, and removes your photo from
-            Cloudinary. Your public page stops working at once.
+            and everything under it from our database straight away, and removes your photo and
+            cover images from Cloudinary. Your public page stops working at once.
           </li>
           <li>
             <strong>Backups:</strong> our database provider may keep backups for a while after
@@ -276,8 +279,8 @@ export default async function PrivacyPage() {
             </li>
             <li>
               <strong>Export it:</strong> “Download my data” gives you a JSON file with your account
-              email, profile, every section, custom sections, testimonials and settings. (There is
-              no analytics data to include, because we do not collect any.)
+              email, profile, every section, custom sections, posts (drafts included), testimonials
+              and settings. (There is no analytics data to include, because we do not collect any.)
             </li>
             <li>
               <strong>Delete it:</strong> “Delete account” erases your account and all your content.

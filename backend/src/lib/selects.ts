@@ -45,3 +45,21 @@ export const orderedList = {
   omit: { profileId: true },
   orderBy: [{ order: 'asc' }, { id: 'asc' }],
 } satisfies Prisma.SkillFindManyArgs;
+
+// The editor's list of posts: everything but the body (which can be long). Newest first.
+export const myPostSummaries = {
+  omit: { profileId: true, body: true },
+  orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+} satisfies Prisma.PostFindManyArgs;
+
+// A visitor's view of a published post. Never includes the profile id, status or draft fields.
+export const publicPostSummarySelect = {
+  id: true,
+  title: true,
+  slug: true,
+  type: true,
+  excerpt: true,
+  externalUrl: true,
+  coverImageUrl: true,
+  publishedAt: true,
+} satisfies Prisma.PostSelect;

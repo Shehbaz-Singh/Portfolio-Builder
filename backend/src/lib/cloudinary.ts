@@ -20,23 +20,20 @@ export interface UploadedImage {
 // Every upload gets a fresh public id, so a replaced avatar also gets a fresh URL and no
 // CDN or browser keeps showing the old picture. The profile id in the name is what lets
 // avatarPublicId() later prove an image belongs to a given profile.
-export function uploadAvatar(buffer: Buffer, profileId: string): Promise<UploadedImage> {
+function uploadImage(
+  buffer: Buffer,
+  publicId: string,
+  width: number,
+  height: number,
+): Promise<UploadedImage> {
   return new Promise((resolve, reject) => {
     cloudinary.uploader
       .upload_stream(
         {
-          public_id: `${AVATAR_FOLDER}/${profileId}-${Date.now()}`,
+          public_id: publicId,
           resource_type: 'image',
           allowed_formats: ['jpg', 'png', 'webp'],
-          transformation: [
-            {
-              width: AVATAR_SIZE,
-              height: AVATAR_SIZE,
-              crop: 'fill',
-              gravity: 'auto',
-              quality: 'auto',
-            },
-          ],
+          transformation: [{ width, height, crop: 'fill', gravity: 'auto', quality: 'auto' }],
         },
         (err, result) => {
           if (err || !result) return reject(err ?? new Error('Cloudinary returned no result'));
@@ -46,6 +43,15 @@ export function uploadAvatar(buffer: Buffer, profileId: string): Promise<Uploade
       .end(buffer);
   });
 }
+
+export const uploadAvatar = (buffer: Buffer, profileId: string) =>
+  uploadImage(buffer, `${AVATAR_FOLDER}/${profileId}-${Date.now()}`, AVATAR_SIZE, AVATAR_SIZE);
+
+// A post's cover: 1200 x 630 (the shape link previews use), under the profile's own folder so every
+// image a profile has can be found, and removed, by that prefix. A fresh name per upload, like avatars.
+const COVER_FOLDER = 'portfolio/covers';
+export const uploadCover = (buffer: Buffer, profileId: string, postId: string) =>
+  uploadImage(buffer, `${COVER_FOLDER}/${profileId}/${postId}-${Date.now()}`, 1200, 630);
 
 // Returns the Cloudinary public id of `url` only if it is one of this profile's own avatars.
 // avatarUrl can also be set through PUT /profile/me, so it may point anywhere, including at
@@ -67,6 +73,20 @@ export function avatarPublicId(url: string, profileId: string): string | null {
   return publicId.startsWith(`${AVATAR_FOLDER}/${profileId}-`) ? publicId : null;
 }
 
+// The Cloudinary id of `url` only if it is one of this profile's own post covers (see avatarPublicId).
+export function coverPublicId(url: string, profileId: string): string | null {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    return null;
+  }
+  if (parsed.hostname !== 'res.cloudinary.com') return null;
+  const match = parsed.pathname.match(/^\/([^/]+)\/image\/upload\/v\d+\/(.+)\.[a-z0-9]+$/i);
+  if (!match || match[1] !== config.CLOUDINARY_CLOUD_NAME) return null;
+  return match[2].startsWith(`${COVER_FOLDER}/${profileId}/`) ? match[2] : null;
+}
+
 export async function deleteImage(publicId: string): Promise<void> {
   await cloudinary.uploader.destroy(publicId, { resource_type: 'image', invalidate: true });
 }
@@ -75,8 +95,10 @@ export async function deleteImage(publicId: string): Promise<void> {
 // Used when the account is deleted. Names carry the profile id (see uploadAvatar), so this cannot
 // touch anyone else's images.
 export async function deleteImagesOf(profileId: string): Promise<void> {
-  await cloudinary.api.delete_resources_by_prefix(`${AVATAR_FOLDER}/${profileId}-`, {
-    resource_type: 'image',
-    invalidate: true,
-  });
+  for (const prefix of [`${AVATAR_FOLDER}/${profileId}-`, `${COVER_FOLDER}/${profileId}/`]) {
+    await cloudinary.api.delete_resources_by_prefix(prefix, {
+      resource_type: 'image',
+      invalidate: true,
+    });
+  }
 }

@@ -17,6 +17,7 @@ import {
   EmptyPage,
   AvailabilityBadge,
   HeaderLink,
+  WritingList,
   InitialsBadge,
   NewTabLink,
   RoleList,
@@ -42,6 +43,9 @@ const fredoka = Fredoka({
   display: 'swap',
   preload: false,
 });
+
+// The class that sets this theme's fonts; the Writing pages use it too.
+export const fontClass = `${sans.className} ${fredoka.variable}`;
 
 const display = 'font-(family-name:--font-theme-display)';
 const focusRing =
@@ -224,6 +228,20 @@ function BlockView({ block }: { block: Block }) {
           ))}
         </ul>
       );
+    case 'writing':
+      return (
+        <WritingList
+          block={block}
+          className="grid gap-6 md:grid-cols-2"
+          itemClassName={`${card} ${lift} group relative flex min-w-0 flex-col p-7`}
+          coverClassName="mb-5 aspect-[40/21] w-full rounded-2xl object-cover"
+          titleClassName={`${display} text-2xl leading-snug font-semibold`}
+          linkClassName={`after:absolute after:inset-0 after:rounded-[2rem] ${focusRing}`}
+          metaClassName="mt-1 text-sm font-semibold text-muted"
+          excerptClassName="mt-3 leading-relaxed text-muted"
+          moreClassName={`mt-6 inline-block font-bold text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`}
+        />
+      );
     case 'testimonials':
       return (
         <>
@@ -352,11 +370,7 @@ function Footer({ footer }: { footer: FooterModel }) {
 export default function SoftTheme({ profile, idPrefix = '' }: ThemeProps) {
   const blocks = buildBlocks(profile, idPrefix);
   return (
-    <ThemeWrapper
-      theme="soft"
-      profile={profile}
-      className={`${sans.className} ${fredoka.variable}`}
-    >
+    <ThemeWrapper theme="soft" profile={profile} className={fontClass}>
       <main id={`${idPrefix}main`} className="mx-auto max-w-4xl px-5 py-12 sm:px-8 sm:py-20">
         <Header header={buildHeader(profile)} />
         {blocks.map((block) => (

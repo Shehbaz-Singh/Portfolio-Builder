@@ -4,6 +4,7 @@ import {
   customIdOf,
   isCustomKey,
   type PublicLink,
+  type PublicPostSummary,
   type PublicProfile,
   type SectionKey,
 } from '@portfolio/shared';
@@ -54,6 +55,18 @@ interface TestimonialEntry {
   message: string;
 }
 
+// One post or article in the Writing section. A post written here opens its own page; a link to an
+// article elsewhere goes straight to it.
+export interface WritingEntry {
+  id: string;
+  title: string;
+  excerpt: string | null;
+  date: string; // ISO
+  href: string;
+  external: boolean;
+  cover: string | null; // checked to be http(s)
+}
+
 interface BlockBase {
   id: string; // unique on the page, for aria-labelledby and anchors
   title: string; // the owner's heading, or the default one
@@ -62,6 +75,12 @@ interface BlockBase {
 export type Block =
   | (BlockBase & { kind: 'about'; text: string })
   | (BlockBase & { kind: 'skills'; skills: { id: string; name: string }[] })
+  | (BlockBase & {
+      kind: 'writing';
+      posts: WritingEntry[]; // the latest few
+      more: boolean; // there are more than these, so link to all of them
+      allHref: string; // the page with every post
+    })
   | (BlockBase & { kind: 'projects'; projects: ProjectEntry[] })
   | (BlockBase & {
       kind: 'testimonials';
@@ -174,6 +193,27 @@ function groupJobs(jobs: PublicProfile['experience']): Entry[] {
   });
 }
 
+// Published posts as entries to draw. A link to an article that cannot be shown safely (not http or
+// https) is left out. Used by the page's Writing section and by the Writing list page.
+export function writingEntries(slug: string, posts: PublicPostSummary[]): WritingEntry[] {
+  return posts.flatMap((post): WritingEntry[] => {
+    const href =
+      post.type === 'link' ? safeHttpUrl(post.externalUrl) : `/${slug}/writing/${post.slug}`;
+    if (!href) return [];
+    return [
+      {
+        id: post.id,
+        title: post.title,
+        excerpt: post.excerpt,
+        date: post.publishedAt,
+        href,
+        external: post.type === 'link',
+        cover: safeHttpUrl(post.coverImageUrl),
+      },
+    ];
+  });
+}
+
 const isBuiltIn = (key: string): key is SectionKey => Object.hasOwn(SECTION_LABELS, key);
 
 // The sections to draw, in the configured order. Hidden sections are not in profile.sections, and
@@ -263,6 +303,19 @@ export function buildBlocks(profile: PublicProfile, idPrefix = ''): Block[] {
           });
         }
         break;
+      case 'writing': {
+        const posts = writingEntries(profile.slug, profile.writing);
+        if (posts.length > 0) {
+          blocks.push({
+            kind: 'writing',
+            ...base,
+            posts,
+            more: profile.writingMore,
+            allHref: `/${profile.slug}/writing`,
+          });
+        }
+        break;
+      }
       case 'education':
         if (profile.education.length > 0) {
           blocks.push({

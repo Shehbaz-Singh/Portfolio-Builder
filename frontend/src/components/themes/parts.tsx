@@ -1,8 +1,9 @@
 import type { ComponentType, ReactNode } from 'react';
+import Link from 'next/link';
 import { Globe, Link2, Mail, Phone } from 'lucide-react';
 import type { PublicLink } from '@portfolio/shared';
-import { formatMonthYear, initials } from '@/lib/format';
-import type { Entry, HeaderModel, Role } from './blocks';
+import { formatDate, formatMonthYear, initials } from '@/lib/format';
+import type { Block, Entry, HeaderModel, Role } from './blocks';
 
 // Small pieces every theme uses, so the markup that matters (dates as <time>, links that open in a
 // new tab, the photo or the initials, the icon on a link) is the same everywhere. Layout and
@@ -263,5 +264,82 @@ export function AvailabilityBadge({
           </a>
         ))}
     </div>
+  );
+}
+
+// The Writing section: the latest posts, each with its date and excerpt (and a "Link" badge for an
+// article elsewhere), and a "View all" link when there are more.
+// A post written here is an internal link; a link to an article elsewhere opens in a new tab and says
+// so. The title is the link (a theme can stretch it over the whole card with after:absolute), so there
+// is one link per post. The cover is decorative (the title is right beside it), so it has no alt text.
+export function WritingList({
+  block,
+  className,
+  itemClassName,
+  coverClassName,
+  titleClassName,
+  linkClassName,
+  metaClassName,
+  excerptClassName,
+  moreClassName,
+}: {
+  block: Extract<Block, { kind: 'writing' }>;
+  className?: string;
+  itemClassName?: string;
+  coverClassName?: string; // leave out to show no covers
+  titleClassName?: string;
+  linkClassName?: string;
+  metaClassName?: string;
+  excerptClassName?: string;
+  moreClassName?: string; // leave out to show no "View all" link
+}) {
+  return (
+    <>
+      <ul className={className}>
+        {block.posts.map((post) => (
+          <li key={post.id} className={itemClassName}>
+            {post.cover && coverClassName && (
+              // A plain <img>, like the avatar: covers come from Cloudinary, already sized.
+              <img
+                src={post.cover}
+                alt=""
+                loading="lazy"
+                width={1200}
+                height={630}
+                className={coverClassName}
+              />
+            )}
+            <h3 className={titleClassName}>
+              {post.external ? (
+                <NewTabLink href={post.href} className={linkClassName}>
+                  {post.title}
+                </NewTabLink>
+              ) : (
+                <Link href={post.href} className={linkClassName}>
+                  {post.title}
+                </Link>
+              )}
+            </h3>
+            <p className={metaClassName}>
+              <time dateTime={post.date}>{formatDate(post.date)}</time>
+              {post.external && (
+                <>
+                  {' '}
+                  <span className="ms-1 inline-flex items-center rounded-full bg-accent-soft px-2 py-0.5 text-xs font-semibold text-accent-fg not-italic">
+                    Link<span className="sr-only">, an article on another site</span>
+                  </span>
+                </>
+              )}
+            </p>
+            {post.excerpt && <p className={excerptClassName}>{post.excerpt}</p>}
+          </li>
+        ))}
+      </ul>
+      {moreClassName && block.more && (
+        <Link href={block.allHref} className={moreClassName}>
+          View all
+        </Link>
+      )}
+    </>
   );
 }

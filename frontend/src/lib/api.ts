@@ -1,5 +1,13 @@
 import { cache } from 'react';
-import { publicProfileSchema, type PublicProfile } from '@portfolio/shared';
+import { z } from 'zod';
+import {
+  publicPostSchema,
+  publicPostSummarySchema,
+  publicProfileSchema,
+  type PublicPost,
+  type PublicPostSummary,
+  type PublicProfile,
+} from '@portfolio/shared';
 import { API_URL } from './config';
 
 // Edits made in the dashboard drop the cached copies at once (the /api proxy calls
@@ -19,3 +27,46 @@ export const getPublicProfile = cache(async (slug: string): Promise<PublicProfil
   if (!res.ok) throw new Error(`Public profile API responded with ${res.status}`);
   return publicProfileSchema.parse(await res.json());
 });
+
+// The published posts of a profile, newest first, or null when the profile or its Writing section is
+// not public (the API gives one 404 for all of those). Dropped with the profile cache.
+export const getPublicPosts = cache(async (slug: string): Promise<PublicPostSummary[] | null> => {
+  const res = await fetch(`${API_URL}/public/${encodeURIComponent(slug)}/posts`, {
+    next: { revalidate: REVALIDATE_SECONDS, tags: [PUBLIC_PROFILES_TAG] },
+  });
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`Public posts API responded with ${res.status}`);
+  return z.array(publicPostSummarySchema).parse(await res.json());
+});
+
+// One published post, or null when there is none (or it is a draft: the API does not say which).
+export const getPublicPost = cache(
+  async (slug: string, postSlug: string): Promise<PublicPost | null> => {
+    const res = await fetch(
+      `${API_URL}/public/${encodeURIComponent(slug)}/posts/${encodeURIComponent(postSlug)}`,
+      { next: { revalidate: REVALIDATE_SECONDS, tags: [PUBLIC_PROFILES_TAG] } },
+    );
+    if (res.status === 404) return null;
+    if (!res.ok) throw new Error(`Public post API responded with ${res.status}`);
+    return publicPostSchema.parse(await res.json());
+  },
+);
+
+// Every published post that has a page, for the sitemap. A failure gives an empty list: the sitemap
+// then lists only the site's own pages instead of failing.
+export async function getSitemapPosts(): Promise<
+  { username: string; postSlug: string; updatedAt: string }[]
+> {
+  try {
+    const res = await fetch(`${API_URL}/public/_posts`, {
+      next: { revalidate: 3600, tags: [PUBLIC_PROFILES_TAG] },
+      signal: AbortSignal.timeout(8000),
+    });
+    if (!res.ok) return [];
+    return z
+      .array(z.object({ username: z.string(), postSlug: z.string(), updatedAt: z.string() }))
+      .parse(await res.json());
+  } catch {
+    return [];
+  }
+}

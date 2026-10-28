@@ -305,8 +305,12 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
     return () => window.removeEventListener('beforeunload', warn);
   }, []);
 
-  const preview = useMemo<PublicProfile>(
-    () => ({
+  const preview = useMemo<PublicProfile>(() => {
+    // `?? []`: an API that predates posts must not blank the dashboard.
+    const published = (profile.posts ?? [])
+      .flatMap((post) => (post.status === 'published' && post.publishedAt ? [post] : []))
+      .sort((a, b) => (b.publishedAt ?? '').localeCompare(a.publishedAt ?? ''));
+    return {
       ...profile,
       ...draft,
       // Like the public API, the badge is only there while it is switched on.
@@ -321,6 +325,18 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
       // The same layout the public API returns (visible sections in order, custom sections with
       // items), worked out from the unsaved config too.
       ...publicLayout(draft?.sectionConfig ?? profile.sectionConfig, profile.customSections),
+      // The latest published posts, the way the API gives them to visitors.
+      writing: published.slice(0, 3).map((post) => ({
+        id: post.id,
+        title: post.title,
+        slug: post.slug,
+        type: post.type,
+        excerpt: post.excerpt,
+        externalUrl: post.externalUrl,
+        coverImageUrl: post.coverImageUrl,
+        publishedAt: post.publishedAt as string,
+      })),
+      writingMore: published.length > 3,
       // Visitors see approved testimonials only, and never the email.
       testimonials: profile.testimonials
         .filter((item) => item.status === 'approved')
@@ -332,9 +348,8 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
           message,
           order,
         })),
-    }),
-    [profile, draft],
-  );
+    };
+  }, [profile, draft]);
 
   const value = useMemo(
     () => ({

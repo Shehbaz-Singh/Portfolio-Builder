@@ -56,3 +56,13 @@ export const resumeUpload = singleFileUpload({
   sizeMessage: 'The PDF must be 5 MB or smaller',
   invalidMessage: 'Send one PDF in the "resume" form field',
 });
+
+// One image in the "cover" field, up to 2 MB (the same limits as the avatar), into req.file.
+export const coverUpload = singleFileUpload({
+  field: 'cover',
+  maxBytes: 2 * 1024 * 1024,
+  allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+  typeMessage: 'Only JPG, PNG and WebP images are allowed',
+  sizeMessage: 'Image must be 2 MB or smaller',
+  invalidMessage: 'Send one image in the "cover" form field',
+});

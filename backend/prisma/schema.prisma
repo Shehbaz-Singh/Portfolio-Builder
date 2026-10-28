@@ -22,6 +22,16 @@ enum AvailabilityStatus {
   custom
 }
 
+enum PostType {
+  post
+  link
+}
+
+enum PostStatus {
+  draft
+  published
+}
+
 enum LinkType {
   linkedin
   github
@@ -63,7 +73,7 @@ model Profile {
   availabilityMessage String?            @db.VarChar(140)
   // Order, visibility and headings of the page sections (see shared/src/section-config.ts).
   // The default must match defaultSectionConfig(); existing rows get it when the column is added.
-  sectionConfig       Json               @default("[{\"key\":\"about\",\"visible\":true},{\"key\":\"skills\",\"visible\":true},{\"key\":\"experience\",\"visible\":true},{\"key\":\"projects\",\"visible\":true},{\"key\":\"education\",\"visible\":true},{\"key\":\"testimonials\",\"visible\":false}]")
+  sectionConfig       Json               @default("[{\"key\":\"about\",\"visible\":true},{\"key\":\"skills\",\"visible\":true},{\"key\":\"experience\",\"visible\":true},{\"key\":\"projects\",\"visible\":true},{\"key\":\"education\",\"visible\":true},{\"key\":\"testimonials\",\"visible\":false},{\"key\":\"writing\",\"visible\":false}]")
 
   user           User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   links          Link[]
@@ -73,6 +83,7 @@ model Profile {
   education      Education[]
   customSections CustomSection[]
   testimonials   Testimonial[]
+  posts          Post[]
 }
 
 model Link {
@@ -192,4 +203,28 @@ model Testimonial {
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@index([profileId, status])
+}
+
+// A short post written here (Markdown body) or a link to an article elsewhere. Drafts are never
+// public. The slug comes from the title, is unique within the profile, and stays when the title
+// changes. The cover image lives in Cloudinary and is only ever set by the upload endpoint.
+model Post {
+  id            String     @id @default(cuid())
+  profileId     String
+  title         String     @db.VarChar(120)
+  slug          String     @db.VarChar(80)
+  type          PostType   @default(post)
+  excerpt       String?    @db.VarChar(300)
+  body          String?
+  externalUrl   String?
+  coverImageUrl String?
+  status        PostStatus @default(draft)
+  publishedAt   DateTime?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, slug])
+  @@index([profileId, status, publishedAt])
 }

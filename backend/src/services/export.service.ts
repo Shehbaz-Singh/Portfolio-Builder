@@ -27,6 +27,8 @@ export async function exportAccountData(userId: string) {
             orderBy: [{ order: 'asc' }, { id: 'asc' }],
           },
           testimonials: myTestimonials,
+          // All posts with their bodies, drafts included.
+          posts: { omit: { profileId: true }, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] },
         },
       },
     },

@@ -19,6 +19,7 @@ import {
   EmptyPage,
   AvailabilityBadge,
   HeaderLink,
+  WritingList,
   InitialsBadge,
   NewTabLink,
   RoleList,
@@ -44,6 +45,9 @@ const sora = Sora({
   display: 'swap',
   preload: false,
 });
+
+// The class that sets this theme's fonts; the Writing pages use it too.
+export const fontClass = `${sans.className} ${sora.variable}`;
 
 const display = 'font-(family-name:--font-theme-display)';
 const focusRing =
@@ -354,6 +358,29 @@ function blockTiles(block: Block): Tile[] {
           </section>
         ),
       }));
+    case 'writing':
+      return [
+        {
+          key: block.id,
+          span: 6,
+          tone: 'plain',
+          node: (
+            <TileBody id={block.id} title={block.title}>
+              <WritingList
+                block={block}
+                className="grid gap-x-8 gap-y-6 md:grid-cols-3"
+                itemClassName="group relative min-w-0"
+                coverClassName="mb-3 aspect-[40/21] w-full rounded-2xl object-cover"
+                titleClassName={`${display} text-lg leading-snug font-bold`}
+                linkClassName={`after:absolute after:inset-0 after:rounded-2xl ${focusRing}`}
+                metaClassName="mt-1 text-sm font-medium text-muted"
+                excerptClassName="mt-2 leading-relaxed text-muted"
+                moreClassName={`mt-6 inline-block text-sm font-semibold text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`}
+              />
+            </TileBody>
+          ),
+        },
+      ];
     case 'testimonials': {
       const tiles: Tile[] = block.testimonials.map((item) => ({
         key: `${block.id}-${item.id}`,
@@ -452,7 +479,7 @@ export default function BentoTheme({
     <ThemeWrapper
       theme="bento"
       profile={profile}
-      className={`${sans.className} ${sora.variable}`}
+      className={fontClass}
       vars={{ '--accent-fg-dark': accentVars(profile.accentColor, DARK_TILE)['--accent-fg'] }}
     >
       <div data-tiles={tiles}>

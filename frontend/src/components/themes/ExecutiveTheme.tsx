@@ -17,6 +17,7 @@ import {
   EmptyPage,
   AvailabilityBadge,
   HeaderLink,
+  WritingList,
   NewTabLink,
   RoleList,
   TotalExperience,
@@ -40,6 +41,9 @@ const serif = Source_Serif_4({
   display: 'swap',
   preload: false,
 });
+
+// The class that sets this theme's fonts; the Writing pages use it too.
+export const fontClass = `${sans.className} ${serif.variable}`;
 
 const display = 'font-(family-name:--font-theme-display)';
 const focusRing =
@@ -175,6 +179,19 @@ function BlockView({ block }: { block: Block }) {
           ))}
         </ul>
       );
+    case 'writing':
+      return (
+        <WritingList
+          block={block}
+          className="space-y-5"
+          itemClassName="min-w-0 break-inside-avoid"
+          titleClassName="font-bold"
+          linkClassName={link}
+          metaClassName="mt-0.5 text-sm text-muted"
+          excerptClassName="mt-1 leading-relaxed"
+          moreClassName={`mt-5 inline-block text-sm font-semibold print:hidden ${link}`}
+        />
+      );
     case 'testimonials':
       return (
         <>
@@ -278,11 +295,7 @@ export default function ExecutiveTheme({ profile, idPrefix = '' }: ThemeProps) {
   const skills = blocks.find((block) => block.kind === 'skills');
   const main = blocks.filter((block) => block.kind !== 'skills');
   return (
-    <ThemeWrapper
-      theme="executive"
-      profile={profile}
-      className={`${sans.className} ${serif.variable}`}
-    >
+    <ThemeWrapper theme="executive" profile={profile} className={fontClass}>
       <div className="mx-auto max-w-6xl lg:px-6 lg:py-10 print:max-w-none print:p-0">
         <div className="exec-sheet bg-surface lg:grid lg:grid-cols-[19rem_minmax(0,1fr)] lg:shadow-overlay print:grid print:grid-cols-[13rem_minmax(0,1fr)] print:shadow-none">
           <Sidebar header={buildHeader(profile)} skills={skills} idPrefix={idPrefix} />

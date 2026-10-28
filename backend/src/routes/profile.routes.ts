@@ -2,6 +2,7 @@ import { Router } from 'express';
 import {
   customItemInputSchema,
   customSectionInputSchema,
+  postInputSchema,
   profileUpdateSchema,
   publishSchema,
   reorderSchema,
@@ -50,9 +51,18 @@ import {
   updateTestimonial,
   updateTestimonialSettings,
 } from '../controllers/testimonial.controller';
+import {
+  createPost,
+  deleteCover,
+  deletePost,
+  getPost,
+  listPosts,
+  updatePost,
+  uploadCover,
+} from '../controllers/post.controller';
 import { requireAuth } from '../middleware/auth';
 import { resumeLimiter, uploadLimiter } from '../middleware/rate-limit';
-import { avatarUpload, resumeUpload } from '../middleware/upload';
+import { avatarUpload, coverUpload, resumeUpload } from '../middleware/upload';
 import { sectionParam, validateSectionBody } from '../middleware/section';
 import { validateBody } from '../middleware/validate';
 
@@ -126,6 +136,16 @@ profileRouter.put('/me/testimonials/:id', validateBody(testimonialInputSchema), 
 profileRouter.post('/me/testimonials/:id/approve', approveTestimonial);
 profileRouter.post('/me/testimonials/:id/reject', rejectTestimonial);
 profileRouter.delete('/me/testimonials/:id', deleteTestimonial);
+
+// Writing: posts and links to articles. Declared before /me/:section like the others. The cover
+// image has its own upload, with the same limits and rate limit as the avatar.
+profileRouter.get('/me/posts', listPosts);
+profileRouter.post('/me/posts', validateBody(postInputSchema), createPost);
+profileRouter.get('/me/posts/:id', getPost);
+profileRouter.put('/me/posts/:id', validateBody(postInputSchema), updatePost);
+profileRouter.delete('/me/posts/:id', deletePost);
+profileRouter.post('/me/posts/:id/cover', uploadLimiter, coverUpload, uploadCover);
+profileRouter.delete('/me/posts/:id/cover', deleteCover);
 
 // :section is one of experience | education | projects | skills | links
 profileRouter.patch('/me/:section/reorder', validateBody(reorderSchema), reorderSection);

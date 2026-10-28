@@ -16,6 +16,7 @@ export const SECTION_KEYS = [
   'projects',
   'education',
   'testimonials',
+  'writing',
 ] as const;
 export const sectionKeySchema = z.enum(SECTION_KEYS);
 export type SectionKey = z.infer<typeof sectionKeySchema>;
@@ -28,10 +29,12 @@ export const SECTION_LABELS: Record<SectionKey, string> = {
   projects: 'Projects',
   education: 'Education',
   testimonials: 'Testimonials',
+  writing: 'Writing',
 };
 
-// Sections that start hidden: the owner switches them on (testimonials need an invitation first).
-const HIDDEN_BY_DEFAULT: readonly SectionKey[] = ['testimonials'];
+// Sections that start hidden: the owner switches them on (testimonials need an invitation first, and
+// writing needs something written).
+const HIDDEN_BY_DEFAULT: readonly SectionKey[] = ['testimonials', 'writing'];
 const visibleByDefault = (key: SectionKey) => !HIDDEN_BY_DEFAULT.includes(key);
 
 export const SECTION_TITLE_MAX = 40;

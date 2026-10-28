@@ -13,6 +13,7 @@ import { ExperienceStep } from './steps/ExperienceStep';
 import { ImportStep } from './steps/ImportStep';
 import { ProjectsStep } from './steps/ProjectsStep';
 import { SkillsStep } from './steps/SkillsStep';
+import { WritingStep } from './steps/WritingStep';
 
 interface ProfileTab {
   id: string;
@@ -29,6 +30,7 @@ const TABS: ProfileTab[] = [
   { id: 'experience', label: 'Experience', Component: ExperienceStep },
   { id: 'projects', label: 'Projects', Component: ProjectsStep },
   { id: 'education', label: 'Education', Component: EducationStep },
+  { id: 'writing', label: 'Writing', Component: WritingStep },
   { id: 'custom', label: 'Custom sections', Component: CustomSectionsStep },
 ];
 const TAB_ITEMS: TabItem[] = TABS.map(({ id, label }) => ({ id, label }));

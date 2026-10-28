@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { availabilityStatusSchema } from './availability';
 import { linkTypeSchema, profileSchema } from './portfolio';
+import { myPostSummarySchema, publicPostSummarySchema } from './posts';
 import { myTestimonialSchema, publicTestimonialSchema } from './testimonials';
 import {
   SECTION_KEYS,
@@ -111,6 +112,11 @@ export const publicProfileSchema = profileSchema
     customSections: z.array(publicCustomSectionSchema).default([]),
     // Approved testimonials only, in the owner's order.
     testimonials: z.array(publicTestimonialSchema).default([]),
+    // The latest published posts (up to 3) for the Writing section; empty while that section is hidden.
+    // The full list is GET /public/:slug/posts.
+    writing: z.array(publicPostSummarySchema).default([]),
+    // True when there are more published posts than the three in `writing` (for a "View all" link).
+    writingMore: z.boolean().default(false),
     links: z.array(publicLinkSchema),
     ...sectionLists,
   });
@@ -123,6 +129,8 @@ export const myProfileSchema = profileSchema.extend({
   customSections: z.array(myCustomSectionSchema).default([]),
   // Every testimonial, pending and rejected included.
   testimonials: z.array(myTestimonialSchema).default([]),
+  // Every post, drafts included, without the body (GET /profile/me/posts/:id has it).
+  posts: z.array(myPostSummarySchema).default([]),
   links: z.array(publicLinkSchema.extend({ visible: z.boolean() })),
   ...sectionLists,
 });

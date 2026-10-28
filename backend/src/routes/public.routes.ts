@@ -1,6 +1,13 @@
 import { Router } from 'express';
 import { HONEYPOT_FIELD, testimonialSubmissionSchema } from '@portfolio/shared';
-import { getPublicProfile, getSiteInfo, submitTestimonial } from '../controllers/public.controller';
+import {
+  getPublicPost,
+  getPublicPosts,
+  getPublicProfile,
+  getSiteInfo,
+  getSitemapPosts,
+  submitTestimonial,
+} from '../controllers/public.controller';
 import { honeypot } from '../middleware/honeypot';
 import { testimonialLimiter } from '../middleware/rate-limit';
 import { validateBody } from '../middleware/validate';
@@ -10,7 +17,10 @@ export const publicRouter = Router();
 
 // Not a slug (they cannot start with an underscore), so it cannot clash with one.
 publicRouter.get('/_info', getSiteInfo);
+publicRouter.get('/_posts', getSitemapPosts);
 publicRouter.get('/:slug', getPublicProfile);
+publicRouter.get('/:slug/posts', getPublicPosts);
+publicRouter.get('/:slug/posts/:postSlug', getPublicPost);
 // Rate limit first, then the honeypot (a bot's request is dropped before it is read), then the
 // body is validated.
 publicRouter.post(

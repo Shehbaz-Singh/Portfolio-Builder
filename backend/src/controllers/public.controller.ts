@@ -41,3 +41,25 @@ export const getSiteInfo = asyncHandler(async (_req, res) => {
         : 'OpenAI';
   res.json({ aiProvider: provider });
 });
+
+// Post slugs are made by the API from a title: lowercase letters, digits and single hyphens.
+const POST_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+export const getPublicPosts = asyncHandler(async (req, res) => {
+  const posts = await publicService.getPublicPosts(slugOf(req));
+  res.set('Cache-Control', CACHE_CONTROL);
+  res.json(posts);
+});
+
+export const getPublicPost = asyncHandler(async (req, res) => {
+  const postSlug = req.params.postSlug as string;
+  if (postSlug.length > 80 || !POST_SLUG.test(postSlug)) throw AppError.notFound('Post not found');
+  const post = await publicService.getPublicPost(slugOf(req), postSlug);
+  res.set('Cache-Control', CACHE_CONTROL);
+  res.json(post);
+});
+
+export const getSitemapPosts = asyncHandler(async (_req, res) => {
+  res.set('Cache-Control', CACHE_CONTROL);
+  res.json(await publicService.getPostsForSitemap());
+});

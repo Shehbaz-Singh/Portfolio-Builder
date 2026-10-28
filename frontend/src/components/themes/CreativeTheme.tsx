@@ -17,6 +17,7 @@ import {
   EmptyPage,
   AvailabilityBadge,
   HeaderLink,
+  WritingList,
   NewTabLink,
   RoleList,
   TotalExperience,
@@ -40,6 +41,9 @@ const mono = Space_Mono({
   display: 'swap',
   preload: false,
 });
+// The class that sets this theme's fonts; the Writing pages use it too.
+export const fontClass = `${display.className} ${mono.variable}`;
+
 const monoText = 'font-(family-name:--font-theme-mono)';
 
 const focusRing =
@@ -171,6 +175,20 @@ function BlockView({ block }: { block: Block }) {
           ))}
         </ul>
       );
+    case 'writing':
+      return (
+        <WritingList
+          block={block}
+          className="grid gap-6 lg:grid-cols-2"
+          itemClassName="group relative flex min-w-0 flex-col rounded-2xl border-2 border-ink bg-page p-6 shadow-[6px_6px_0_0_var(--accent)] transition-all duration-200 focus-within:-translate-x-0.5 focus-within:-translate-y-0.5 focus-within:shadow-[9px_9px_0_0_var(--accent)] motion-safe:hover:-translate-x-0.5 motion-safe:hover:-translate-y-0.5 hover:shadow-[9px_9px_0_0_var(--accent)]"
+          coverClassName="mb-4 aspect-[40/21] w-full rounded-xl border-2 border-ink object-cover"
+          titleClassName="text-2xl leading-tight font-black"
+          linkClassName={`after:absolute after:inset-0 after:rounded-2xl ${focusRing}`}
+          metaClassName={`${monoText} mt-2 text-xs font-bold text-muted`}
+          excerptClassName="mt-3 text-muted"
+          moreClassName={`mt-8 inline-block text-lg font-black underline decoration-4 decoration-accent underline-offset-4 ${focusRing}`}
+        />
+      );
     case 'testimonials':
       return (
         <>
@@ -287,11 +305,7 @@ export default function CreativeTheme({ profile, idPrefix = '' }: ThemeProps) {
   const blocks = buildBlocks(profile, idPrefix);
   const animate = !idPrefix;
   return (
-    <ThemeWrapper
-      theme="creative"
-      profile={profile}
-      className={`${display.className} ${mono.variable}`}
-    >
+    <ThemeWrapper theme="creative" profile={profile} className={fontClass}>
       <Header header={buildHeader(profile)} />
       <main id={`${idPrefix}main`} className="mx-auto max-w-5xl px-5 pb-20 sm:px-8">
         {blocks.map((block, index) => (

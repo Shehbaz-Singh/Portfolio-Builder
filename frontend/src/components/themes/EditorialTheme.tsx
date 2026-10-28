@@ -17,6 +17,7 @@ import {
   EmptyPage,
   AvailabilityBadge,
   HeaderLink,
+  WritingList,
   NewTabLink,
   RoleList,
   TotalExperience,
@@ -42,6 +43,9 @@ const serif = Newsreader({
   display: 'swap',
   preload: false,
 });
+
+// The class that sets this theme's fonts; the Writing pages use it too.
+export const fontClass = `${sans.className} ${serif.variable}`;
 
 const display = 'font-(family-name:--font-theme-display)';
 const caps = 'text-xs font-semibold tracking-[0.18em] uppercase';
@@ -172,6 +176,20 @@ function BlockView({ block }: { block: Block }) {
           ))}
         </ul>
       );
+    case 'writing':
+      return (
+        <WritingList
+          block={block}
+          className="space-y-12"
+          itemClassName="ed-hover group relative min-w-0"
+          coverClassName="mb-4 aspect-[40/21] w-full object-cover"
+          titleClassName={`${display} text-2xl leading-tight font-medium sm:text-3xl`}
+          linkClassName={`after:absolute after:inset-0 ${focusRing}`}
+          metaClassName={`${display} mt-2 text-muted italic`}
+          excerptClassName="mt-3 leading-relaxed"
+          moreClassName={`mt-10 inline-block text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`}
+        />
+      );
     case 'testimonials':
       return (
         <>
@@ -288,11 +306,7 @@ function Footer({ footer }: { footer: FooterModel }) {
 export default function EditorialTheme({ profile, idPrefix = '' }: ThemeProps) {
   const blocks = buildBlocks(profile, idPrefix);
   return (
-    <ThemeWrapper
-      theme="editorial"
-      profile={profile}
-      className={`${sans.className} ${serif.variable}`}
-    >
+    <ThemeWrapper theme="editorial" profile={profile} className={fontClass}>
       <main id={`${idPrefix}main`} className="mx-auto max-w-2xl px-5 py-10 sm:px-8 sm:py-16">
         <Masthead header={buildHeader(profile)} />
         {blocks.map((block) => (

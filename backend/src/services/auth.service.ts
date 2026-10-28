@@ -135,6 +135,7 @@ export async function deleteAccount(userId: string, { password }: DeleteAccountI
           prisma.customSectionItem.deleteMany({ where: { section: { profileId } } }),
           prisma.customSection.deleteMany({ where: { profileId } }),
           prisma.testimonial.deleteMany({ where: { profileId } }),
+          prisma.post.deleteMany({ where: { profileId } }),
           prisma.link.deleteMany({ where: { profileId } }),
           prisma.skill.deleteMany({ where: { profileId } }),
           prisma.experience.deleteMany({ where: { profileId } }),
