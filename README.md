@@ -1,47 +1,143 @@
-# Parichay
+<div align="center">
 
-Fill in your details once and get a clean, shareable portfolio page at your own link, like `yoursite.com/ayush-gill`. No design work and no hosting to set up.
+# Parichay · परिचय
 
-## What it does
+**Introduce yourself properly.**
 
-**For the person building a portfolio**
+Upload your resume, pick a look, and get a polished portfolio page at one link that's yours.
 
-- Start from your resume: upload a PDF and the details, links, skills, jobs, education and projects it contains are filled in for you to review, fix and save. Nothing is saved until you say so, and the PDF itself is never stored.
-- Sign up, then build your page from a dashboard with a sidebar (a bottom bar on phones): Profile (basics, about, skills, experience, projects, education), Sections, Themes, Testimonials and Settings. A completeness meter suggests what to fill in next, and your changes save automatically.
-- See a live preview next to the form while you type, using the same theme your visitors will see, at phone, tablet or desktop width.
-- Add links (LinkedIn, GitHub, email, phone, website) and hide any of them with a switch without deleting it.
-- Upload a profile photo; it is cropped to a square automatically.
-- Drag to reorder links, skills, experience, projects and education. Keyboard reordering works too.
-- Choose your own page address, pick one of five themes (Editorial, Bento, Soft, Executive or Creative) from a gallery of live previews, and an accent color (with a warning when it is hard to read on that theme).
-- Choose which sections your page shows, drag them into the order you want and rename their headings. Hiding a section keeps what you wrote in it.
-- Add your own sections (Certifications, Awards, Publications, Volunteering or anything else), each with its own list of items, and place them in the same order as the built-in ones.
-- Publish or unpublish with one switch. You get the public link with copy and open buttons, and a warning if your name or About section is still empty. Unpublishing takes the page down immediately.
-- Change your password or delete your account from the settings page. Deleting removes the portfolio and photo for good.
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=flat&logo=express&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=flat&logo=prisma&logoColor=white)
 
-**For the people visiting a portfolio**
+</div>
 
-- A fast, readable page that works on phones, with a Share button (system share sheet, or copy link, LinkedIn, X, WhatsApp and email).
-- Proper link previews when the page is shared, with a generated social image showing the name, tagline and photo.
-- Unpublished or missing pages look identical, so nobody can tell which names are taken.
+## About
 
-## How it is put together
+Parichay (परिचय) is the Hindi word for "introduction". It is a web app that turns your resume, or a few details you type in, into a clean portfolio page at your own address, like `yoursite.com/your-name`. There is no design work and no hosting to set up. You choose a theme, add your projects and publish.
 
-| Part        | What it is                                                                                            |
-| ----------- | ----------------------------------------------------------------------------------------------------- |
-| `frontend/` | Next.js (App Router), React and Tailwind: the public pages and the editor                             |
-| `backend/`  | Express API with PostgreSQL through Prisma, organised as routes, controllers, services and middleware |
-| `shared/`   | Zod schemas and types used by both sides, so a field is validated the same way everywhere             |
+It is a full-stack TypeScript project: a Next.js frontend, an Express API, a PostgreSQL database, and a shared package of validation schemas that both sides use.
 
-Photos are stored on Cloudinary. Everything is a TypeScript npm workspace in one repository.
+## Features
 
-## Design choices worth knowing
+**Build your page**
 
-- **Login lives in a protected cookie.** The browser never talks to the API directly. The site forwards requests and keeps the login token in an httpOnly cookie, so scripts on the page can never read it.
+- **Resume import.** Upload a PDF and your details, links, skills, jobs, education and projects are filled in for you to review. Nothing is saved until you say so, and the PDF itself is never stored.
+- **Live preview.** See your page change as you type, at phone, tablet or desktop width, using the same theme your visitors will see. Changes save automatically.
+- **Five themes, any accent color.** Editorial, Bento, Soft, Executive and Creative, each with its own fonts. Text colors adjust so your page stays readable on any accent.
+- **Sections you control.** Show, hide, rename and reorder sections, and add your own, like Certifications, Awards or Open source. Hiding a section keeps what you wrote in it.
+- **Writing.** Publish short posts in Markdown with a cover image, or link to articles you wrote elsewhere. Each post gets its own page and share image.
+- **Testimonials.** Let visitors leave one, and approve each before it appears. Their email is never public.
+- **Availability badge.** Say you are open to work, freelance or collaboration, with a message of your own.
+
+**Share it**
+
+- One link to copy, a share menu, and a downloadable **QR code** for a printed resume.
+- Proper link previews when the page is shared, and a sitemap for posts.
+
+**Stay in control**
+
+- **Export** everything you added as a file, or **delete** your account and all of it, at any time.
+- A new page stays private until you switch on Publish, and unpublished and missing pages look the same.
+
+## Tech stack
+
+**Frontend**
+
+![Next.js](https://img.shields.io/badge/Next.js-000000?style=flat&logo=nextdotjs&logoColor=white)
+![React](https://img.shields.io/badge/React-20232A?style=flat&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=typescript&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-06B6D4?style=flat&logo=tailwindcss&logoColor=white)
+
+**Backend**
+
+![Node.js](https://img.shields.io/badge/Node.js-339933?style=flat&logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-000000?style=flat&logo=express&logoColor=white)
+![Prisma](https://img.shields.io/badge/Prisma-2D3748?style=flat&logo=prisma&logoColor=white)
+![JWT](https://img.shields.io/badge/JWT-000000?style=flat&logo=jsonwebtokens&logoColor=white)
+
+**Data and services**
+
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=flat&logo=postgresql&logoColor=white)
+![Neon](https://img.shields.io/badge/Neon-00E599?style=flat&logo=neon&logoColor=black)
+![Cloudinary](https://img.shields.io/badge/Cloudinary-3448C5?style=flat&logo=cloudinary&logoColor=white)
+![Gemini](https://img.shields.io/badge/Gemini-8E75B2?style=flat&logo=googlegemini&logoColor=white)
+
+**Shared and tooling**
+
+![Zod](https://img.shields.io/badge/Zod-3E67B1?style=flat&logo=zod&logoColor=white)
+![ESLint](https://img.shields.io/badge/ESLint-4B32C3?style=flat&logo=eslint&logoColor=white)
+![Prettier](https://img.shields.io/badge/Prettier-F7B93E?style=flat&logo=prettier&logoColor=black)
+![npm](https://img.shields.io/badge/npm-CB3837?style=flat&logo=npm&logoColor=white)
+
+It is an npm workspaces monorepo, and the `shared` package holds the Zod schemas that both the frontend and the backend use.
+
+### How it fits together
+
+```
+parichay/
+├── frontend/   Next.js app: landing page, public portfolio pages, dashboard
+├── backend/    Express API, Prisma schema and migrations, seed script
+├── shared/     Zod schemas and types used by both sides
+└── docs/       Brand guide: palette, fonts, logo and voice
+```
+
+A few choices worth knowing:
+
+- **The login token lives in an httpOnly cookie.** The browser never calls the API directly. The site forwards requests and attaches the token, so scripts on the page can never read it.
 - **Everything is validated on the server** with the shared schemas, and the API never returns password hashes or other people's data.
-- **Built for a sleepy free-tier backend.** Slow responses show a "waking up" message, reads retry automatically, and a failed save keeps what you typed.
-- **Public pages are cached briefly** for speed, and the cache is cleared the moment you save, so edits and unpublishing show up at once.
-- **Safe by default:** links only accept http(s), email and phone formats, uploads are checked by their actual contents, and login and upload attempts are rate limited per visitor.
+- **Themes are real components.** Each one receives the whole public profile and draws it. The dashboard preview and the landing page use the same code.
+- **Built for a sleepy free-tier backend.** Slow responses show a "waking up" message, reads retry, and a failed save keeps what you typed.
+- **Public pages are cached briefly**, and the cache is cleared the moment you save.
+- **Safe by default.** Links accept only http(s), email and phone formats. Uploads are checked by their actual contents. Markdown is rendered without raw HTML. Logins and uploads are rate limited per visitor.
+- **Accessible.** Built to WCAG 2.2 AA: contrast, visible focus, keyboard support, reduced motion and a skip link.
 
-## Sample profiles
+## Getting started
 
-Five made-up profiles (Tanisha Walia, Ayush Gill, Navjot Singh, Sameer Bhatia and Syed Abraar) show what a page looks like, one in each theme. Their content is in `shared/src/samples.ts` and is used by the landing page and by the seed script. To put them in the database, run the migrations and then `npm run db:seed -w @parichay/backend`. Running it again replaces the samples and touches nothing else. Nobody can sign in as a sample, and their addresses are reserved.
+You need Node 20 or newer and a PostgreSQL database (a free Neon project works). Cloudinary and Gemini keys are optional: without them, uploads and resume import are simply unavailable.
+
+```bash
+# 1. Install
+npm install
+
+# 2. Configure (each file explains its settings)
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env.local
+
+# 3. Create the tables, and optionally add the demo profiles
+npm run prisma:deploy -w @parichay/backend
+npm run db:seed -w @parichay/backend
+
+# 4. Run everything: API on :4000, site on :3000
+npm run dev
+```
+
+| Command             | What it does                                     |
+| ------------------- | ------------------------------------------------ |
+| `npm run dev`       | Builds `shared`, then runs all three in watch    |
+| `npm run build`     | Production build of shared, backend and frontend |
+| `npm run typecheck` | Type-checks the backend and frontend             |
+| `npm run lint`      | ESLint across the repo                           |
+| `npm run format`    | Prettier (`format:check` only checks)            |
+
+### Demo profiles
+
+The seed script adds five demo portfolios, one for each theme, so you can see what a page looks like: `tanisha-walia` (Editorial), `ayush-gill` (Bento), `syed-abraar` (Soft), `sameer-bhatia` (Executive) and `navjot-singh` (Creative). Their content lives in `shared/src/samples.ts`. Running the seed again refreshes them and touches nothing else. They are labeled "Sample profile" on their pages, nobody can sign in as them, and their addresses are reserved.
+
+## Privacy
+
+Parichay keeps your email, your page content and your images, and nothing more. There is no tracking or advertising. The only cookie is the sign-in one. Read the full [Privacy Policy](frontend/src/app/privacy/page.tsx) and [Terms](frontend/src/app/terms/page.tsx).
+
+## License
+
+MIT. See [LICENSE](LICENSE).
+
+<div align="center">
+
+Made with love by [Shehbaz Singh](https://github.com/Shehbaz-Singh)
+
+</div>
