@@ -218,6 +218,12 @@ button,
   --muted: #4b5262;
   --border: #d5d9e1;
 }
+/* On a wide screen the page is the sheet edge to edge, so there is no gray desk behind it. */
+@media (min-width: 64rem) {
+  .theme-executive {
+    --bg: #ffffff;
+  }
+}
 .exec-side {
   --bg: #0e1118;
   --text: #eef0f6;

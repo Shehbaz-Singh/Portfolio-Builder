@@ -62,7 +62,7 @@ function Sidebar({
 }) {
   const contact = `flex max-w-full items-start gap-2.5 py-1 text-sm hover:underline ${focusRing}`;
   return (
-    <aside className="exec-side p-7 sm:p-9 print:border-e print:border-line print:p-5">
+    <aside className="exec-side p-7 sm:p-9 lg:sticky lg:top-0 lg:h-screen lg:overflow-y-auto lg:[scrollbar-width:none] lg:[&::-webkit-scrollbar]:hidden xl:p-10 print:static print:h-auto print:overflow-visible print:border-e print:border-line print:p-5">
       <Avatar
         avatar={header.avatar}
         className="size-28 rounded-full ring-4 ring-white/20 print:ring-0"
@@ -129,10 +129,13 @@ function Sidebar({
 
 function Section({ block, children }: { block: Block; children: ReactNode }) {
   return (
-    <section aria-labelledby={block.id} className="mt-9 first:mt-0 print:break-inside-auto">
+    <section
+      aria-labelledby={block.id}
+      className="mt-9 first:mt-0 2xl:break-inside-avoid print:break-inside-auto"
+    >
       <h2
         id={block.id}
-        className={`${display} relative mb-5 border-b border-line pb-2 text-xl font-semibold`}
+        className={`${display} relative mb-5 break-after-avoid border-b border-line pb-2 text-xl font-semibold`}
       >
         {block.title}
         <span aria-hidden="true" className="absolute -bottom-px start-0 h-0.5 w-12 bg-accent" />
@@ -276,7 +279,7 @@ function BlockView({ block }: { block: Block }) {
 
 function Footer({ footer }: { footer: FooterModel }) {
   return (
-    <footer className="mx-auto max-w-6xl px-5 pt-6 pb-10 text-center text-sm text-muted print:pt-3 print:pb-0">
+    <footer className="mt-14 border-t border-line pt-6 text-sm text-muted print:mt-6 print:pt-3">
       <p>
         © {footer.year} {footer.name}
       </p>
@@ -296,19 +299,26 @@ export default function ExecutiveTheme({ profile, idPrefix = '' }: ThemeProps) {
   const main = blocks.filter((block) => block.kind !== 'skills');
   return (
     <ThemeWrapper theme="executive" profile={profile} className={fontClass}>
-      <div className="mx-auto max-w-6xl lg:px-6 lg:py-10 print:max-w-none print:p-0">
-        <div className="exec-sheet bg-surface lg:grid lg:grid-cols-[19rem_minmax(0,1fr)] lg:shadow-overlay print:grid print:grid-cols-[13rem_minmax(0,1fr)] print:shadow-none">
+      <div className="print:max-w-none print:p-0">
+        <div className="exec-sheet bg-surface lg:grid lg:min-h-screen lg:grid-cols-[20rem_minmax(0,1fr)] xl:grid-cols-[24rem_minmax(0,1fr)] print:grid print:grid-cols-[13rem_minmax(0,1fr)]">
           <Sidebar header={buildHeader(profile)} skills={skills} idPrefix={idPrefix} />
-          <main id={`${idPrefix}main`} className="min-w-0 p-7 sm:p-10 lg:p-12 print:p-5 print:pt-1">
-            {main.map((block) => (
-              <Section key={block.id} block={block}>
-                <BlockView block={block} />
-              </Section>
-            ))}
+          <main
+            id={`${idPrefix}main`}
+            className="min-w-0 p-7 sm:p-10 lg:px-[clamp(2.5rem,4vw,6rem)] lg:py-14 print:p-5 print:pt-1"
+          >
+            {/* Sections flow down the page in the order the owner chose, and on a wide screen
+                across two or three columns instead of one long strip. */}
+            <div className="2xl:columns-2 2xl:gap-x-20 min-[2200px]:columns-3 print:columns-1">
+              {main.map((block) => (
+                <Section key={block.id} block={block}>
+                  <BlockView block={block} />
+                </Section>
+              ))}
+            </div>
             {main.length === 0 && <EmptyPage className="text-muted" />}
+            <Footer footer={buildFooter(profile)} />
           </main>
         </div>
-        <Footer footer={buildFooter(profile)} />
       </div>
     </ThemeWrapper>
   );

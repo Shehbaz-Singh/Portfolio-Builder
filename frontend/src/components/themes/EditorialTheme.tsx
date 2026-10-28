@@ -62,15 +62,23 @@ function Section({
   animate: boolean;
   children: ReactNode;
 }) {
+  // On a wide screen the label sits in a left rail (and stays in view while you read the section)
+  // and the content takes the rest, so the page uses the width instead of one narrow column.
   return (
     <Reveal enabled={animate}>
-      <section aria-labelledby={block.id} className="mt-16 sm:mt-24">
-        <h2 id={block.id} className={`${caps} mb-8 flex items-center gap-4`}>
+      <section
+        aria-labelledby={block.id}
+        className="mt-16 sm:mt-24 lg:grid lg:grid-cols-[12rem_minmax(0,1fr)] lg:gap-x-12 xl:grid-cols-[16rem_minmax(0,1fr)] xl:gap-x-20"
+      >
+        <h2
+          id={block.id}
+          className={`${caps} mb-8 flex items-center gap-4 lg:sticky lg:top-8 lg:mb-0 lg:flex-col lg:items-start lg:gap-3 lg:self-start`}
+        >
           <span aria-hidden="true" className="h-px w-8 shrink-0 bg-accent" />
           <span className="min-w-0">{block.title}</span>
-          <span aria-hidden="true" className="h-px min-w-6 flex-1 bg-line" />
+          <span aria-hidden="true" className="h-px min-w-6 flex-1 bg-line lg:hidden" />
         </h2>
-        {children}
+        <div className="min-w-0">{children}</div>
       </section>
     </Reveal>
   );
@@ -78,9 +86,11 @@ function Section({
 
 function Masthead({ header }: { header: HeaderModel }) {
   return (
-    <header className="rise-in text-center">
+    <header className="rise-in text-center lg:text-start">
       <div className="border-y border-ink py-3">
-        <p className={`${caps} flex items-center justify-center gap-1.5 text-muted`}>
+        <p
+          className={`${caps} flex items-center justify-center gap-1.5 text-muted lg:justify-start`}
+        >
           {header.location ? (
             <>
               <MapPin aria-hidden="true" className="size-3.5 shrink-0" />
@@ -91,39 +101,45 @@ function Masthead({ header }: { header: HeaderModel }) {
           )}
         </p>
       </div>
-      <Avatar
-        avatar={header.avatar}
-        className="mx-auto mt-10 size-24 rounded-full"
-        placeholderClassName={`${display} border border-ink text-3xl text-ink`}
-      />
-      <h1
-        className={`${display} mt-8 text-[clamp(2.75rem,10vw,5.5rem)] leading-[1.02] font-medium tracking-tight text-balance`}
-      >
-        {header.name}
-      </h1>
-      {header.tagline && (
-        <p
-          className={`${display} mx-auto mt-5 max-w-xl text-xl leading-snug text-pretty text-muted italic sm:text-2xl`}
-        >
-          {header.tagline}
-        </p>
-      )}
-      <AvailabilityBadge
-        availability={header.availability}
-        className="mx-auto mt-6 w-fit justify-center border border-line px-4 py-2.5 text-start text-sm text-ink"
-        dotClassName="bg-accent-fg"
-        linkClassName={`text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`}
-      />
-      <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 border-y border-line py-4 text-sm">
-        {header.links.map((item) => (
-          <li key={item.id} className="max-w-full">
-            <HeaderLink link={item} className={`inline-flex items-center gap-2 ${link}`} />
-          </li>
-        ))}
-        <li>
-          <ShareButton url={header.share.url} title={header.share.title} variant="outline" />
-        </li>
-      </ul>
+      <div className="lg:mt-14 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(20rem,28rem)] lg:items-end lg:gap-x-20">
+        <div className="min-w-0">
+          <Avatar
+            avatar={header.avatar}
+            className="mx-auto mt-10 size-24 rounded-full lg:mx-0 lg:mt-0 lg:size-28"
+            placeholderClassName={`${display} border border-ink text-3xl text-ink`}
+          />
+          <h1
+            className={`${display} mt-8 text-[clamp(2.75rem,10vw,5.5rem)] leading-[1.02] lg:text-[clamp(4rem,7.5vw,11rem)] lg:leading-[0.95] font-medium tracking-tight text-balance`}
+          >
+            {header.name}
+          </h1>
+          {header.tagline && (
+            <p
+              className={`${display} mx-auto mt-5 max-w-xl text-xl leading-snug text-pretty text-muted italic sm:text-2xl lg:mx-0 lg:max-w-3xl lg:text-3xl`}
+            >
+              {header.tagline}
+            </p>
+          )}
+        </div>
+        <div className="min-w-0">
+          <AvailabilityBadge
+            availability={header.availability}
+            className="mx-auto mt-6 w-fit lg:mx-0 justify-center border border-line px-4 py-2.5 text-start text-sm text-ink"
+            dotClassName="bg-accent-fg"
+            linkClassName={`text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`}
+          />
+          <ul className="mt-8 flex flex-wrap items-center justify-center gap-x-6 gap-y-3 border-y border-line py-4 text-sm lg:justify-start">
+            {header.links.map((item) => (
+              <li key={item.id} className="max-w-full">
+                <HeaderLink link={item} className={`inline-flex items-center gap-2 ${link}`} />
+              </li>
+            ))}
+            <li>
+              <ShareButton url={header.share.url} title={header.share.title} variant="outline" />
+            </li>
+          </ul>
+        </div>
+      </div>
     </header>
   );
 }
@@ -133,7 +149,7 @@ function BlockView({ block }: { block: Block }) {
     case 'about':
       return (
         <p
-          className={`${display} text-xl leading-relaxed whitespace-pre-line first-letter:float-start first-letter:me-3 first-letter:mt-1 first-letter:text-[4.5rem] first-letter:leading-[0.8] first-letter:font-medium first-letter:text-accent-fg sm:text-[1.35rem] sm:leading-[1.7]`}
+          className={`${display} max-w-3xl text-xl leading-relaxed whitespace-pre-line xl:max-w-none xl:columns-2 xl:gap-16 first-letter:float-start first-letter:me-3 first-letter:mt-1 first-letter:text-[4.5rem] first-letter:leading-[0.8] first-letter:font-medium first-letter:text-accent-fg sm:text-[1.35rem] sm:leading-[1.7]`}
         >
           {block.text}
         </p>
@@ -141,7 +157,7 @@ function BlockView({ block }: { block: Block }) {
     case 'skills':
       // Reads as one sentence: the items are inline.
       return (
-        <ul className={`${display} text-xl leading-9`}>
+        <ul className={`${display} max-w-5xl text-xl leading-9`}>
           {block.skills.map((skill) => (
             <li key={skill.id} className="inline after:content-[',_'] last:after:content-['.']">
               {skill.name}
@@ -151,7 +167,7 @@ function BlockView({ block }: { block: Block }) {
       );
     case 'projects':
       return (
-        <ul className="space-y-12">
+        <ul className="grid gap-y-12 xl:grid-cols-2 xl:gap-x-14 2xl:grid-cols-3">
           {block.projects.map((project) => (
             <li key={project.id} className="ed-hover group relative min-w-0">
               <h3 className={`${display} text-2xl leading-tight font-medium sm:text-3xl`}>
@@ -194,7 +210,7 @@ function BlockView({ block }: { block: Block }) {
       return (
         <>
           {block.testimonials.length > 0 ? (
-            <ul className="space-y-16">
+            <ul className="grid gap-16 xl:grid-cols-2 xl:gap-x-20">
               {block.testimonials.map((item) => (
                 <li key={item.id} className="min-w-0">
                   <figure>
@@ -232,11 +248,11 @@ function BlockView({ block }: { block: Block }) {
       return (
         <>
           <TotalExperience total={block.total} className="mb-5 text-sm text-muted" />
-          <ol className="divide-y divide-line border-y border-line">
+          <ol className="divide-y divide-line border-y border-line 2xl:grid 2xl:grid-cols-2 2xl:gap-x-16 2xl:divide-y-0 2xl:border-y-0">
             {block.entries.map((entry) => (
               <li
                 key={entry.id}
-                className={`min-w-0 py-7 ${entry.start ? 'md:grid md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-8' : ''}`}
+                className={`min-w-0 py-7 2xl:border-t 2xl:border-line ${entry.start ? 'md:grid md:grid-cols-[8.5rem_minmax(0,1fr)] md:gap-8' : ''}`}
               >
                 {entry.start && (
                   <p className="mb-2 text-sm text-muted tabular-nums md:mt-1.5 md:mb-0">
@@ -285,7 +301,7 @@ function BlockView({ block }: { block: Block }) {
 
 function Footer({ footer }: { footer: FooterModel }) {
   return (
-    <footer className="mx-auto max-w-2xl px-5 pb-12 sm:px-8">
+    <footer className="mx-auto max-w-[110rem] px-5 sm:px-8 lg:px-[clamp(3rem,6vw,8rem)] pb-12">
       <div
         className={`${display} mt-24 border-t border-ink pt-6 text-center text-sm text-muted italic`}
       >
@@ -307,7 +323,10 @@ export default function EditorialTheme({ profile, idPrefix = '' }: ThemeProps) {
   const blocks = buildBlocks(profile, idPrefix);
   return (
     <ThemeWrapper theme="editorial" profile={profile} className={fontClass}>
-      <main id={`${idPrefix}main`} className="mx-auto max-w-2xl px-5 py-10 sm:px-8 sm:py-16">
+      <main
+        id={`${idPrefix}main`}
+        className="mx-auto max-w-[110rem] px-5 sm:px-8 lg:px-[clamp(3rem,6vw,8rem)] py-10 sm:py-16"
+      >
         <Masthead header={buildHeader(profile)} />
         {blocks.map((block) => (
           <Section key={block.id} block={block} animate={!idPrefix}>
