@@ -2,6 +2,8 @@
 // here instead of writing it inline, so the wording lives in one place. Messages that depend on a
 // value are small functions. Validation messages of the shared schemas live in @parichay/shared.
 
+import { IMAGE_MAX_BYTES, RESUME_MAX_BYTES, megabytes } from '@parichay/shared';
+
 export const ERRORS = {
   // ---- general
   authRequired: 'Authentication required',
@@ -51,7 +53,7 @@ export const ERRORS = {
 
   // ---- uploads
   imageTypes: 'Only JPG, PNG and WebP images are allowed',
-  imageTooLarge: 'Image must be 2 MB or smaller',
+  imageTooLarge: `Image must be ${megabytes(IMAGE_MAX_BYTES)} or smaller`,
   imageUploadFailed: 'Could not upload the image, please try again',
   sendAvatar: 'Send one image in the "avatar" form field',
   sendCover: 'Send one image in the "cover" form field',
@@ -60,7 +62,7 @@ export const ERRORS = {
   attachCover: 'Attach an image in the "cover" form field',
   attachResume: 'Attach a PDF in the "resume" form field',
   pdfOnly: 'Only PDF files are supported',
-  pdfTooLarge: 'The PDF must be 5 MB or smaller',
+  pdfTooLarge: `The PDF must be ${megabytes(RESUME_MAX_BYTES)} or smaller`,
 
   // ---- resume import
   pdfUnreadable: "We couldn't read that PDF. It may be damaged or password protected.",

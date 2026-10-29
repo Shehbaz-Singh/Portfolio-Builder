@@ -1,3 +1,4 @@
+import { RESUME_MAX_BYTES, ERROR_CODES } from '@parichay/shared';
 import { revalidateTag } from 'next/cache';
 import { NextResponse, type NextRequest } from 'next/server';
 import { PUBLIC_PROFILES_TAG } from '@/lib/api';
@@ -16,7 +17,7 @@ const UPSTREAM_TIMEOUT_MS = 55_000;
 const FORWARDED_AREAS = new Set(['auth', 'profile', 'public']);
 // The API enforces the real per-route limits (2 MB avatar, 5 MB resume); this only stops the
 // proxy from buffering something absurd. Vercel itself rejects bodies over 4.5 MB.
-const MAX_BODY_BYTES = 5.5 * 1024 * 1024;
+const MAX_BODY_BYTES = RESUME_MAX_BYTES + 512 * 1024; // the biggest upload, plus the form's overhead
 
 const fail = (status: number, code: string, message: string) =>
   NextResponse.json({ error: { code, message } }, { status });
@@ -28,7 +29,7 @@ async function handle(req: NextRequest, { params }: Context) {
   const route = path.join('/');
 
   if (!FORWARDED_AREAS.has(path[0]) || path.some((s) => s === '.' || s === '..')) {
-    return fail(404, 'NOT_FOUND', 'Not found');
+    return fail(404, ERROR_CODES.NOT_FOUND, 'Not found');
   }
 
   const isRead = req.method === 'GET' || req.method === 'HEAD';
@@ -61,11 +62,11 @@ async function handle(req: NextRequest, { params }: Context) {
   let body: ArrayBuffer | undefined;
   if (!isRead) {
     if (Number(req.headers.get('content-length')) > MAX_BODY_BYTES) {
-      return fail(413, 'FILE_TOO_LARGE', 'That upload is too large');
+      return fail(413, ERROR_CODES.FILE_TOO_LARGE, 'That upload is too large');
     }
     body = await req.arrayBuffer();
     if (body.byteLength > MAX_BODY_BYTES)
-      return fail(413, 'FILE_TOO_LARGE', 'That upload is too large');
+      return fail(413, ERROR_CODES.FILE_TOO_LARGE, 'That upload is too large');
   }
 
   let upstream: Response;

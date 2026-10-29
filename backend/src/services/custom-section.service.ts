@@ -8,6 +8,7 @@ import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { WAIT, lockProfile } from '../lib/locks';
 import { prisma } from '../lib/prisma';
+import { assertExactIds } from '../lib/reorder';
 import { orNotFound } from '../lib/prisma-errors';
 import { customItems } from '../lib/selects';
 import { saveSectionConfig } from './section-layout.service';
@@ -164,8 +165,10 @@ export async function updateItem(
 
 export async function deleteItem(profileId: string, sectionId: string, id: string) {
   await assertOwnSection(prisma, profileId, sectionId);
-  await orNotFound(prisma.customSectionItem.delete({ where: { id, sectionId } }), itemNotFound);
-  await prisma.$transaction((tx) => deleteTranslationsFor(tx, profileId, 'customItem', [id]));
+  await prisma.$transaction(async (tx) => {
+    await orNotFound(tx.customSectionItem.delete({ where: { id, sectionId } }), itemNotFound);
+    await deleteTranslationsFor(tx, profileId, 'customItem', [id]);
+  });
 }
 
 // `ids` is the new order. It must list every item in the section exactly once, which also
@@ -177,10 +180,7 @@ export async function reorderItems(profileId: string, sectionId: string, ids: st
     where: { sectionId },
     select: { id: true },
   });
-  const currentIds = new Set(current.map((item) => item.id));
-  if (ids.length !== currentIds.size || !ids.every((id) => currentIds.has(id))) {
-    throw new AppError(400, 'INVALID_REORDER', ERRORS.reorderCustomItems);
-  }
+  assertExactIds(ids, current, ERRORS.reorderCustomItems);
 
   await prisma.$transaction(
     ids.map((id, order) =>

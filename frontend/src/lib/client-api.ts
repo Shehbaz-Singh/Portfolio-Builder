@@ -1,4 +1,4 @@
-import { apiErrorSchema } from '@parichay/shared';
+import { apiErrorSchema, ERROR_CODES } from '@parichay/shared';
 
 // Browser-side API client. It calls this site's /api proxy (which attaches the JWT from the
 // httpOnly cookie), parses the API's error format and sends the user to /login on a 401.
@@ -51,12 +51,13 @@ async function attempt(path: string, options: Options): Promise<Response | ApiEr
 // Messages that say what happened and what to do next, for the errors people can actually run into.
 // Anything not listed keeps the server's own wording (validation errors name the field).
 const FRIENDLY: Record<string, string> = {
-  INVALID_CREDENTIALS:
+  [ERROR_CODES.INVALID_CREDENTIALS]:
     "That email and password don't match. Check them and try again, or create an account if you're new.",
-  RATE_LIMITED: "You've tried that a few times in a row. Wait a few minutes, then try again.",
-  INVALID_PASSWORD: "That isn't your current password. Check it and try again.",
-  UPLOAD_FAILED: "We couldn't save that image. Try again, or pick a different one.",
-  NOTHING_FOUND:
+  [ERROR_CODES.RATE_LIMITED]:
+    "You've tried that a few times in a row. Wait a few minutes, then try again.",
+  [ERROR_CODES.INVALID_PASSWORD]: "That isn't your current password. Check it and try again.",
+  [ERROR_CODES.UPLOAD_FAILED]: "We couldn't save that image. Try again, or pick a different one.",
+  [ERROR_CODES.NOTHING_FOUND]:
     "We couldn't find resume details in that file. Try a PDF with selectable text, or fill in your details by hand.",
 };
 

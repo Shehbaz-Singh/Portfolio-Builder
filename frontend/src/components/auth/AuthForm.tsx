@@ -4,7 +4,13 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm, useFormContext } from 'react-hook-form';
-import { loginSchema, registerSchema, type LoginInput, type RegisterInput } from '@parichay/shared';
+import {
+  loginSchema,
+  registerSchema,
+  type LoginInput,
+  type RegisterInput,
+  ERROR_CODES,
+} from '@parichay/shared';
 import { api } from '@/lib/client-api';
 import { schemaResolver } from '@/lib/form';
 import { Form, TextField } from '../form-fields';
@@ -95,7 +101,7 @@ export function AuthForm({ mode, expired = false }: { mode: Mode; expired?: bool
         <Form
           form={form}
           onSubmit={onSubmit}
-          codeFields={{ EMAIL_TAKEN: 'email' }}
+          codeFields={{ [ERROR_CODES.EMAIL_TAKEN]: 'email' }}
           submitLabel={text.submit}
         >
           {mode === 'register' && (

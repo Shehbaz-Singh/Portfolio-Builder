@@ -8,6 +8,7 @@ import {
   type MyLanguages,
   type MyPost,
   type StoredTranslation,
+  ERROR_CODES,
 } from '@parichay/shared';
 import { ApiError, api } from '@/lib/client-api';
 import { buildGroups, fieldKey, type FieldSpec } from '@/lib/translation-fields';
@@ -231,8 +232,8 @@ function LocaleForm({
         return { value };
       } catch (err) {
         if (err instanceof ApiError) {
-          if (err.code === 'SUGGESTIONS_UNAVAILABLE') setUnavailable(true);
-          if (err.code === 'SUGGESTION_LIMIT') setLimitMessage(err.message);
+          if (err.code === ERROR_CODES.SUGGESTIONS_UNAVAILABLE) setUnavailable(true);
+          if (err.code === ERROR_CODES.SUGGESTION_LIMIT) setLimitMessage(err.message);
         }
         return { error: errorText(err) };
       }

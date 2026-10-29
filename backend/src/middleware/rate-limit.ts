@@ -5,7 +5,7 @@ import { ipKeyGenerator, rateLimit } from 'express-rate-limit';
 import { config } from '../lib/config';
 import { AppError } from '../lib/errors';
 import { ERRORS } from '../lib/messages';
-
+import { ERROR_CODES } from '@parichay/shared';
 
 function fromFrontend(req: Request): boolean {
   const expected = config.PROXY_SECRET;
@@ -34,7 +34,8 @@ function limiter(options: {
     ...options,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
-    handler: (_req, _res, next) => next(new AppError(429, 'RATE_LIMITED', ERRORS.rateLimited)),
+    handler: (_req, _res, next) =>
+      next(new AppError(429, ERROR_CODES.RATE_LIMITED, ERRORS.rateLimited)),
   });
 }
 

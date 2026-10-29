@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { z } from 'zod';
-import { profileUpdateSchema } from '@parichay/shared';
+import { ABOUT_MAX, profileUpdateSchema } from '@parichay/shared';
 import { schemaResolver } from '@/lib/form';
 import { Form, TextArea } from '../../form-fields';
 import { useFormAutosave } from '../autosave';
@@ -61,7 +61,7 @@ export function AboutStep() {
           name="about"
           label="About"
           rows={10}
-          maxLength={5000}
+          maxLength={ABOUT_MAX}
           placeholder="Hi, I'm Priya. I design apps people actually enjoy using. Lately I've been working on…"
           hint="Write the way you'd introduce yourself to someone new: who you are, what you do, what you care about. Two or three short paragraphs is plenty. A blank line starts a new paragraph. Saved as you type."
         />

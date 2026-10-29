@@ -13,6 +13,7 @@ import {
 import { withSections } from './section-layout.service';
 import { assertSlugAvailable, slugTaken } from './slug.service';
 import { ERRORS } from '../lib/messages';
+import { ownProfile } from '../lib/profile';
 
 // The whole profile as the editor (and later the public page) needs it, in one query.
 const fullProfileSelect = {
@@ -32,11 +33,7 @@ const fullProfileSelect = {
 } satisfies Prisma.ProfileSelect;
 
 export async function getProfile(profileId: string) {
-  const profile = await prisma.profile.findUnique({
-    where: { id: profileId },
-    select: fullProfileSelect,
-  });
-  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
+  const profile = await ownProfile(profileId, fullProfileSelect);
   return withSections(profile);
 }
 
@@ -92,11 +89,7 @@ export async function updateProfile(profileId: string, input: ProfileUpdateInput
 export async function setPublished(profileId: string, published?: boolean) {
   let next = published;
   if (next === undefined) {
-    const current = await prisma.profile.findUnique({
-      where: { id: profileId },
-      select: { published: true },
-    });
-    if (!current) throw AppError.notFound(ERRORS.profileNotFound);
+    const current = await ownProfile(profileId, { published: true });
     next = !current.published;
   }
 

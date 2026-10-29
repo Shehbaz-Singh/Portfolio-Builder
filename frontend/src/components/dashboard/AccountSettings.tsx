@@ -11,6 +11,7 @@ import {
   type ChangePasswordInput,
   type DeleteAccountInput,
   type SessionResponse,
+  ERROR_CODES,
 } from '@parichay/shared';
 import { api } from '@/lib/client-api';
 import { schemaResolver } from '@/lib/form';
@@ -57,7 +58,7 @@ function ChangePassword() {
       <Form
         form={form}
         onSubmit={onSubmit}
-        codeFields={{ INVALID_PASSWORD: 'currentPassword' }}
+        codeFields={{ [ERROR_CODES.INVALID_PASSWORD]: 'currentPassword' }}
         submitLabel="Change password"
       >
         <TextField
@@ -190,7 +191,7 @@ function DeleteAccount() {
           <Form
             form={form}
             onSubmit={onSubmit}
-            codeFields={{ INVALID_PASSWORD: 'password' }}
+            codeFields={{ [ERROR_CODES.INVALID_PASSWORD]: 'password' }}
             submitLabel="Yes, delete everything"
             pendingLabel="Deleting…"
             danger

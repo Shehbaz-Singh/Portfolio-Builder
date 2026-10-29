@@ -1,5 +1,6 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import {
   Bold,
@@ -14,8 +15,9 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 import {
-  COVER_MAX_BYTES,
-  COVER_TYPES,
+  IMAGE_MAX_BYTES,
+  IMAGE_TYPES,
+  megabytes,
   POST_BODY_MAX,
   POST_EXCERPT_MAX,
   POST_TITLE_MAX,
@@ -27,11 +29,16 @@ import {
 } from '@parichay/shared';
 import { api } from '@/lib/client-api';
 import { applyFormat, type Format } from '@/lib/markdown-format';
-import { Markdown } from '../../Markdown';
 import { Button, Card, ErrorText, Input, SlowNotice, Tabs, Textarea, useConfirm } from '../../ui';
 import { cx } from '../../ui/cx';
 import { errorText, useEditor, useReportDirty } from '../editor-context';
 import { NOTICES, PROBLEMS, CONFIRMS } from '@/lib/messages';
+import { useImageUpload } from '../use-image-upload';
+
+// Only the Preview tab needs the Markdown renderer, so it is fetched when that tab is first opened.
+const Markdown = dynamic(() => import('../../Markdown').then((m) => m.Markdown), {
+  loading: () => <p className="text-sm text-muted">Loading the preview…</p>,
+});
 
 type Fields = {
   title: string;
@@ -153,9 +160,7 @@ function CoverImage({
   cover: string | null;
   setCover: (url: string | null) => void;
 }) {
-  const { update, notify } = useEditor();
-  const input = useRef<HTMLInputElement>(null);
-  const [busy, setBusy] = useState(false);
+  const { update } = useEditor();
 
   const remember = (url: string | null) =>
     update((p) => ({
@@ -163,43 +168,25 @@ function CoverImage({
       posts: p.posts.map((post) => (post.id === postId ? { ...post, coverImageUrl: url } : post)),
     }));
 
-  async function onFile(file: File | undefined) {
-    if (!file || !postId) return;
-    if (!(COVER_TYPES as readonly string[]).includes(file.type))
-      return notify('error', PROBLEMS.imageType);
-    if (file.size > COVER_MAX_BYTES) return notify('error', PROBLEMS.coverTooLarge);
-    const form = new FormData();
-    form.append('cover', file);
-    setBusy(true);
-    try {
-      const { coverImageUrl } = await api<{ coverImageUrl: string }>(
-        `/profile/me/posts/${postId}/cover`,
-        { method: 'POST', form },
-      );
-      setCover(coverImageUrl);
-      remember(coverImageUrl);
-      notify('success', NOTICES.coverSaved);
-    } catch (err) {
-      notify('error', errorText(err));
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function onRemove() {
-    if (!postId) return;
-    setBusy(true);
-    try {
-      await api(`/profile/me/posts/${postId}/cover`, { method: 'DELETE' });
-      setCover(null);
-      remember(null);
-      notify('success', NOTICES.coverRemoved);
-    } catch (err) {
-      notify('error', errorText(err));
-    } finally {
-      setBusy(false);
-    }
-  }
+  const {
+    input,
+    busy,
+    upload,
+    remove: onRemove,
+  } = useImageUpload({
+    endpoint: postId ? `/profile/me/posts/${postId}/cover` : null,
+    field: 'cover',
+    resultKey: 'coverImageUrl',
+    types: IMAGE_TYPES,
+    maxBytes: IMAGE_MAX_BYTES,
+    tooLarge: PROBLEMS.coverTooLarge,
+    uploaded: NOTICES.coverSaved,
+    removed: NOTICES.coverRemoved,
+    onChange: (url) => {
+      setCover(url);
+      remember(url);
+    },
+  });
 
   return (
     <div className="space-y-2">
@@ -216,12 +203,12 @@ function CoverImage({
       <input
         ref={input}
         type="file"
-        accept={COVER_TYPES.join(',')}
+        accept={IMAGE_TYPES.join(',')}
         className="sr-only"
         tabIndex={-1}
         aria-hidden="true"
         onChange={(e) => {
-          void onFile(e.target.files?.[0]);
+          void upload(e.target.files?.[0]);
           e.target.value = ''; // choosing the same file again should still work
         }}
       />
@@ -239,7 +226,7 @@ function CoverImage({
       </div>
       <p className="text-xs text-muted">
         {postId
-          ? 'JPG, PNG or WebP, up to 2 MB. It is cropped to 1200 × 630.'
+          ? `JPG, PNG or WebP, up to ${megabytes(IMAGE_MAX_BYTES)}. It is cropped to 1200 × 630.`
           : 'Save the draft first, then you can add an image.'}
       </p>
       <SlowNotice pending={busy} />

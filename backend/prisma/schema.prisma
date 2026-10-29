@@ -257,6 +257,7 @@ model Post {
 
   @@unique([profileId, slug])
   @@index([profileId, status, publishedAt])
+  @@index([status, type, updatedAt, id])
 }
 
 enum TranslatableEntity {
@@ -290,7 +291,6 @@ model Translation {
   profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
 
   @@unique([profileId, locale, entityType, entityId, field])
-  @@index([profileId, locale])
 }
 
 // How many AI translation suggestions a user has asked for on a day (UTC), for the daily limit.

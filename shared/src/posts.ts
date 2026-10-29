@@ -92,7 +92,3 @@ export const publicPostSchema = publicPostSummarySchema.extend({
 });
 export type PublicPostSummary = z.infer<typeof publicPostSummarySchema>;
 export type PublicPost = z.infer<typeof publicPostSchema>;
-
-// The cover image: same limits as the avatar (see backend/src/middleware/upload.ts).
-export const COVER_MAX_BYTES = 2 * 1024 * 1024;
-export const COVER_TYPES = ['image/jpeg', 'image/png', 'image/webp'] as const;

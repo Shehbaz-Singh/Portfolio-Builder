@@ -230,6 +230,7 @@ export async function PostView({
               alt=""
               width={1200}
               height={630}
+              decoding="async"
               className="mt-8 aspect-[40/21] w-full rounded-card object-cover"
             />
           )}

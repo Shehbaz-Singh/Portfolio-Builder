@@ -1,7 +1,12 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import type { ResumeResponse } from '@parichay/shared';
+import {
+  RESUME_PROXY_MAX_BYTES,
+  megabytes,
+  type ResumeResponse,
+  ERROR_CODES,
+} from '@parichay/shared';
 import { ApiError, api } from '@/lib/client-api';
 import { Button, Card, ErrorText, SlowNotice, useConfirm } from '../../ui';
 import { useEditor } from '../editor-context';
@@ -9,7 +14,7 @@ import { NOTICES, PROBLEMS, CONFIRMS } from '@/lib/messages';
 
 // Larger than the API's 5 MB limit is refused there too; this lower one is what fits through
 // the site's /api proxy on Vercel (its request bodies are capped at 4.5 MB).
-const MAX_BYTES = 4.5 * 1024 * 1024;
+const MAX_BYTES = RESUME_PROXY_MAX_BYTES;
 
 // First step of onboarding: read a resume PDF and fill in what it says. Nothing is saved here.
 // The parsed result lands in the other steps' forms as unsaved edits and suggestions.
@@ -44,7 +49,7 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
     } catch (err) {
       setError(err instanceof ApiError ? err.message : PROBLEMS.pdfUnread);
       // Only a missing key means "do not try again": offer the manual route clearly.
-      setEmpty(err instanceof ApiError && err.code === 'RESUME_IMPORT_UNAVAILABLE');
+      setEmpty(err instanceof ApiError && err.code === ERROR_CODES.RESUME_IMPORT_UNAVAILABLE);
     } finally {
       setReading(false);
     }
@@ -87,7 +92,8 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
           {reading ? 'Reading your resume…' : 'Choose your resume (PDF)'}
         </Button>
         <p className="text-xs text-muted">
-          PDF with selectable text, up to 4.5 MB. Scanned images are not supported.
+          PDF with selectable text, up to {megabytes(RESUME_PROXY_MAX_BYTES)}. Scanned images are
+          not supported.
         </p>
         <p role="status" className="text-sm text-muted">
           {reading

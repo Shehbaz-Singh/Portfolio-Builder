@@ -1,76 +1,56 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import { z } from 'zod';
 import {
   linkInputSchema,
+  IMAGE_MAX_BYTES,
+  IMAGE_TYPES,
   linkTypeSchema,
+  megabytes,
   profileUpdateSchema,
   slugSchema,
   type LinkInput,
   type LinkType,
   type MyLink,
   type MyProfile,
+  ERROR_CODES,
 } from '@parichay/shared';
 import { Link2 } from 'lucide-react';
-import { ApiError, api } from '@/lib/client-api';
+import { ApiError } from '@/lib/client-api';
 import { schemaResolver } from '@/lib/form';
 import { initials } from '@/lib/format';
 import { CheckboxField, Form, SelectField, TextField } from '../../form-fields';
 import { Button, SlowNotice, Switch } from '../../ui';
 import { useFormAutosave } from '../autosave';
 import { EditorForm } from '../EditorForm';
-import { errorText, useEditor, useReportDirty, useSection } from '../editor-context';
+import { useEditor, useReportDirty, useSection } from '../editor-context';
 import { SectionManager, type ItemFormProps } from '../SectionManager';
 import { AvailabilityCard } from './AvailabilityCard';
 import { ResumeCard } from './ResumeCard';
 import { WorkingTogetherCard } from './WorkingTogetherCard';
 import { NOTICES, PROBLEMS } from '@/lib/messages';
-
-const AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
+import { useImageUpload } from '../use-image-upload';
 
 function AvatarUpload() {
-  const { profile, update, notify } = useEditor();
-  const input = useRef<HTMLInputElement>(null);
-  const [uploading, setUploading] = useState(false);
-
-  async function onRemove() {
-    setUploading(true);
-    try {
-      await api('/profile/me/avatar', { method: 'DELETE' });
-      update((p) => ({ ...p, avatarUrl: null }));
-      notify('success', NOTICES.photoRemoved);
-    } catch (err) {
-      notify('error', errorText(err));
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  async function onFile(file: File | undefined) {
-    if (!file) return;
-    // Same limits as the API, checked here first so a wrong file fails instantly.
-    if (!AVATAR_TYPES.includes(file.type)) return notify('error', PROBLEMS.imageType);
-    if (file.size > AVATAR_MAX_BYTES) return notify('error', PROBLEMS.avatarTooLarge);
-
-    const form = new FormData();
-    form.append('avatar', file);
-    setUploading(true);
-    try {
-      const { avatarUrl } = await api<{ avatarUrl: string }>('/profile/me/avatar', {
-        method: 'POST',
-        form,
-      });
-      update((p) => ({ ...p, avatarUrl }));
-      notify('success', NOTICES.photoUp);
-    } catch (err) {
-      notify('error', errorText(err));
-    } finally {
-      setUploading(false);
-    }
-  }
+  const { profile, update } = useEditor();
+  const {
+    input,
+    busy: uploading,
+    upload,
+    remove,
+  } = useImageUpload({
+    endpoint: '/profile/me/avatar',
+    field: 'avatar',
+    resultKey: 'avatarUrl',
+    types: IMAGE_TYPES,
+    maxBytes: IMAGE_MAX_BYTES,
+    tooLarge: PROBLEMS.avatarTooLarge,
+    uploaded: NOTICES.photoUp,
+    removed: NOTICES.photoRemoved,
+    onChange: (avatarUrl) => update((p) => ({ ...p, avatarUrl })),
+  });
 
   return (
     <div className="flex items-center gap-4">
@@ -94,12 +74,12 @@ function AvatarUpload() {
         <input
           ref={input}
           type="file"
-          accept={AVATAR_TYPES.join(',')}
+          accept={IMAGE_TYPES.join(',')}
           className="sr-only"
           tabIndex={-1}
           aria-hidden="true"
           onChange={(e) => {
-            void onFile(e.target.files?.[0]);
+            void upload(e.target.files?.[0]);
             e.target.value = ''; // picking the same file again should still trigger onChange
           }}
         />
@@ -108,12 +88,12 @@ function AvatarUpload() {
             {uploading ? 'Working…' : profile.avatarUrl ? 'Change photo' : 'Upload photo'}
           </Button>
           {profile.avatarUrl && (
-            <Button variant="danger" disabled={uploading} onClick={onRemove}>
+            <Button variant="danger" disabled={uploading} onClick={remove}>
               Remove
             </Button>
           )}
         </div>
-        <p className="text-xs text-muted">JPG, PNG or WebP, up to 2 MB.</p>
+        <p className="text-xs text-muted">JPG, PNG or WebP, up to {megabytes(IMAGE_MAX_BYTES)}.</p>
         <SlowNotice pending={uploading} />
       </div>
     </div>
@@ -227,7 +207,7 @@ function SlugForm() {
     <EditorForm
       form={form}
       onSubmit={onSubmit}
-      codeFields={{ SLUG_TAKEN: 'slug' }}
+      codeFields={{ [ERROR_CODES.SLUG_TAKEN]: 'slug' }}
       submitLabel="Save address"
     >
       <TextField

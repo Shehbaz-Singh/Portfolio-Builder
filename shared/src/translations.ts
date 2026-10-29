@@ -66,11 +66,14 @@ export const fieldRule = (entity: TranslatableEntity, field: string) =>
 export const localeSchema = z.enum(LOCALE_CODES);
 
 // One stored translation, as the editor reads and writes it. An empty value removes it.
+const entityIdSchema = z.string().min(1).max(100);
+const fieldNameSchema = z.string().min(1).max(40);
+
 export const translationEntrySchema = z
   .object({
     entityType: translatableEntitySchema,
-    entityId: z.string().min(1).max(100),
-    field: z.string().min(1).max(40),
+    entityId: entityIdSchema,
+    field: fieldNameSchema,
     value: z.string().max(20000),
     // True while the text came from the AI suggestion and the owner has not edited it.
     needsReview: z.boolean().default(false),
@@ -145,8 +148,8 @@ export type MyLanguages = z.infer<typeof myLanguagesSchema>;
 export const suggestRequestSchema = z.object({
   locale: localeSchema,
   entityType: translatableEntitySchema,
-  entityId: z.string().min(1).max(100),
-  field: z.string().min(1).max(40),
+  entityId: entityIdSchema,
+  field: fieldNameSchema,
 });
 export const SUGGESTIONS_PER_DAY = 40;
 

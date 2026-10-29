@@ -2,7 +2,7 @@
 
 import { Briefcase } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { experienceInputSchema, type ExperienceInput } from '@parichay/shared';
+import { DESCRIPTION_MAX, experienceInputSchema, type ExperienceInput } from '@parichay/shared';
 import { schemaResolver } from '@/lib/form';
 import { formatRange } from '@/lib/format';
 import { TextArea, TextField } from '../../form-fields';
@@ -54,7 +54,7 @@ function ExperienceForm({ item, draft, onDone, onSaved }: ItemFormProps<'experie
         name="description"
         label="What you did"
         rows={5}
-        maxLength={3000}
+        maxLength={DESCRIPTION_MAX}
         placeholder="Led the redesign of the checkout flow, which cut drop-off by a fifth."
         hint="Say what you did and what changed because of it. Numbers help, if you have them."
       />

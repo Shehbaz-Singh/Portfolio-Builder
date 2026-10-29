@@ -106,14 +106,19 @@ export const accentColorSchema = z
   .toLowerCase()
   .regex(/^#[0-9a-f]{6}$/, VALIDATION.hexColor);
 
+// Lengths the forms show next to their fields.
+export const FULL_NAME_MAX = 100;
+export const ABOUT_MAX = 5000;
+export const DESCRIPTION_MAX = 3000; // a job's or a project's description
+
 export const linkTypeSchema = z.enum(['linkedin', 'github', 'email', 'phone', 'website', 'other']);
 export type LinkType = z.infer<typeof linkTypeSchema>;
 
 export const profileInputSchema = z.object({
   slug: slugSchema,
-  fullName: trimmed(100),
+  fullName: trimmed(FULL_NAME_MAX),
   tagline: optionalText(160),
-  about: optionalText(5000),
+  about: optionalText(ABOUT_MAX),
   location: optionalText(100),
   avatarUrl: httpUrl.nullish().transform((v) => v ?? null),
   theme: themeSchema.default(DEFAULT_THEME),
@@ -216,7 +221,7 @@ export const experienceInputSchema = z
       .date()
       .nullish()
       .transform((v) => v ?? null),
-    description: z.string().trim().max(3000).default(''),
+    description: z.string().trim().max(DESCRIPTION_MAX).default(''),
     order: orderField,
   })
   .refine(dateRange, dateRangeIssue);
@@ -225,7 +230,7 @@ export type ExperienceInput = z.infer<typeof experienceInputSchema>;
 export const projectInputSchema = z.object({
   name: trimmed(100),
   url: httpUrl.nullish().transform((v) => v ?? null),
-  description: z.string().trim().max(3000).default(''),
+  description: z.string().trim().max(DESCRIPTION_MAX).default(''),
   techTags: z.array(trimmed(30)).max(20).default([]),
   order: orderField,
 });

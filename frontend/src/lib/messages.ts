@@ -3,6 +3,8 @@
 // that depend on a value are small functions. Validation messages that come from the shared
 // schemas live in @parichay/shared, and the public portfolio's text in lib/i18n/messages.
 
+import { IMAGE_MAX_BYTES, RESUME_PROXY_MAX_BYTES, megabytes } from '@parichay/shared';
+
 export const NOTICES = {
   saved: 'Saved.',
   deleted: 'Deleted.',
@@ -50,11 +52,10 @@ export const PROBLEMS = {
   linkNotUpdated: "We couldn't update that link. Please try again.",
   copyLink: "We couldn't copy the link automatically. Select it and copy it by hand.",
   imageType: "That file type won't work. Choose a JPG, PNG or WebP image.",
-  avatarTooLarge: 'That image is over 2 MB. Choose a smaller one, or shrink it and try again.',
-  coverTooLarge: 'That image is over 2 MB. Choose a smaller one, or shrink it first.',
+  avatarTooLarge: `That image is over ${megabytes(IMAGE_MAX_BYTES)}. Choose a smaller one, or shrink it and try again.`,
+  coverTooLarge: `That image is over ${megabytes(IMAGE_MAX_BYTES)}. Choose a smaller one, or shrink it first.`,
   notPdf: 'That doesn’t look like a PDF. Choose a PDF file, or fill in your details by hand.',
-  pdfTooLarge:
-    'That PDF is over 4.5 MB. Try a smaller or compressed version, or fill in your details by hand.',
+  pdfTooLarge: `That PDF is over ${megabytes(RESUME_PROXY_MAX_BYTES)}. Try a smaller or compressed version, or fill in your details by hand.`,
   pdfUnread: 'We couldn’t read that file. Try again, or fill in your details by hand.',
   sectionTitle: 'Enter a title (up to 80 characters).',
   passwordsDiffer: 'Those two passwords are different. Type the new one the same way twice.',

@@ -5,6 +5,7 @@ import {
   languageOf,
   translationKey,
   type TranslatableEntity,
+  ERROR_CODES,
 } from '@parichay/shared';
 import { AppError } from '../lib/errors';
 import { LlmError, getLlmProvider } from '../lib/llm';
@@ -32,7 +33,11 @@ async function takeSuggestion(userId: string) {
     update: { count: { increment: 1 } },
   });
   if (row.count > SUGGESTIONS_PER_DAY) {
-    throw new AppError(429, 'SUGGESTION_LIMIT', ERRORS.suggestionLimit(SUGGESTIONS_PER_DAY));
+    throw new AppError(
+      429,
+      ERROR_CODES.SUGGESTION_LIMIT,
+      ERRORS.suggestionLimit(SUGGESTIONS_PER_DAY),
+    );
   }
 }
 
@@ -73,7 +78,7 @@ export async function suggest(
 
   const provider = getLlmProvider();
   if (!provider) {
-    throw new AppError(503, 'SUGGESTIONS_UNAVAILABLE', ERRORS.suggestionsUnavailable);
+    throw new AppError(503, ERROR_CODES.SUGGESTIONS_UNAVAILABLE, ERRORS.suggestionsUnavailable);
   }
 
   await takeSuggestion(userId);
@@ -92,7 +97,7 @@ export async function suggest(
       throw new AppError(504, 'SUGGESTIONS_TIMEOUT', ERRORS.suggestionsTimeout);
     }
     if (err instanceof LlmError) console.error(`Translation: ${provider.name} ${err.kind}`);
-    throw new AppError(503, 'SUGGESTIONS_UNAVAILABLE', ERRORS.suggestionsUnavailable);
+    throw new AppError(503, ERROR_CODES.SUGGESTIONS_UNAVAILABLE, ERRORS.suggestionsUnavailable);
   }
 
   const value = parseTranslation(reply);

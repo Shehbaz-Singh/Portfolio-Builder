@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { optionalLine, requiredBlock, requiredLine } from './text';
+import { EMAIL_MAX, optionalLine, requiredBlock, requiredLine } from './text';
 import { VALIDATION } from './messages';
 
 // Testimonials: quotes about the profile's owner. A visitor can submit one when the owner accepts
@@ -16,7 +16,7 @@ export const TESTIMONIAL_ROLE_MAX = 100;
 export const TESTIMONIAL_COMPANY_MAX = 100;
 export const TESTIMONIAL_MESSAGE_MIN = 20;
 export const TESTIMONIAL_MESSAGE_MAX = 800;
-export const TESTIMONIAL_EMAIL_MAX = 254;
+export const TESTIMONIAL_EMAIL_MAX = EMAIL_MAX;
 
 // Keeps the table and the owner's list manageable, however many people submit.
 export const MAX_TESTIMONIALS = 100; // all statuses, per profile

@@ -1,5 +1,6 @@
 import type { ApiError } from '@parichay/shared';
 import { ERRORS } from './messages';
+import { ERROR_CODES } from '@parichay/shared';
 
 type ErrorDetails = NonNullable<ApiError['error']['details']>;
 
@@ -24,6 +25,6 @@ export class AppError extends Error {
   }
 
   static notFound(message: string = ERRORS.notFound) {
-    return new AppError(404, 'NOT_FOUND', message);
+    return new AppError(404, ERROR_CODES.NOT_FOUND, message);
   }
 }

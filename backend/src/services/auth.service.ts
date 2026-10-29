@@ -7,6 +7,7 @@ import {
   RegisterInput,
   SessionResponse,
   readWorkingHours,
+  ERROR_CODES,
 } from '@parichay/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
@@ -40,7 +41,7 @@ function toSession(user: SessionUser): SessionResponse {
   };
 }
 
-const emailTaken = () => AppError.conflict('EMAIL_TAKEN', ERRORS.emailTaken);
+const emailTaken = () => AppError.conflict(ERROR_CODES.EMAIL_TAKEN, ERRORS.emailTaken);
 
 export async function register(input: RegisterInput): Promise<AuthResponse> {
   const { email, password } = input;
@@ -88,7 +89,7 @@ export async function login({ email, password }: LoginInput): Promise<AuthRespon
   // Same error and same amount of work whether the email or the password was wrong.
   const valid = await verifyPassword(password, user?.passwordHash ?? null);
   if (!user || !valid) {
-    throw new AppError(401, 'INVALID_CREDENTIALS', ERRORS.invalidCredentials);
+    throw new AppError(401, ERROR_CODES.INVALID_CREDENTIALS, ERRORS.invalidCredentials);
   }
 
   return { token: signToken(user.id), ...toSession(user) };
@@ -109,7 +110,7 @@ async function confirmPassword(userId: string, password: string) {
   });
   if (!user) throw AppError.unauthorized(ERRORS.accountGone, 'INVALID_TOKEN');
   if (!(await verifyPassword(password, user.passwordHash))) {
-    throw new AppError(403, 'INVALID_PASSWORD', ERRORS.incorrectPassword);
+    throw new AppError(403, ERROR_CODES.INVALID_PASSWORD, ERRORS.incorrectPassword);
   }
   return user;
 }

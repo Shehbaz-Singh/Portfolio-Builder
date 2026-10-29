@@ -10,12 +10,14 @@ import {
   SYSTEM_PROMPT,
 } from '../lib/resume-parse';
 import { ERRORS } from '../lib/messages';
+import { ERROR_CODES } from '@parichay/shared';
 
 const LLM_TIMEOUT_MS = 40_000;
 // A page of real text is far more than this; less means a scan or an empty file.
 const MIN_TEXT_CHARS = 80;
 
-const unavailable = () => new AppError(503, 'RESUME_IMPORT_UNAVAILABLE', ERRORS.resumeUnavailable);
+const unavailable = () =>
+  new AppError(503, ERROR_CODES.RESUME_IMPORT_UNAVAILABLE, ERRORS.resumeUnavailable);
 
 // Turns a provider failure into an error the person can act on. Only the kind is logged, for
 // whoever runs the server (a wrong API key shows up here): never the resume or the provider's body.
@@ -68,7 +70,7 @@ export async function parseResume(pdf: Buffer): Promise<ResumeResponse> {
 
   const result = sanitizeResume(raw);
   if (!hasContent(result)) {
-    throw new AppError(422, 'NOTHING_FOUND', ERRORS.resumeNothingFound);
+    throw new AppError(422, ERROR_CODES.NOTHING_FOUND, ERRORS.resumeNothingFound);
   }
   return result;
 }

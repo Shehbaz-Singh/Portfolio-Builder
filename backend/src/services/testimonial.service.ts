@@ -8,6 +8,7 @@ import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { WAIT, lockProfile } from '../lib/locks';
 import { prisma } from '../lib/prisma';
+import { assertExactIds } from '../lib/reorder';
 import { orNotFound } from '../lib/prisma-errors';
 import { myTestimonials } from '../lib/selects';
 import { ERRORS } from '../lib/messages';
@@ -134,10 +135,7 @@ export function reorder(profileId: string, ids: string[]) {
       where: { profileId, status: 'approved' },
       select: { id: true },
     });
-    const current = new Set(approved.map((item) => item.id));
-    if (ids.length !== current.size || !ids.every((id) => current.has(id))) {
-      throw new AppError(400, 'INVALID_REORDER', ERRORS.reorderTestimonials);
-    }
+    assertExactIds(ids, approved, ERRORS.reorderTestimonials);
     for (const [order, id] of ids.entries()) {
       await tx.testimonial.update({ where: { id }, data: { order }, select: { id: true } });
     }

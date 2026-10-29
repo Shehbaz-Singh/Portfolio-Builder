@@ -1,8 +1,8 @@
 import { MAX_POSTS, type PostInput } from '@parichay/shared';
 import type { Prisma } from '../generated/prisma/client';
-import { coverPublicId, deleteImage, uploadCover } from '../lib/cloudinary';
+import { coverPublicId, uploadCover } from '../lib/cloudinary';
 import { AppError } from '../lib/errors';
-import { detectImageType } from '../lib/image';
+import { deleteImageQuietly, replaceImage } from '../lib/image-lifecycle';
 import { WAIT, lockProfile } from '../lib/locks';
 import { prisma } from '../lib/prisma';
 import { orNotFound } from '../lib/prisma-errors';
@@ -83,19 +83,9 @@ export async function updatePost(profileId: string, id: string, input: PostInput
   );
 }
 
-// Housekeeping: a failure only leaves an unused image behind, so it is logged (without any id) and
-// never fails the request.
 async function deleteCoverQuietly(url: string | null, profileId: string) {
   const publicId = url && coverPublicId(url, profileId);
-  if (!publicId) return;
-  try {
-    await deleteImage(publicId);
-  } catch (err) {
-    console.warn(
-      'Could not delete a post cover image:',
-      err instanceof Error ? err.message : 'unknown error',
-    );
-  }
+  if (publicId) await deleteImageQuietly(publicId, 'a post cover image');
 }
 
 export async function deletePost(profileId: string, id: string) {
@@ -104,43 +94,34 @@ export async function deletePost(profileId: string, id: string) {
     select: { coverImageUrl: true },
   });
   if (!post) throw notFound();
-  await orNotFound(prisma.post.delete({ where: { id, profileId } }), notFound);
-  await prisma.$transaction((tx) => deleteTranslationsFor(tx, profileId, 'post', [id]));
+  await prisma.$transaction(async (tx) => {
+    await orNotFound(tx.post.delete({ where: { id, profileId } }), notFound);
+    await deleteTranslationsFor(tx, profileId, 'post', [id]);
+  });
   await deleteCoverQuietly(post.coverImageUrl, profileId);
 }
 
 export async function replaceCover(profileId: string, id: string, file: Buffer) {
-  if (!detectImageType(file)) {
-    throw new AppError(400, 'UNSUPPORTED_FILE_TYPE', ERRORS.imageTypes);
-  }
-  const post = await prisma.post.findFirst({
-    where: { id, profileId },
-    select: { coverImageUrl: true },
+  const uploaded = await replaceImage({
+    file,
+    load: async () => {
+      const post = await prisma.post.findFirst({
+        where: { id, profileId },
+        select: { coverImageUrl: true },
+      });
+      if (!post) throw notFound();
+      return post;
+    },
+    upload: () => uploadCover(file, profileId, id),
+    save: (image) =>
+      prisma.post.update({
+        where: { id, profileId },
+        data: { coverImageUrl: image.url },
+        select: { id: true },
+      }),
+    discardNew: (image) => deleteCoverQuietly(image.url, profileId), // no post points to it
+    discardOld: (post) => deleteCoverQuietly(post.coverImageUrl, profileId), // the one it replaces
   });
-  if (!post) throw notFound();
-
-  let uploaded;
-  try {
-    uploaded = await uploadCover(file, profileId, id);
-  } catch (err) {
-    console.error(
-      'Cloudinary upload failed:',
-      err instanceof Error ? err.message : 'unknown error',
-    );
-    throw new AppError(502, 'UPLOAD_FAILED', ERRORS.imageUploadFailed);
-  }
-
-  try {
-    await prisma.post.update({
-      where: { id, profileId },
-      data: { coverImageUrl: uploaded.url },
-      select: { id: true },
-    });
-  } catch (err) {
-    await deleteCoverQuietly(uploaded.url, profileId); // no post points to it
-    throw err;
-  }
-  await deleteCoverQuietly(post.coverImageUrl, profileId); // the one it replaces
   return { coverImageUrl: uploaded.url };
 }
 

@@ -2,7 +2,7 @@
 
 import { FolderKanban } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { projectInputSchema, type ProjectInput } from '@parichay/shared';
+import { DESCRIPTION_MAX, projectInputSchema, type ProjectInput } from '@parichay/shared';
 import { schemaResolver } from '@/lib/form';
 import { TextArea, TextField } from '../../form-fields';
 import { EditorForm } from '../EditorForm';
@@ -59,7 +59,7 @@ function ProjectForm({ item, draft, onDone, onSaved }: ItemFormProps<'projects'>
         name="description"
         label="Description"
         rows={4}
-        maxLength={3000}
+        maxLength={DESCRIPTION_MAX}
         placeholder="A weekly meal planner that builds your shopping list for you."
         hint="What it is, who it's for, and what you did on it."
       />

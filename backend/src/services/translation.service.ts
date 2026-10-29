@@ -11,6 +11,7 @@ import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
 import { ERRORS } from '../lib/messages';
+import { ownProfile } from '../lib/profile';
 
 type Tx = Prisma.TransactionClient;
 
@@ -112,9 +113,22 @@ const toStored = (row: {
 });
 
 export async function listTranslations(profileId: string, locale: string) {
-  const rows = await prisma.translation.findMany({ where: { profileId, locale } });
+  const rows = await prisma.translation.findMany({
+    where: { profileId, locale },
+    select: rowSelect,
+  });
   return rows.map(toStored);
 }
+
+// What the status math reads of a stored translation, and nothing more.
+const rowSelect = {
+  locale: true,
+  entityType: true,
+  entityId: true,
+  field: true,
+  value: true,
+  needsReview: true,
+} as const;
 
 interface Row {
   locale: string;
@@ -168,14 +182,10 @@ export function statusFor(locale: string, source: Source, rows: Row[]): Language
 }
 
 export async function getLanguages(profileId: string) {
-  const profile = await prisma.profile.findUnique({
-    where: { id: profileId },
-    select: { defaultLocale: true, locales: true },
-  });
-  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
+  const profile = await ownProfile(profileId, { defaultLocale: true, locales: true });
   const [source, rows] = await Promise.all([
     loadSource(profileId),
-    prisma.translation.findMany({ where: { profileId } }),
+    prisma.translation.findMany({ where: { profileId }, select: rowSelect }),
   ]);
   return {
     defaultLocale: profile.defaultLocale,
@@ -191,11 +201,7 @@ export async function saveTranslations(
   locale: string,
   entries: TranslationEntry[],
 ) {
-  const profile = await prisma.profile.findUnique({
-    where: { id: profileId },
-    select: { locales: true },
-  });
-  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
+  const profile = await ownProfile(profileId, { locales: true });
   if (!profile.locales.includes(locale)) {
     throw new AppError(400, 'LANGUAGE_NOT_ENABLED', ERRORS.languageNotEnabled);
   }
@@ -249,11 +255,7 @@ export async function saveTranslations(
 // ---- adding and removing languages
 
 export async function addLanguage(profileId: string, locale: string) {
-  const profile = await prisma.profile.findUnique({
-    where: { id: profileId },
-    select: { defaultLocale: true, locales: true },
-  });
-  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
+  const profile = await ownProfile(profileId, { defaultLocale: true, locales: true });
   if (locale === profile.defaultLocale) {
     throw new AppError(409, 'LANGUAGE_IS_DEFAULT', ERRORS.languageIsDefault);
   }
@@ -272,11 +274,7 @@ export async function addLanguage(profileId: string, locale: string) {
 
 // Removing deletes only that language's texts; the default language is never touched.
 export async function removeLanguage(profileId: string, locale: string) {
-  const profile = await prisma.profile.findUnique({
-    where: { id: profileId },
-    select: { locales: true },
-  });
-  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
+  const profile = await ownProfile(profileId, { locales: true });
   if (!profile.locales.includes(locale)) throw AppError.notFound(ERRORS.languageNotFound);
   await prisma.$transaction([
     prisma.translation.deleteMany({ where: { profileId, locale } }),
@@ -291,11 +289,7 @@ export async function removeLanguage(profileId: string, locale: string) {
 // The main language can only change while no other language exists: translations are written
 // against it, so changing it under them would leave them describing the wrong text.
 export async function setDefaultLanguage(profileId: string, locale: string) {
-  const profile = await prisma.profile.findUnique({
-    where: { id: profileId },
-    select: { locales: true },
-  });
-  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
+  const profile = await ownProfile(profileId, { locales: true });
   if (profile.locales.length > 0) {
     throw new AppError(409, 'LANGUAGES_IN_USE', ERRORS.languagesInUse);
   }
@@ -351,7 +345,7 @@ export async function publishableLocales(profileId: string, locales: string[]) {
   if (locales.length === 0) return [];
   const [source, rows] = await Promise.all([
     loadSource(profileId),
-    prisma.translation.findMany({ where: { profileId } }),
+    prisma.translation.findMany({ where: { profileId }, select: rowSelect }),
   ]);
   return locales.filter((locale) => statusFor(locale, source, rows).publishable);
 }

@@ -1,4 +1,5 @@
 import type { RequestHandler } from 'express';
+import { IMAGE_MAX_BYTES, IMAGE_TYPES, RESUME_MAX_BYTES, ERROR_CODES } from '@parichay/shared';
 import multer from 'multer';
 import { AppError } from '../lib/errors';
 import { ERRORS } from '../lib/messages';
@@ -31,7 +32,7 @@ function singleFileUpload(options: UploadOptions): RequestHandler {
       if (!err) return next();
       if (err instanceof AppError) return next(err);
       if (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE') {
-        return next(new AppError(413, 'FILE_TOO_LARGE', sizeMessage));
+        return next(new AppError(413, ERROR_CODES.FILE_TOO_LARGE, sizeMessage));
       }
       next(new AppError(400, 'INVALID_UPLOAD', invalidMessage));
     });
@@ -41,8 +42,8 @@ function singleFileUpload(options: UploadOptions): RequestHandler {
 // One image in the "avatar" field, up to 2 MB, into req.file.
 export const avatarUpload = singleFileUpload({
   field: 'avatar',
-  maxBytes: 2 * 1024 * 1024,
-  allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+  maxBytes: IMAGE_MAX_BYTES,
+  allowedTypes: [...IMAGE_TYPES],
   typeMessage: ERRORS.imageTypes,
   sizeMessage: ERRORS.imageTooLarge,
   invalidMessage: ERRORS.sendAvatar,
@@ -51,7 +52,7 @@ export const avatarUpload = singleFileUpload({
 // One PDF in the "resume" field, up to 5 MB, into req.file.
 export const resumeUpload = singleFileUpload({
   field: 'resume',
-  maxBytes: 5 * 1024 * 1024,
+  maxBytes: RESUME_MAX_BYTES,
   allowedTypes: ['application/pdf'],
   typeMessage: ERRORS.pdfOnly,
   sizeMessage: ERRORS.pdfTooLarge,
@@ -61,8 +62,8 @@ export const resumeUpload = singleFileUpload({
 // One image in the "cover" field, up to 2 MB (the same limits as the avatar), into req.file.
 export const coverUpload = singleFileUpload({
   field: 'cover',
-  maxBytes: 2 * 1024 * 1024,
-  allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
+  maxBytes: IMAGE_MAX_BYTES,
+  allowedTypes: [...IMAGE_TYPES],
   typeMessage: ERRORS.imageTypes,
   sizeMessage: ERRORS.imageTooLarge,
   invalidMessage: ERRORS.sendCover,

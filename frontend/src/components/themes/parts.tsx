@@ -135,6 +135,7 @@ export function Avatar({
         width={160}
         height={160}
         referrerPolicy="no-referrer"
+        decoding="async"
         className={`${className} object-cover`}
       />
     );
@@ -339,6 +340,7 @@ export function WritingList({
                 src={post.cover}
                 alt=""
                 loading="lazy"
+                decoding="async"
                 width={1200}
                 height={630}
                 className={coverClassName}

@@ -22,6 +22,9 @@ const lengthRule = (min: number, max: number) =>
     .min(min, min > 1 ? VALIDATION.tooShort(min) : undefined)
     .max(max, VALIDATION.tooLong(max));
 
+// The longest email address, as the standard has it.
+export const EMAIL_MAX = 254;
+
 export const requiredLine = (max: number, min = 1) =>
   z.string().transform(oneLine).pipe(lengthRule(min, max));
 
