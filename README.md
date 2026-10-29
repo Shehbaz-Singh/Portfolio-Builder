@@ -137,6 +137,6 @@ MIT. See [LICENSE](LICENSE).
 
 <div align="center">
 
-Made with love by [Shehbaz Singh](https://github.com/Shehbaz-Singh)
+Crafted with care, and a little &#9829;, by [Shehbaz Singh](https://github.com/Shehbaz-Singh)
 
 </div>
