@@ -6,6 +6,7 @@ import { POST_BODY_MAX, POST_EXCERPT_MAX, POST_TITLE_MAX } from './posts';
 import { SECTION_TITLE_MAX } from './section-config';
 import { optionalBlock, optionalLine } from './text';
 import { WORK_NOTE_MAX } from './work-card';
+import { VALIDATION } from './messages';
 
 // What the owner can translate. Names, companies, institutions, links, dates, tech tags and the
 // location stay as written, and so do testimonials (they are quotes).
@@ -77,7 +78,7 @@ export const translationEntrySchema = z
   .superRefine((entry, ctx) => {
     const rule = fieldRule(entry.entityType, entry.field);
     if (!rule) {
-      ctx.addIssue({ code: 'custom', path: ['field'], message: 'This field cannot be translated' });
+      ctx.addIssue({ code: 'custom', path: ['field'], message: VALIDATION.notTranslatable });
       return;
     }
     // The same cleaning and limit as the original field (plain text, no control characters).
@@ -88,7 +89,7 @@ export const translationEntrySchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['value'],
-        message: `Use ${rule.max} characters or fewer`,
+        message: VALIDATION.tooLong(rule.max),
       });
     }
   })

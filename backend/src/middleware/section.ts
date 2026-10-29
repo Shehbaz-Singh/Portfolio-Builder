@@ -2,10 +2,11 @@ import type { RequestHandler, RequestParamHandler } from 'express';
 import { isSection, sectionInputSchemas, type Section } from '@parichay/shared';
 import { AppError } from '../lib/errors';
 import { validateBody } from './validate';
+import { ERRORS } from '../lib/messages';
 
 // router.param('section', sectionParam): rejects unknown sections and stores the valid one.
 export const sectionParam: RequestParamHandler = (_req, res, next, value: string) => {
-  if (!isSection(value)) return next(AppError.notFound('Unknown section'));
+  if (!isSection(value)) return next(AppError.notFound(ERRORS.sectionNotFound));
   res.locals.section = value;
   next();
 };

@@ -26,6 +26,7 @@ import { SectionManager, type ItemFormProps } from '../SectionManager';
 import { AvailabilityCard } from './AvailabilityCard';
 import { ResumeCard } from './ResumeCard';
 import { WorkingTogetherCard } from './WorkingTogetherCard';
+import { NOTICES, PROBLEMS } from '@/lib/messages';
 
 const AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
@@ -40,7 +41,7 @@ function AvatarUpload() {
     try {
       await api('/profile/me/avatar', { method: 'DELETE' });
       update((p) => ({ ...p, avatarUrl: null }));
-      notify('success', 'Photo removed. Your initials will show instead.');
+      notify('success', NOTICES.photoRemoved);
     } catch (err) {
       notify('error', errorText(err));
     } finally {
@@ -51,13 +52,8 @@ function AvatarUpload() {
   async function onFile(file: File | undefined) {
     if (!file) return;
     // Same limits as the API, checked here first so a wrong file fails instantly.
-    if (!AVATAR_TYPES.includes(file.type))
-      return notify('error', "That file type won't work. Choose a JPG, PNG or WebP image.");
-    if (file.size > AVATAR_MAX_BYTES)
-      return notify(
-        'error',
-        'That image is over 2 MB. Choose a smaller one, or shrink it and try again.',
-      );
+    if (!AVATAR_TYPES.includes(file.type)) return notify('error', PROBLEMS.imageType);
+    if (file.size > AVATAR_MAX_BYTES) return notify('error', PROBLEMS.avatarTooLarge);
 
     const form = new FormData();
     form.append('avatar', file);
@@ -68,7 +64,7 @@ function AvatarUpload() {
         form,
       });
       update((p) => ({ ...p, avatarUrl }));
-      notify('success', 'Looking good. Your photo is up.');
+      notify('success', NOTICES.photoUp);
     } catch (err) {
       notify('error', errorText(err));
     } finally {
@@ -176,7 +172,7 @@ function DetailsForm() {
     await saveFields(values);
     if (reviewing) {
       setReviewing(false);
-      notify('success', 'Saved.');
+      notify('success', NOTICES.saved);
     }
   }
   useFormAutosave(form, save, { enabled: !reviewing });
@@ -222,7 +218,7 @@ function SlugForm() {
   async function onSubmit(values: z.output<typeof addressSchema>) {
     if (values.slug !== profile.slug) {
       const saved = await saveFields({ slug: values.slug });
-      notify('success', 'Page address saved.');
+      notify('success', NOTICES.slugSaved);
       form.reset({ slug: saved.slug });
     }
   }
@@ -316,10 +312,7 @@ function VisibilityToggle({ link }: { link: MyLink }) {
     try {
       await updateItem(link.id, { type: link.type, url: link.url, visible: !link.visible });
     } catch (err) {
-      notify(
-        'error',
-        err instanceof ApiError ? err.message : "We couldn't update that link. Please try again.",
-      );
+      notify('error', err instanceof ApiError ? err.message : PROBLEMS.linkNotUpdated);
     } finally {
       setPending(false);
     }

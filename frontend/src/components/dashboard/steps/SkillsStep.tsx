@@ -14,6 +14,7 @@ import {
   type Suggestion,
 } from '../editor-context';
 import { SortableList } from '../SortableList';
+import { NOTICES } from '@/lib/messages';
 
 export function SkillsStep() {
   const { items, create, remove, reorder } = useSection('skills');
@@ -32,7 +33,7 @@ export function SkillsStep() {
     try {
       await create(values);
       form.reset();
-      notify('success', `Added ${values.name}.`);
+      notify('success', NOTICES.skillAdded(values.name));
     } catch (err) {
       showApiError(form, err);
     }
@@ -153,7 +154,7 @@ export function SkillsStep() {
                 className="min-h-6 min-w-6 rounded-full px-2 text-muted hover:bg-line hover:text-danger"
                 onClick={() =>
                   remove(skill.id).then(
-                    () => notify('success', `Removed ${skill.name}.`),
+                    () => notify('success', NOTICES.skillRemoved(skill.name)),
                     (err) => notify('error', errorText(err)),
                   )
                 }

@@ -10,11 +10,12 @@ import { WAIT, lockProfile } from '../lib/locks';
 import { prisma } from '../lib/prisma';
 import { orNotFound } from '../lib/prisma-errors';
 import { myTestimonials } from '../lib/selects';
+import { ERRORS } from '../lib/messages';
 
 // Testimonials. A testimonial is always looked up by (id, profileId), so one that belongs to
 // someone else looks exactly like one that does not exist (404).
 
-const notFound = () => AppError.notFound('Testimonial not found');
+const notFound = () => AppError.notFound(ERRORS.testimonialNotFound);
 
 // The fields of the input and nothing else (a public submission also carries the honeypot).
 const fields = ({
@@ -31,8 +32,7 @@ async function nextOrder(tx: Prisma.TransactionClient, profileId: string) {
   return (_max.order ?? -1) + 1;
 }
 
-const tooMany = () =>
-  AppError.conflict('LIMIT_REACHED', 'No more testimonials can be added right now');
+const tooMany = () => AppError.conflict('LIMIT_REACHED', ERRORS.testimonialLimit);
 
 // ---- visitors
 
@@ -43,9 +43,9 @@ export async function submit(slug: string, input: TestimonialInput) {
     where: { slug, published: true },
     select: { id: true, acceptTestimonials: true },
   });
-  if (!profile) throw AppError.notFound('Profile not found');
+  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
   if (!profile.acceptTestimonials) {
-    throw new AppError(403, 'TESTIMONIALS_CLOSED', 'This person is not accepting testimonials');
+    throw new AppError(403, 'TESTIMONIALS_CLOSED', ERRORS.testimonialsClosed);
   }
 
   await prisma.$transaction(async (tx) => {
@@ -136,11 +136,7 @@ export function reorder(profileId: string, ids: string[]) {
     });
     const current = new Set(approved.map((item) => item.id));
     if (ids.length !== current.size || !ids.every((id) => current.has(id))) {
-      throw new AppError(
-        400,
-        'INVALID_REORDER',
-        'ids must list every approved testimonial exactly once',
-      );
+      throw new AppError(400, 'INVALID_REORDER', ERRORS.reorderTestimonials);
     }
     for (const [order, id] of ids.entries()) {
       await tx.testimonial.update({ where: { id }, data: { order }, select: { id: true } });

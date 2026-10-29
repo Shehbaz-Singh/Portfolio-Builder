@@ -14,6 +14,7 @@ import { PublishCelebration } from './PublishCelebration';
 import { useRegisterDashboardActions } from './palette/actions';
 import { PaletteButton } from './palette/PaletteHost';
 import { QrCodeDialog } from './QrCodeDialog';
+import { NOTICES, PROBLEMS } from '@/lib/messages';
 
 // The fields a portfolio is not much use without, and the Profile tab that fills each in.
 const REQUIRED: {
@@ -31,7 +32,7 @@ const STATUS_TEXT: Record<SaveStatus | 'dirty', string> = {
   dirty: 'Not saved yet',
   saving: 'Saving…',
   invalid: 'Check the highlighted fields and we’ll save',
-  error: 'We couldn’t save. Your changes are still here',
+  error: PROBLEMS.saveFailed,
 };
 
 // Whether what you see is safe on the server. Screen readers hear every state except "Saving…",
@@ -96,12 +97,7 @@ function PublishControls() {
         writeFlag(celebratedKey);
         setCelebrating(true);
       } else {
-        notify(
-          'success',
-          res.published
-            ? 'Your portfolio is live again.'
-            : 'Your portfolio is hidden. Only you can see it now, and you can publish it again any time.',
-        );
+        notify('success', res.published ? NOTICES.portfolioLive : NOTICES.portfolioHidden);
       }
     } catch (err) {
       notify('error', errorText(err));
@@ -123,7 +119,7 @@ function PublishControls() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      notify('error', "We couldn't copy the link automatically. Select it and copy it by hand.");
+      notify('error', PROBLEMS.copyLink);
     }
   }
 

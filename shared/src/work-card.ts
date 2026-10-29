@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { VALIDATION } from './messages';
 
 // The "Working together" card: when and how to reach the owner. Everything here is optional, and the
 // card only reaches a visitor while the owner has it switched on.
@@ -37,12 +38,12 @@ export const timeZoneSchema = z
   .string()
   .trim()
   .max(64)
-  .refine(isTimeZone, 'Choose a time zone from the list');
+  .refine(isTimeZone, VALIDATION.timeZoneUnknown);
 
 // ---- weekly hours
 
 export const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
-const timeSchema = z.string().regex(TIME_PATTERN, 'Use a 24-hour time like 09:30');
+const timeSchema = z.string().regex(TIME_PATTERN, VALIDATION.timeFormat);
 
 export const minutesOf = (time: string) => {
   const [hours, minutes] = time.split(':').map(Number);
@@ -52,7 +53,7 @@ export const minutesOf = (time: string) => {
 export const timeRangeSchema = z
   .object({ start: timeSchema, end: timeSchema })
   .refine((range) => minutesOf(range.start) < minutesOf(range.end), {
-    message: 'The end must be after the start',
+    message: VALIDATION.rangeEndAfterStart,
     path: ['end'],
   });
 export type TimeRange = z.infer<typeof timeRangeSchema>;
@@ -61,10 +62,10 @@ export type TimeRange = z.infer<typeof timeRangeSchema>;
 // not cross midnight: a late shift is written as two days.
 const daySchema = z
   .array(timeRangeSchema)
-  .max(2, 'Use at most two time ranges a day')
+  .max(2, VALIDATION.tooManyRanges)
   .refine(
     (ranges) => ranges.length < 2 || minutesOf(ranges[0].end) <= minutesOf(ranges[1].start),
-    'The second range must start after the first one ends',
+    VALIDATION.rangesOverlap,
   );
 
 export const workingHoursSchema = z.object({

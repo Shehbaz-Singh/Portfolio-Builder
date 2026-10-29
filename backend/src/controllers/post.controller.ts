@@ -4,6 +4,7 @@ import { asyncHandler } from '../lib/async-handler';
 import { AppError } from '../lib/errors';
 import { getProfileId } from '../middleware/auth';
 import * as service from '../services/post.service';
+import { ERRORS } from '../lib/messages';
 
 // @types/express types route params as string | string[], but Express 4 always gives a string.
 const postId = (req: Request) => req.params.id as string;
@@ -32,7 +33,7 @@ export const deletePost = asyncHandler(async (req, res) => {
 
 // req.file is set by the coverUpload middleware (multipart field "cover").
 export const uploadCover = asyncHandler(async (req, res) => {
-  if (!req.file) throw new AppError(400, 'NO_FILE', 'Attach an image in the "cover" form field');
+  if (!req.file) throw new AppError(400, 'NO_FILE', ERRORS.attachCover);
   res.json(await service.replaceCover(getProfileId(req), postId(req), req.file.buffer));
 });
 

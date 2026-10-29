@@ -1,6 +1,7 @@
 import jwt, { type SignOptions } from 'jsonwebtoken';
 import { config } from './config';
 import { AppError } from './errors';
+import { ERRORS } from './messages';
 
 const ALGORITHM = 'HS256';
 
@@ -17,14 +18,14 @@ export function verifyToken(token: string): string {
   try {
     const payload = jwt.verify(token, config.JWT_SECRET, { algorithms: [ALGORITHM] });
     if (typeof payload === 'string' || !payload.sub) {
-      throw AppError.unauthorized('Invalid token', 'INVALID_TOKEN');
+      throw AppError.unauthorized(ERRORS.invalidToken, 'INVALID_TOKEN');
     }
     return payload.sub;
   } catch (err) {
     if (err instanceof AppError) throw err;
     if (err instanceof jwt.TokenExpiredError) {
-      throw AppError.unauthorized('Token has expired', 'TOKEN_EXPIRED');
+      throw AppError.unauthorized(ERRORS.tokenExpired, 'TOKEN_EXPIRED');
     }
-    throw AppError.unauthorized('Invalid token', 'INVALID_TOKEN');
+    throw AppError.unauthorized(ERRORS.invalidToken, 'INVALID_TOKEN');
   }
 }

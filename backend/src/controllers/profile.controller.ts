@@ -7,6 +7,7 @@ import * as exportService from '../services/export.service';
 import * as profileService from '../services/profile.service';
 import * as resumeService from '../services/resume.service';
 import * as layoutService from '../services/section-layout.service';
+import { ERRORS } from '../lib/messages';
 
 // req.body has already been validated and parsed by validateBody().
 export const getMyProfile = asyncHandler(async (req, res) => {
@@ -33,7 +34,7 @@ export const deleteMyAvatar = asyncHandler(async (req, res) => {
 
 // req.file is set by the avatarUpload middleware (multipart field "avatar").
 export const uploadMyAvatar = asyncHandler(async (req, res) => {
-  if (!req.file) throw new AppError(400, 'NO_FILE', 'Attach an image in the "avatar" form field');
+  if (!req.file) throw new AppError(400, 'NO_FILE', ERRORS.attachAvatar);
   res.json(await avatarService.replaceAvatar(getProfileId(req), req.file.buffer));
 });
 
@@ -45,7 +46,7 @@ export const publishMyProfile = asyncHandler(async (req, res) => {
 // req.file is set by the resumeUpload middleware (multipart field "resume"). The result is
 // returned for the person to review; nothing is saved here.
 export const parseMyResume = asyncHandler(async (req, res) => {
-  if (!req.file) throw new AppError(400, 'NO_FILE', 'Attach a PDF in the "resume" form field');
+  if (!req.file) throw new AppError(400, 'NO_FILE', ERRORS.attachResume);
   res.json(await resumeService.parseResume(req.file.buffer));
 });
 

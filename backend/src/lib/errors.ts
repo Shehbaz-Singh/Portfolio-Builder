@@ -1,4 +1,5 @@
 import type { ApiError } from '@parichay/shared';
+import { ERRORS } from './messages';
 
 type ErrorDetails = NonNullable<ApiError['error']['details']>;
 
@@ -14,7 +15,7 @@ export class AppError extends Error {
     this.name = 'AppError';
   }
 
-  static unauthorized(message = 'Authentication required', code = 'UNAUTHORIZED') {
+  static unauthorized(message: string = ERRORS.authRequired, code = 'UNAUTHORIZED') {
     return new AppError(401, code, message);
   }
 
@@ -22,7 +23,7 @@ export class AppError extends Error {
     return new AppError(409, code, message);
   }
 
-  static notFound(message = 'Not found') {
+  static notFound(message: string = ERRORS.notFound) {
     return new AppError(404, 'NOT_FOUND', message);
   }
 }

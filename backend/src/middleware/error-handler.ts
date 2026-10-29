@@ -3,9 +3,10 @@ import type { ApiError } from '@parichay/shared';
 import { ZodError } from 'zod';
 import { config } from '../lib/config';
 import { AppError } from '../lib/errors';
+import { ERRORS } from '../lib/messages';
 
 export const notFoundHandler: RequestHandler = (req, _res, next) => {
-  next(AppError.notFound(`Route not found: ${req.method} ${req.path}`));
+  next(AppError.notFound(ERRORS.routeNotFound(req.method, req.path)));
 };
 
 function send(res: Parameters<ErrorRequestHandler>[2], status: number, error: ApiError['error']) {
@@ -26,7 +27,7 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   if (err instanceof ZodError) {
     return send(res, 400, {
       code: 'VALIDATION_ERROR',
-      message: 'Invalid request data',
+      message: ERRORS.invalidData,
       details: err.issues.map((i) => ({ path: i.path.join('.'), message: i.message })),
     });
   }
@@ -34,10 +35,10 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
   // Errors raised by express.json() for bad bodies carry an http status and a type.
   if (typeof err === 'object' && err !== null && 'type' in err) {
     if (err.type === 'entity.parse.failed') {
-      return send(res, 400, { code: 'INVALID_JSON', message: 'Request body is not valid JSON' });
+      return send(res, 400, { code: 'INVALID_JSON', message: ERRORS.invalidJson });
     }
     if (err.type === 'entity.too.large') {
-      return send(res, 413, { code: 'PAYLOAD_TOO_LARGE', message: 'Request body is too large' });
+      return send(res, 413, { code: 'PAYLOAD_TOO_LARGE', message: ERRORS.bodyTooLarge });
     }
   }
 

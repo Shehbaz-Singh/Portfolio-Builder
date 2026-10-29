@@ -29,6 +29,7 @@ import { SITE_URL } from '@/lib/config';
 import { downloadMyData } from '@/lib/download-export';
 import { THEME_LIST, getTheme } from '@/lib/themes';
 import type { DashboardActions } from './actions';
+import { NOTICES, PROBLEMS } from '@/lib/messages';
 
 // Every command of the palette is an entry in a list below. To add one: add an object to the list
 // that fits (GO_TO for a page or tab, or a function in ACTIONS / ITEMS), and it shows up, is
@@ -281,9 +282,9 @@ const actions: Source = ({ profile, actions: getActions, notify }) => {
       run: async () => {
         try {
           await downloadMyData();
-          notify('success', 'Your data file is downloading.');
+          notify('success', NOTICES.dataDownloading);
         } catch {
-          notify('error', "We couldn't prepare your data file. Please try again.");
+          notify('error', PROBLEMS.dataFile);
         }
       },
     },
@@ -301,9 +302,9 @@ const themes: Source = ({ profile, saveFields, notify }) =>
     run: async () => {
       try {
         await saveFields({ theme: theme.key });
-        notify('success', `Theme changed to ${theme.name}.`);
+        notify('success', NOTICES.themeChanged(theme.name));
       } catch {
-        notify('error', "We couldn't change the theme. Please try again.");
+        notify('error', PROBLEMS.themeNotChanged);
       }
     },
   }));
@@ -319,9 +320,9 @@ const accents: Source = ({ profile, saveFields, notify }) =>
     run: async () => {
       try {
         await saveFields({ accentColor: preset.hex });
-        notify('success', `Accent color changed to ${preset.name}.`);
+        notify('success', NOTICES.accentChanged(preset.name));
       } catch {
-        notify('error', "We couldn't change the color. Please try again.");
+        notify('error', PROBLEMS.colorNotChanged);
       }
     },
   }));

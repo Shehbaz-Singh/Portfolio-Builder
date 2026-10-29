@@ -9,6 +9,7 @@ import { Badge, Button, Card, EmptyState, useConfirm } from '../../ui';
 import { errorText, useEditor } from '../editor-context';
 import { useGo } from '../navigation';
 import { PostEditor } from './PostEditor';
+import { NOTICES, CONFIRMS } from '@/lib/messages';
 
 function PostRow({
   post,
@@ -88,7 +89,7 @@ export function WritingStep() {
   async function remove(post: MyPostSummary) {
     const ok = await confirm({
       title: 'Delete this post?',
-      message: `“${post.title}” will be removed for good, along with its cover image. This can’t be undone.`,
+      message: CONFIRMS.deletePost(post.title),
       confirmLabel: 'Delete',
       cancelLabel: 'Keep it',
       danger: true,
@@ -98,7 +99,7 @@ export function WritingStep() {
     try {
       await api(`/profile/me/posts/${post.id}`, { method: 'DELETE' });
       update((p) => ({ ...p, posts: p.posts.filter((item) => item.id !== post.id) }));
-      notify('success', 'Deleted.');
+      notify('success', NOTICES.deleted);
     } catch (err) {
       notify('error', errorText(err));
     } finally {

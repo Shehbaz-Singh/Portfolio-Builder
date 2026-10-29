@@ -31,6 +31,7 @@ import { Markdown } from '../../Markdown';
 import { Button, Card, ErrorText, Input, SlowNotice, Tabs, Textarea, useConfirm } from '../../ui';
 import { cx } from '../../ui/cx';
 import { errorText, useEditor, useReportDirty } from '../editor-context';
+import { NOTICES, PROBLEMS, CONFIRMS } from '@/lib/messages';
 
 type Fields = {
   title: string;
@@ -165,9 +166,8 @@ function CoverImage({
   async function onFile(file: File | undefined) {
     if (!file || !postId) return;
     if (!(COVER_TYPES as readonly string[]).includes(file.type))
-      return notify('error', "That file type won't work. Choose a JPG, PNG or WebP image.");
-    if (file.size > COVER_MAX_BYTES)
-      return notify('error', 'That image is over 2 MB. Choose a smaller one, or shrink it first.');
+      return notify('error', PROBLEMS.imageType);
+    if (file.size > COVER_MAX_BYTES) return notify('error', PROBLEMS.coverTooLarge);
     const form = new FormData();
     form.append('cover', file);
     setBusy(true);
@@ -178,7 +178,7 @@ function CoverImage({
       );
       setCover(coverImageUrl);
       remember(coverImageUrl);
-      notify('success', 'Cover image saved.');
+      notify('success', NOTICES.coverSaved);
     } catch (err) {
       notify('error', errorText(err));
     } finally {
@@ -193,7 +193,7 @@ function CoverImage({
       await api(`/profile/me/posts/${postId}/cover`, { method: 'DELETE' });
       setCover(null);
       remember(null);
-      notify('success', 'Cover image removed.');
+      notify('success', NOTICES.coverRemoved);
     } catch (err) {
       notify('error', errorText(err));
     } finally {
@@ -334,13 +334,10 @@ function PostForm({ initial, onClose }: { initial: MyPost | null; onClose: () =>
           : p.posts.map((post) => (post.id === result.id ? summaryOf(result) : post)),
       }));
       if (next === 'published' && wasDraft) {
-        notify(
-          'success',
-          'Published. It shows on your page while the Writing section is switched on.',
-        );
+        notify('success', NOTICES.published);
         onClose();
       } else {
-        notify('success', next === 'published' ? 'Changes saved.' : 'Draft saved.');
+        notify('success', next === 'published' ? NOTICES.changesSaved : NOTICES.draftSaved);
       }
     } catch (err) {
       setFormError(errorText(err));
@@ -354,7 +351,7 @@ function PostForm({ initial, onClose }: { initial: MyPost | null; onClose: () =>
       dirty &&
       !(await confirm({
         title: 'Discard your changes?',
-        message: 'You have changes that are not saved. Go back to the list and lose them?',
+        message: CONFIRMS.discardPost,
         confirmLabel: 'Discard',
         cancelLabel: 'Keep editing',
         danger: true,

@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { VALIDATION } from './messages';
 
 // Plain text. Everything is stored and shown as text: markup is never interpreted (React
 // escapes it when rendering), and control characters (a NUL byte makes Postgres reject the row)
@@ -18,8 +19,8 @@ const block = (text: string) => withoutControls(text).replace(/\r\n?/g, '\n').tr
 const lengthRule = (min: number, max: number) =>
   z
     .string()
-    .min(min, min > 1 ? `Use at least ${min} characters` : undefined)
-    .max(max, `Use ${max} characters or fewer`);
+    .min(min, min > 1 ? VALIDATION.tooShort(min) : undefined)
+    .max(max, VALIDATION.tooLong(max));
 
 export const requiredLine = (max: number, min = 1) =>
   z.string().transform(oneLine).pipe(lengthRule(min, max));

@@ -2,6 +2,7 @@ import { AppError } from '../lib/errors';
 import { avatarPublicId, deleteImage, deleteImagesOf, uploadAvatar } from '../lib/cloudinary';
 import { detectImageType } from '../lib/image';
 import { prisma } from '../lib/prisma';
+import { ERRORS } from '../lib/messages';
 
 // Deleting is housekeeping: a failure only leaves an unused image behind, so it is logged
 // and never fails the request.
@@ -38,21 +39,21 @@ export async function deleteAllImagesOf(avatarUrl: string | null, profileId: str
 
 export async function replaceAvatar(profileId: string, file: Buffer) {
   if (!detectImageType(file)) {
-    throw new AppError(400, 'UNSUPPORTED_FILE_TYPE', 'Only JPG, PNG and WebP images are allowed');
+    throw new AppError(400, 'UNSUPPORTED_FILE_TYPE', ERRORS.imageTypes);
   }
 
   const current = await prisma.profile.findUnique({
     where: { id: profileId },
     select: { avatarUrl: true },
   });
-  if (!current) throw AppError.notFound('Profile not found');
+  if (!current) throw AppError.notFound(ERRORS.profileNotFound);
 
   let uploaded;
   try {
     uploaded = await uploadAvatar(file, profileId);
   } catch (err) {
     console.error('Cloudinary upload failed:', err);
-    throw new AppError(502, 'UPLOAD_FAILED', 'Could not upload the image, please try again');
+    throw new AppError(502, 'UPLOAD_FAILED', ERRORS.imageUploadFailed);
   }
 
   try {
@@ -75,7 +76,7 @@ export async function removeAvatar(profileId: string) {
     where: { id: profileId },
     select: { avatarUrl: true },
   });
-  if (!current) throw AppError.notFound('Profile not found');
+  if (!current) throw AppError.notFound(ERRORS.profileNotFound);
   if (!current.avatarUrl) return;
 
   await prisma.profile.update({ where: { id: profileId }, data: { avatarUrl: null } });

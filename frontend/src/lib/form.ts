@@ -2,6 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import type { FieldValues, Path, Resolver, UseFormReturn } from 'react-hook-form';
 import type { z } from 'zod';
 import { ApiError } from './client-api';
+import { PROBLEMS } from '@/lib/messages';
 
 // zod words a blank date as "Invalid date"; say what to do instead.
 const errorMap = (issue: z.ZodIssueOptionalMessage, ctx: { defaultError: string }) => ({
@@ -40,7 +41,7 @@ export function showApiError<T extends FieldValues>(
   codeFields: Record<string, Path<T>> = {},
 ) {
   if (!(err instanceof ApiError)) {
-    form.setError('root.server', { message: 'Something went wrong. Please try again.' });
+    form.setError('root.server', { message: PROBLEMS.generic });
     return;
   }
   const field = codeFields[err.code];

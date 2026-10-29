@@ -5,6 +5,7 @@ import { config } from '../lib/config';
 import { AppError } from '../lib/errors';
 import * as publicService from '../services/public.service';
 import * as testimonialService from '../services/testimonial.service';
+import { ERRORS } from '../lib/messages';
 
 // Short cache: edits show up within a minute, while a busy portfolio does not hit the
 // database on every view. Express also adds an ETag, so revalidation costs a 304.
@@ -13,7 +14,7 @@ const CACHE_CONTROL = 'public, max-age=60, stale-while-revalidate=300';
 // Anything that cannot be a valid slug (including reserved words) cannot be a profile.
 function slugOf(req: Request) {
   const slug = slugFormatSchema.safeParse(req.params.slug as string);
-  if (!slug.success) throw AppError.notFound('Profile not found');
+  if (!slug.success) throw AppError.notFound(ERRORS.profileNotFound);
   return slug.data;
 }
 
@@ -21,7 +22,8 @@ function slugOf(req: Request) {
 function langOf(req: Request) {
   const lang = req.query.lang;
   if (lang === undefined) return undefined;
-  if (typeof lang !== 'string' || !isLocaleCode(lang)) throw AppError.notFound('Profile not found');
+  if (typeof lang !== 'string' || !isLocaleCode(lang))
+    throw AppError.notFound(ERRORS.profileNotFound);
   return lang;
 }
 
@@ -61,7 +63,8 @@ export const getPublicPosts = asyncHandler(async (req, res) => {
 
 export const getPublicPost = asyncHandler(async (req, res) => {
   const postSlug = req.params.postSlug as string;
-  if (postSlug.length > 80 || !POST_SLUG.test(postSlug)) throw AppError.notFound('Post not found');
+  if (postSlug.length > 80 || !POST_SLUG.test(postSlug))
+    throw AppError.notFound(ERRORS.postNotFound);
   const post = await publicService.getPublicPost(slugOf(req), postSlug, langOf(req));
   res.set('Cache-Control', CACHE_CONTROL);
   res.json(post);

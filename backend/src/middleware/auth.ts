@@ -3,6 +3,7 @@ import { asyncHandler } from '../lib/async-handler';
 import { AppError } from '../lib/errors';
 import { verifyToken } from '../lib/jwt';
 import { prisma } from '../lib/prisma';
+import { ERRORS } from '../lib/messages';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -18,7 +19,7 @@ declare global {
 export const requireAuth = asyncHandler(async (req, _res, next) => {
   const [scheme, token, ...rest] = (req.headers.authorization ?? '').split(' ');
   if (scheme?.toLowerCase() !== 'bearer' || !token || rest.length > 0) {
-    throw AppError.unauthorized('Missing or malformed Authorization header');
+    throw AppError.unauthorized(ERRORS.missingAuthHeader);
   }
 
   const userId = verifyToken(token);
@@ -26,7 +27,7 @@ export const requireAuth = asyncHandler(async (req, _res, next) => {
     where: { id: userId },
     select: { id: true, email: true, profile: { select: { id: true } } },
   });
-  if (!user) throw AppError.unauthorized('Account no longer exists', 'INVALID_TOKEN');
+  if (!user) throw AppError.unauthorized(ERRORS.accountGone, 'INVALID_TOKEN');
 
   req.user = { id: user.id, email: user.email, profileId: user.profile?.id ?? null };
   next();
@@ -36,6 +37,6 @@ export const requireAuth = asyncHandler(async (req, _res, next) => {
 // one user from reading or changing another user's records.
 export function getProfileId(req: Request): string {
   const profileId = req.user?.profileId;
-  if (!profileId) throw AppError.notFound('Profile not found');
+  if (!profileId) throw AppError.notFound(ERRORS.profileNotFound);
   return profileId;
 }

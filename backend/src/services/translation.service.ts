@@ -10,6 +10,7 @@ import {
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
+import { ERRORS } from '../lib/messages';
 
 type Tx = Prisma.TransactionClient;
 
@@ -48,7 +49,7 @@ export async function loadSource(profileId: string): Promise<Source> {
       posts: { select: { id: true, title: true, excerpt: true, body: true, type: true } },
     },
   });
-  if (!profile) throw AppError.notFound('Profile not found');
+  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
 
   const entities = new Set<string>();
   const texts = new Map<string, string>();
@@ -171,7 +172,7 @@ export async function getLanguages(profileId: string) {
     where: { id: profileId },
     select: { defaultLocale: true, locales: true },
   });
-  if (!profile) throw AppError.notFound('Profile not found');
+  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
   const [source, rows] = await Promise.all([
     loadSource(profileId),
     prisma.translation.findMany({ where: { profileId } }),
@@ -194,14 +195,14 @@ export async function saveTranslations(
     where: { id: profileId },
     select: { locales: true },
   });
-  if (!profile) throw AppError.notFound('Profile not found');
+  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
   if (!profile.locales.includes(locale)) {
-    throw new AppError(400, 'LANGUAGE_NOT_ENABLED', 'Add this language first');
+    throw new AppError(400, 'LANGUAGE_NOT_ENABLED', ERRORS.languageNotEnabled);
   }
   const { entities } = await loadSource(profileId);
   for (const entry of entries) {
     if (!entities.has(entityKey(entry.entityType, entry.entityId))) {
-      throw new AppError(400, 'UNKNOWN_ENTITY', 'One of the texts no longer exists');
+      throw new AppError(400, 'UNKNOWN_ENTITY', ERRORS.textGone);
     }
   }
 
@@ -252,19 +253,15 @@ export async function addLanguage(profileId: string, locale: string) {
     where: { id: profileId },
     select: { defaultLocale: true, locales: true },
   });
-  if (!profile) throw AppError.notFound('Profile not found');
+  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
   if (locale === profile.defaultLocale) {
-    throw new AppError(409, 'LANGUAGE_IS_DEFAULT', 'That is already your main language');
+    throw new AppError(409, 'LANGUAGE_IS_DEFAULT', ERRORS.languageIsDefault);
   }
   if (profile.locales.includes(locale)) {
-    throw new AppError(409, 'LANGUAGE_EXISTS', 'That language is already added');
+    throw new AppError(409, 'LANGUAGE_EXISTS', ERRORS.languageExists);
   }
   if (profile.locales.length >= MAX_EXTRA_LANGUAGES) {
-    throw new AppError(
-      409,
-      'LANGUAGE_LIMIT',
-      `You can add up to ${MAX_EXTRA_LANGUAGES} languages besides your main one`,
-    );
+    throw new AppError(409, 'LANGUAGE_LIMIT', ERRORS.languageLimit(MAX_EXTRA_LANGUAGES));
   }
   await prisma.profile.update({
     where: { id: profileId },
@@ -279,8 +276,8 @@ export async function removeLanguage(profileId: string, locale: string) {
     where: { id: profileId },
     select: { locales: true },
   });
-  if (!profile) throw AppError.notFound('Profile not found');
-  if (!profile.locales.includes(locale)) throw AppError.notFound('Language not found');
+  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
+  if (!profile.locales.includes(locale)) throw AppError.notFound(ERRORS.languageNotFound);
   await prisma.$transaction([
     prisma.translation.deleteMany({ where: { profileId, locale } }),
     prisma.profile.update({
@@ -298,13 +295,9 @@ export async function setDefaultLanguage(profileId: string, locale: string) {
     where: { id: profileId },
     select: { locales: true },
   });
-  if (!profile) throw AppError.notFound('Profile not found');
+  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
   if (profile.locales.length > 0) {
-    throw new AppError(
-      409,
-      'LANGUAGES_IN_USE',
-      'Remove your other languages before changing your main language',
-    );
+    throw new AppError(409, 'LANGUAGES_IN_USE', ERRORS.languagesInUse);
   }
   await prisma.profile.update({ where: { id: profileId }, data: { defaultLocale: locale } });
   return getLanguages(profileId);

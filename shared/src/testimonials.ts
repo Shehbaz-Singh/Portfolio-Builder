@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { optionalLine, requiredBlock, requiredLine } from './text';
+import { VALIDATION } from './messages';
 
 // Testimonials: quotes about the profile's owner. A visitor can submit one when the owner accepts
 // them; it waits as "pending" until the owner approves it. Only approved ones are public, and the
@@ -33,7 +34,7 @@ const optionalEmail = z
   .max(TESTIMONIAL_EMAIL_MAX)
   .nullish()
   .transform((email) => email || null)
-  .pipe(z.string().email('Enter a valid email address').nullable());
+  .pipe(z.string().email(VALIDATION.emailInvalid).nullable());
 
 // What the owner types when adding or editing one, and what a visitor submits.
 export const testimonialInputSchema = z.object({

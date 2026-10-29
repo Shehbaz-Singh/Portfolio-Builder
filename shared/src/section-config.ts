@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { MAX_CUSTOM_SECTIONS } from './custom-sections';
+import { VALIDATION } from './messages';
 
 // Which sections the portfolio page shows, in what order, and under what heading. This is
 // layout only: the content itself (skills, jobs, ...) is stored as before.
@@ -77,7 +78,7 @@ export const sectionConfigSchema = z
         ctx.addIssue({
           code: 'custom',
           path: [index, 'key'],
-          message: `Each section can appear only once (${item.key} is repeated)`,
+          message: VALIDATION.sectionRepeated(item.key),
         });
       }
       seen.add(item.key);

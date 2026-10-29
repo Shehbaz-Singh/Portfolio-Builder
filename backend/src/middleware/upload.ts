@@ -1,6 +1,7 @@
 import type { RequestHandler } from 'express';
 import multer from 'multer';
 import { AppError } from '../lib/errors';
+import { ERRORS } from '../lib/messages';
 
 interface UploadOptions {
   field: string; // the multipart field name
@@ -42,9 +43,9 @@ export const avatarUpload = singleFileUpload({
   field: 'avatar',
   maxBytes: 2 * 1024 * 1024,
   allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
-  typeMessage: 'Only JPG, PNG and WebP images are allowed',
-  sizeMessage: 'Image must be 2 MB or smaller',
-  invalidMessage: 'Send one image in the "avatar" form field',
+  typeMessage: ERRORS.imageTypes,
+  sizeMessage: ERRORS.imageTooLarge,
+  invalidMessage: ERRORS.sendAvatar,
 });
 
 // One PDF in the "resume" field, up to 5 MB, into req.file.
@@ -52,9 +53,9 @@ export const resumeUpload = singleFileUpload({
   field: 'resume',
   maxBytes: 5 * 1024 * 1024,
   allowedTypes: ['application/pdf'],
-  typeMessage: 'Only PDF files are supported',
-  sizeMessage: 'The PDF must be 5 MB or smaller',
-  invalidMessage: 'Send one PDF in the "resume" form field',
+  typeMessage: ERRORS.pdfOnly,
+  sizeMessage: ERRORS.pdfTooLarge,
+  invalidMessage: ERRORS.sendResume,
 });
 
 // One image in the "cover" field, up to 2 MB (the same limits as the avatar), into req.file.
@@ -62,7 +63,7 @@ export const coverUpload = singleFileUpload({
   field: 'cover',
   maxBytes: 2 * 1024 * 1024,
   allowedTypes: ['image/jpeg', 'image/png', 'image/webp'],
-  typeMessage: 'Only JPG, PNG and WebP images are allowed',
-  sizeMessage: 'Image must be 2 MB or smaller',
-  invalidMessage: 'Send one image in the "cover" form field',
+  typeMessage: ERRORS.imageTypes,
+  sizeMessage: ERRORS.imageTooLarge,
+  invalidMessage: ERRORS.sendCover,
 });

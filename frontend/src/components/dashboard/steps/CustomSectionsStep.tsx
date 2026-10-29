@@ -28,6 +28,7 @@ import {
   useEditor,
   type CustomItem,
 } from '../editor-context';
+import { NOTICES, PROBLEMS, CONFIRMS } from '@/lib/messages';
 
 // Starting points for "Add section". The title is filled in and can be changed before creating.
 const PRESETS = ['Certifications', 'Awards', 'Publications', 'Volunteering'];
@@ -124,11 +125,11 @@ function RenameForm({ section, onDone }: { section: MyCustomSection; onDone: () 
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     const parsed = customSectionInputSchema.safeParse({ title });
-    if (!parsed.success) return setError('Enter a title (up to 80 characters).');
+    if (!parsed.success) return setError(PROBLEMS.sectionTitle);
     setSaving(true);
     try {
       await rename(section.id, parsed.data.title);
-      notify('success', 'Saved.');
+      notify('success', NOTICES.saved);
       onDone();
     } catch (err) {
       setError(errorText(err));
@@ -173,7 +174,7 @@ function CustomSectionCard({ section }: { section: MyCustomSection }) {
     const items = count ? ` and its ${count} item${count === 1 ? '' : 's'}` : '';
     const sure = await confirm({
       title: 'Delete this section?',
-      message: `Delete "${section.title}"${items}? This cannot be undone.`,
+      message: CONFIRMS.deleteSection(section.title, items),
       confirmLabel: 'Delete section',
       danger: true,
     });
@@ -181,7 +182,7 @@ function CustomSectionCard({ section }: { section: MyCustomSection }) {
     setDeleting(true);
     try {
       await remove(section.id);
-      notify('success', 'Section deleted.');
+      notify('success', NOTICES.sectionDeleted);
     } catch (err) {
       notify('error', errorText(err));
       setDeleting(false);
@@ -268,11 +269,11 @@ function AddSection({ count }: { count: number }) {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     const parsed = customSectionInputSchema.safeParse({ title });
-    if (!parsed.success) return setError('Enter a title (up to 80 characters).');
+    if (!parsed.success) return setError(PROBLEMS.sectionTitle);
     setSaving(true);
     try {
       await create(parsed.data.title);
-      notify('success', 'Section added. Add items to it, and it appears on your page.');
+      notify('success', NOTICES.sectionAdded);
       setTitle(null);
     } catch (err) {
       setError(errorText(err));

@@ -1,6 +1,7 @@
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
 import { customItems, myTestimonials, orderedList, profileSelect } from '../lib/selects';
+import { ERRORS } from '../lib/messages';
 
 // Everything stored about the signed-in person, for them to keep. It is built from explicit selects,
 // so the password hash can never end up in it. Internal foreign keys are left out; ids stay so the
@@ -43,7 +44,7 @@ export async function exportAccountData(userId: string) {
       },
     },
   });
-  if (!user) throw AppError.unauthorized('Account no longer exists', 'INVALID_TOKEN');
+  if (!user) throw AppError.unauthorized(ERRORS.accountGone, 'INVALID_TOKEN');
 
   const { profile, email, createdAt, termsAcceptedAt, termsVersion } = user;
   return {

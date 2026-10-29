@@ -12,6 +12,7 @@ import {
 } from '../lib/selects';
 import { withSections } from './section-layout.service';
 import { assertSlugAvailable, slugTaken } from './slug.service';
+import { ERRORS } from '../lib/messages';
 
 // The whole profile as the editor (and later the public page) needs it, in one query.
 const fullProfileSelect = {
@@ -35,7 +36,7 @@ export async function getProfile(profileId: string) {
     where: { id: profileId },
     select: fullProfileSelect,
   });
-  if (!profile) throw AppError.notFound('Profile not found');
+  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
   return withSections(profile);
 }
 
@@ -43,12 +44,9 @@ export async function getProfile(profileId: string) {
 // any use, and a preferred way to be reached has to be a link the owner is showing.
 async function assertWorkCard(profileId: string, input: ProfileUpdateInput) {
   if (input.workCardEnabled && !input.timezone) {
-    throw new AppError(
-      400,
-      'VALIDATION_ERROR',
-      'Choose a time zone to show the Working together card',
-      [{ path: 'timezone', message: 'Choose a time zone' }],
-    );
+    throw new AppError(400, 'VALIDATION_ERROR', ERRORS.timeZoneForCard, [
+      { path: 'timezone', message: ERRORS.timeZoneField },
+    ]);
   }
   if (!input.preferredContact) return;
   const links = await prisma.link.findMany({
@@ -61,17 +59,12 @@ async function assertWorkCard(profileId: string, input: ProfileUpdateInput) {
       links.map((link) => link.type),
     )
   ) {
-    throw new AppError(
-      400,
-      'VALIDATION_ERROR',
-      'That contact option is not one of your visible links',
-      [
-        {
-          path: 'preferredContact',
-          message: 'Add and show that link first, or choose another way to be reached',
-        },
-      ],
-    );
+    throw new AppError(400, 'VALIDATION_ERROR', ERRORS.contactNotVisible, [
+      {
+        path: 'preferredContact',
+        message: ERRORS.contactNotVisibleField,
+      },
+    ]);
   }
 }
 
@@ -103,7 +96,7 @@ export async function setPublished(profileId: string, published?: boolean) {
       where: { id: profileId },
       select: { published: true },
     });
-    if (!current) throw AppError.notFound('Profile not found');
+    if (!current) throw AppError.notFound(ERRORS.profileNotFound);
     next = !current.published;
   }
 

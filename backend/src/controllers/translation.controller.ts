@@ -5,11 +5,12 @@ import { AppError } from '../lib/errors';
 import { getProfileId } from '../middleware/auth';
 import * as ai from '../services/translation-ai.service';
 import * as service from '../services/translation.service';
+import { ERRORS } from '../lib/messages';
 
 // A language code from the path. An unknown one is the same 404 as a language that is not added.
 function localeOf(req: Request) {
   const locale = req.params.locale as string;
-  if (!isLocaleCode(locale)) throw AppError.notFound('Language not found');
+  if (!isLocaleCode(locale)) throw AppError.notFound(ERRORS.languageNotFound);
   return locale;
 }
 
@@ -32,11 +33,7 @@ export const setDefaultLanguage = asyncHandler(async (req, res) => {
 export const removeLanguage = asyncHandler(async (req, res) => {
   const locale = localeOf(req);
   if (req.query.confirm !== locale) {
-    throw new AppError(
-      400,
-      'CONFIRMATION_REQUIRED',
-      'Confirm by repeating the language code in the "confirm" query parameter',
-    );
+    throw new AppError(400, 'CONFIRMATION_REQUIRED', ERRORS.confirmRepeatCode);
   }
   res.json(await service.removeLanguage(getProfileId(req), locale));
 });

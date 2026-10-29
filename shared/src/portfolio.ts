@@ -6,6 +6,7 @@ import {
 } from './availability';
 import { isLocaleCode } from './languages';
 import { optionalLine } from './text';
+import { VALIDATION } from './messages';
 import {
   WORK_NOTE_MAX,
   closedWeek,
@@ -34,7 +35,7 @@ export const httpUrl = z
   .trim()
   .max(2048)
   .url()
-  .refine((u) => /^https?:\/\//i.test(u), 'Must start with http:// or https://');
+  .refine((u) => /^https?:\/\//i.test(u), VALIDATION.urlScheme);
 
 // Optional: when omitted on create the item is appended; on update it keeps its position.
 const orderField = z.number().int().min(0).optional();
@@ -77,7 +78,7 @@ export const slugFormatSchema = z
   .toLowerCase()
   .min(3)
   .max(30)
-  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'Use lowercase letters, numbers and single hyphens');
+  .regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, VALIDATION.slugFormat);
 
 // The address a person may choose: the right shape and not reserved.
 export const slugSchema = slugFormatSchema.refine(
@@ -103,7 +104,7 @@ export const accentColorSchema = z
   .string()
   .trim()
   .toLowerCase()
-  .regex(/^#[0-9a-f]{6}$/, 'Use a hex color like #2563eb');
+  .regex(/^#[0-9a-f]{6}$/, VALIDATION.hexColor);
 
 export const linkTypeSchema = z.enum(['linkedin', 'github', 'email', 'phone', 'website', 'other']);
 export type LinkType = z.infer<typeof linkTypeSchema>;
@@ -204,7 +205,7 @@ export type SkillInput = z.infer<typeof skillInputSchema>;
 
 const dateRange = <T extends { startDate: Date; endDate: Date | null }>(v: T) =>
   v.endDate === null || v.endDate >= v.startDate;
-const dateRangeIssue = { message: 'End date must not be before the start date', path: ['endDate'] };
+const dateRangeIssue = { message: VALIDATION.endBeforeStart, path: ['endDate'] };
 
 export const experienceInputSchema = z
   .object({

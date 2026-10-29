@@ -2,8 +2,9 @@ import { isReservedSlug } from '@parichay/shared';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
 import { slugify } from '../lib/slug';
+import { ERRORS } from '../lib/messages';
 
-export const slugTaken = () => AppError.conflict('SLUG_TAKEN', 'This slug is already taken');
+export const slugTaken = () => AppError.conflict('SLUG_TAKEN', ERRORS.slugTaken);
 
 // "asha-rao", then "asha-rao-2", "asha-rao-3", ... Reserved words count as taken.
 // One query loads every slug starting with the base, then the first free number is picked.

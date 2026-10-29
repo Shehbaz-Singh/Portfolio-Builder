@@ -12,6 +12,7 @@ import { orNotFound } from '../lib/prisma-errors';
 import { customItems } from '../lib/selects';
 import { saveSectionConfig } from './section-layout.service';
 import { deleteTranslationsFor } from './translation.service';
+import { ERRORS } from '../lib/messages';
 
 // User-made sections and their items. Ownership: a section is always looked up by
 // (id, profileId), and an item by (id, sectionId) only after that. A record that belongs to
@@ -25,8 +26,8 @@ const sectionSelect = {
   items: customItems,
 } satisfies Prisma.CustomSectionSelect;
 
-const sectionNotFound = () => AppError.notFound('Custom section not found');
-const itemNotFound = () => AppError.notFound('Item not found');
+const sectionNotFound = () => AppError.notFound(ERRORS.customSectionNotFound);
+const itemNotFound = () => AppError.notFound(ERRORS.itemNotFound);
 
 type Db = Prisma.TransactionClient | typeof prisma;
 
@@ -62,10 +63,7 @@ export function createSection(profileId: string, input: CustomSectionInput) {
     await lockProfile(tx, profileId);
     const count = await tx.customSection.count({ where: { profileId } });
     if (count >= MAX_CUSTOM_SECTIONS) {
-      throw AppError.conflict(
-        'LIMIT_REACHED',
-        `You can have at most ${MAX_CUSTOM_SECTIONS} custom sections`,
-      );
+      throw AppError.conflict('LIMIT_REACHED', ERRORS.maxCustomSections(MAX_CUSTOM_SECTIONS));
     }
     const created = await tx.customSection.create({
       data: { profileId, title: input.title, order: count },
@@ -138,10 +136,7 @@ export function createItem(profileId: string, sectionId: string, input: CustomIt
       _max: { order: true },
     });
     if (_count >= MAX_CUSTOM_ITEMS) {
-      throw AppError.conflict(
-        'LIMIT_REACHED',
-        `You can have at most ${MAX_CUSTOM_ITEMS} items in a section`,
-      );
+      throw AppError.conflict('LIMIT_REACHED', ERRORS.maxCustomItems(MAX_CUSTOM_ITEMS));
     }
     return tx.customSectionItem.create({
       data: { ...input, sectionId, order: (_max.order ?? -1) + 1 },
@@ -184,11 +179,7 @@ export async function reorderItems(profileId: string, sectionId: string, ids: st
   });
   const currentIds = new Set(current.map((item) => item.id));
   if (ids.length !== currentIds.size || !ids.every((id) => currentIds.has(id))) {
-    throw new AppError(
-      400,
-      'INVALID_REORDER',
-      'ids must list every item in the section exactly once',
-    );
+    throw new AppError(400, 'INVALID_REORDER', ERRORS.reorderCustomItems);
   }
 
   await prisma.$transaction(

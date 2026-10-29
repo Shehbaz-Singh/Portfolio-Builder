@@ -9,11 +9,12 @@ import { orNotFound } from '../lib/prisma-errors';
 import { myPostSummaries } from '../lib/selects';
 import { slugifyTitle } from '../lib/slug';
 import { deleteTranslationsFor } from './translation.service';
+import { ERRORS } from '../lib/messages';
 
 // Posts and links in the Writing section. Ownership: a post is always looked up by (id, profileId),
 // so one that belongs to someone else looks exactly like one that does not exist (404).
 
-const notFound = () => AppError.notFound('Post not found');
+const notFound = () => AppError.notFound(ERRORS.postNotFound);
 
 const own = { omit: { profileId: true } } satisfies Prisma.PostFindManyArgs;
 
@@ -52,7 +53,7 @@ export function createPost(profileId: string, input: PostInput) {
     await lockProfile(tx, profileId);
     const count = await tx.post.count({ where: { profileId } });
     if (count >= MAX_POSTS) {
-      throw AppError.conflict('LIMIT_REACHED', `You can have at most ${MAX_POSTS} posts`);
+      throw AppError.conflict('LIMIT_REACHED', ERRORS.maxPosts(MAX_POSTS));
     }
     return tx.post.create({
       data: {
@@ -110,7 +111,7 @@ export async function deletePost(profileId: string, id: string) {
 
 export async function replaceCover(profileId: string, id: string, file: Buffer) {
   if (!detectImageType(file)) {
-    throw new AppError(400, 'UNSUPPORTED_FILE_TYPE', 'Only JPG, PNG and WebP images are allowed');
+    throw new AppError(400, 'UNSUPPORTED_FILE_TYPE', ERRORS.imageTypes);
   }
   const post = await prisma.post.findFirst({
     where: { id, profileId },
@@ -126,7 +127,7 @@ export async function replaceCover(profileId: string, id: string, file: Buffer) 
       'Cloudinary upload failed:',
       err instanceof Error ? err.message : 'unknown error',
     );
-    throw new AppError(502, 'UPLOAD_FAILED', 'Could not upload the image, please try again');
+    throw new AppError(502, 'UPLOAD_FAILED', ERRORS.imageUploadFailed);
   }
 
   try {

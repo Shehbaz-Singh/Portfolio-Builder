@@ -20,6 +20,7 @@ import { downloadMyData } from '@/lib/download-export';
 import { Button, Card } from '../ui';
 import { LogOutButton } from './Nav';
 import { ContentSkeleton, LoadFailed } from './screens';
+import { PROBLEMS } from '@/lib/messages';
 
 const loadSession = (signal: AbortSignal) => api<SessionResponse>('/auth/me', { signal });
 
@@ -36,7 +37,7 @@ function ChangePassword() {
     setChanged(false);
     if (values.newPassword !== form.getValues('confirmPassword')) {
       form.setError('confirmPassword', {
-        message: 'Those two passwords are different. Type the new one the same way twice.',
+        message: PROBLEMS.passwordsDiffer,
       });
       return;
     }

@@ -4,6 +4,7 @@ import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
 import { orNotFound } from '../lib/prisma-errors';
 import { deleteTranslationsFor } from './translation.service';
+import { ERRORS } from '../lib/messages';
 
 // experience, education, projects, skills and links all follow the same rules, so one
 // service handles them. This is the minimal slice of a Prisma model delegate it relies on.
@@ -27,7 +28,7 @@ const delegates = {
 } as unknown as Record<Section, Delegate>;
 
 const omit = { profileId: true };
-const notFound = () => AppError.notFound('Item not found');
+const notFound = () => AppError.notFound(ERRORS.itemNotFound);
 
 // Every query below filters by profileId. A record id that belongs to someone else simply
 // does not match, so it looks exactly like a record that does not exist (404).
@@ -53,7 +54,7 @@ export async function createItem(section: Section, profileId: string, input: Row
   if (count >= SECTION_LIMITS[section]) {
     throw AppError.conflict(
       'LIMIT_REACHED',
-      `You can have at most ${SECTION_LIMITS[section]} items in ${section}`,
+      ERRORS.maxSectionItems(SECTION_LIMITS[section], section),
     );
   }
 
@@ -102,11 +103,7 @@ export async function reorderItems(section: Section, profileId: string, ids: str
   const current = await delegate.findMany({ where: { profileId }, select: { id: true } });
   const currentIds = new Set(current.map((row) => row.id));
   if (ids.length !== currentIds.size || !ids.every((id) => currentIds.has(id))) {
-    throw new AppError(
-      400,
-      'INVALID_REORDER',
-      `ids must list every item in ${section} exactly once`,
-    );
+    throw new AppError(400, 'INVALID_REORDER', ERRORS.reorderSection(section));
   }
 
   // One transaction, so a failure part-way cannot leave a half-reordered list.

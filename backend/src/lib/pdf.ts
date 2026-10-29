@@ -1,5 +1,6 @@
 import { PDFParse } from 'pdf-parse';
 import { AppError } from './errors';
+import { ERRORS } from './messages';
 
 // A resume is a page or two; anything past this is not worth the parsing time or the tokens.
 const MAX_PAGES = 8;
@@ -7,12 +8,7 @@ const PARSE_TIMEOUT_MS = 20_000;
 // What is sent to the model at most (roughly 6,000 tokens).
 const MAX_TEXT_CHARS = 24_000;
 
-const unreadable = () =>
-  new AppError(
-    422,
-    'UNREADABLE_PDF',
-    "We couldn't read that PDF. It may be damaged or password protected.",
-  );
+const unreadable = () => new AppError(422, 'UNREADABLE_PDF', ERRORS.pdfUnreadable);
 
 // Real PDFs start with "%PDF-" (a few start with junk first, so the first KB is checked).
 // A file's declared Content-Type is whatever the client says; this is the actual check.

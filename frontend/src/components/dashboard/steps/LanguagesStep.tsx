@@ -16,6 +16,7 @@ import { errorText, useEditor } from '../editor-context';
 import { LanguageProgress } from '../languages/LanguageProgress';
 import { TranslationEditor } from '../languages/TranslationEditor';
 import { ContentSkeleton, LoadFailed } from '../screens';
+import { NOTICES } from '@/lib/messages';
 
 const loadLanguages = (signal: AbortSignal) =>
   api<MyLanguages>('/profile/me/languages', { signal });
@@ -123,7 +124,7 @@ function MainLanguage({
         body: { defaultLocale: code },
       });
       apply(next);
-      notify('success', `Main language is now ${languageOf(code).name}.`);
+      notify('success', NOTICES.mainLanguage(languageOf(code).name));
     } catch (err) {
       setError(errorText(err));
     } finally {
@@ -203,7 +204,7 @@ function OtherLanguages({
       });
       apply(next);
       setPreviewLocale(code);
-      const message = `${languageOf(code).name} added. Translate its texts below.`;
+      const message = NOTICES.languageAdded(languageOf(code).name);
       setAnnouncement(message);
       notify('success', message);
     } catch (err) {
@@ -280,7 +281,7 @@ function OtherLanguages({
           onClose={() => setRemoving(null)}
           onRemoved={(next) => {
             apply(next, removing);
-            const message = `${languageOf(removing).name} and its texts were deleted.`;
+            const message = NOTICES.languageRemoved(languageOf(removing).name);
             setAnnouncement(message);
             notify('success', message);
             setRemoving(null);

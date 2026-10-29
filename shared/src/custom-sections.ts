@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { httpUrl } from './portfolio';
 import { optionalBlock, optionalLine, requiredLine } from './text';
+import { VALIDATION } from './messages';
 
 // Sections the user creates (Certifications, Awards, Publications, Volunteering, ...): a title
 // and a list of items. Where they sit on the page is part of the section config
@@ -37,13 +38,13 @@ export const customItemInputSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['endDate'],
-        message: 'Add a start date before an end date',
+        message: VALIDATION.startBeforeEnd,
       });
     } else if (item.endDate && item.startDate && item.endDate < item.startDate) {
       ctx.addIssue({
         code: 'custom',
         path: ['endDate'],
-        message: 'End date must not be before the start date',
+        message: VALIDATION.endBeforeStart,
       });
     }
   });

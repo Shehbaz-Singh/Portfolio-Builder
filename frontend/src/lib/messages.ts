@@ -1,0 +1,74 @@
+// The dashboard's own messages: toasts, error text and the sentences of confirm dialogs. They are
+// named here instead of written where they are shown, so the wording lives in one place. Messages
+// that depend on a value are small functions. Validation messages that come from the shared
+// schemas live in @parichay/shared, and the public portfolio's text in lib/i18n/messages.
+
+export const NOTICES = {
+  saved: 'Saved.',
+  deleted: 'Deleted.',
+  changesSaved: 'Changes saved.',
+  draftSaved: 'Draft saved.',
+  published: 'Published. It shows on your page while the Writing section is switched on.',
+  portfolioLive: 'Your portfolio is live again.',
+  portfolioHidden:
+    'Your portfolio is hidden. Only you can see it now, and you can publish it again any time.',
+  slugSaved: 'Page address saved.',
+  photoRemoved: 'Photo removed. Your initials will show instead.',
+  photoUp: 'Looking good. Your photo is up.',
+  coverSaved: 'Cover image saved.',
+  coverRemoved: 'Cover image removed.',
+  sectionAdded: 'Section added. Add items to it, and it appears on your page.',
+  sectionDeleted: 'Section deleted.',
+  importDone: 'Got it. Take a look through each tab, fix anything that’s off, then save.',
+  dataDownloading: 'Your data file is downloading.',
+  testimonialSaved: 'Testimonial saved.',
+  testimonialAdded: 'Testimonial added to your page.',
+  testimonialDeleted: 'Testimonial deleted.',
+  testimonialsOff: 'No longer accepting testimonials.',
+  testimonialsOn: 'Now accepting testimonials.',
+  testimonialsShown: 'The Testimonials section is now shown on your page.',
+  testimonialApproved: (name: string) => `Approved the testimonial from ${name}.`,
+  testimonialRejected: (name: string) => `Rejected the testimonial from ${name}.`,
+  testimonialRemoved: (name: string) => `Removed ${name}'s testimonial from your page.`,
+  skillAdded: (name: string) => `Added ${name}.`,
+  skillRemoved: (name: string) => `Removed ${name}.`,
+  themeChanged: (name: string) => `Theme changed to ${name}.`,
+  accentChanged: (name: string) => `Accent color changed to ${name}.`,
+  mainLanguage: (name: string) => `Main language is now ${name}.`,
+  languageAdded: (name: string) => `${name} added. Translate its texts below.`,
+  languageRemoved: (name: string) => `${name} and its texts were deleted.`,
+} as const;
+
+export const PROBLEMS = {
+  generic: 'Something went wrong. Please try again.',
+  notSaved: 'Something went wrong, and your change may not have been saved. Please try again.',
+  tryAgain: 'That did not work. Please try again.',
+  orderNotSaved: (reason: string) => `Couldn't save the new order. ${reason}`,
+  dataFile: "We couldn't prepare your data file. Please try again.",
+  themeNotChanged: "We couldn't change the theme. Please try again.",
+  colorNotChanged: "We couldn't change the color. Please try again.",
+  linkNotUpdated: "We couldn't update that link. Please try again.",
+  copyLink: "We couldn't copy the link automatically. Select it and copy it by hand.",
+  imageType: "That file type won't work. Choose a JPG, PNG or WebP image.",
+  avatarTooLarge: 'That image is over 2 MB. Choose a smaller one, or shrink it and try again.',
+  coverTooLarge: 'That image is over 2 MB. Choose a smaller one, or shrink it first.',
+  notPdf: 'That doesn’t look like a PDF. Choose a PDF file, or fill in your details by hand.',
+  pdfTooLarge:
+    'That PDF is over 4.5 MB. Try a smaller or compressed version, or fill in your details by hand.',
+  pdfUnread: 'We couldn’t read that file. Try again, or fill in your details by hand.',
+  sectionTitle: 'Enter a title (up to 80 characters).',
+  passwordsDiffer: 'Those two passwords are different. Type the new one the same way twice.',
+  saveFailed: 'We couldn’t save. Your changes are still here',
+} as const;
+
+export const CONFIRMS = {
+  leaveUnsaved: 'You have changes that are not saved. Leave and lose them?',
+  discardPost: 'You have changes that are not saved. Go back to the list and lose them?',
+  discardImport: 'Everything read from your resume will be thrown away.',
+  deleteSection: (title: string, items: string) =>
+    `Delete "${title}"${items}? This cannot be undone.`,
+  deleteTestimonial: (name: string) =>
+    `The testimonial from ${name} will be deleted. This cannot be undone.`,
+  deletePost: (title: string) =>
+    `“${title}” will be removed for good, along with its cover image. This can’t be undone.`,
+} as const;

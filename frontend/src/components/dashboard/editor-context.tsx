@@ -26,6 +26,7 @@ import { ApiError, api } from '@/lib/client-api';
 import { applyTranslations } from '@/lib/translate-preview';
 import { ToastRegion, type ToastData } from '../ui';
 import { saveProfile } from './save-profile';
+import { PROBLEMS } from '@/lib/messages';
 
 // Fields the live preview shows while they are still being typed (not yet saved).
 export type Draft = Partial<
@@ -146,9 +147,7 @@ export function useEditor(): EditorContextValue {
 }
 
 export const errorText = (err: unknown) =>
-  err instanceof ApiError
-    ? err.message
-    : 'Something went wrong, and your change may not have been saved. Please try again.';
+  err instanceof ApiError ? err.message : PROBLEMS.notSaved;
 
 // A brand-new profile has only a name. Those people start on the resume import.
 export const isBlank = (p: MyProfile) =>
@@ -559,7 +558,7 @@ function useListApi<T extends { id: string }>(
         await api(`${base}/reorder`, { method: 'PATCH', body: { ids } });
       } catch (err) {
         replaceList(() => before);
-        notify('error', `Couldn't save the new order. ${errorText(err)}`);
+        notify('error', PROBLEMS.orderNotSaved(errorText(err)));
       }
     },
     [base, items, notify, replaceList],

@@ -4,6 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useCallback } from 'react';
 import { useConfirm } from '../ui';
 import { useEditor } from './editor-context';
+import { CONFIRMS } from '@/lib/messages';
 
 // Moving away from something with edits that would be lost asks first. An autosave that has not
 // gone out yet is not asked about: it is sent as the screen closes.
@@ -15,7 +16,7 @@ export function useLeaveGuard() {
       !hasUnsaved() ||
       (await confirm({
         title: 'Leave without saving?',
-        message: 'You have changes that are not saved. Leave and lose them?',
+        message: CONFIRMS.leaveUnsaved,
         confirmLabel: 'Leave',
         cancelLabel: 'Stay',
         danger: true,

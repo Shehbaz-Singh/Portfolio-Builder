@@ -10,6 +10,7 @@ import { AppError } from '../lib/errors';
 import { LlmError, getLlmProvider } from '../lib/llm';
 import { prisma } from '../lib/prisma';
 import { loadSource } from './translation.service';
+import { ERRORS } from '../lib/messages';
 
 const TIMEOUT_MS = 30_000;
 
@@ -31,11 +32,7 @@ async function takeSuggestion(userId: string) {
     update: { count: { increment: 1 } },
   });
   if (row.count > SUGGESTIONS_PER_DAY) {
-    throw new AppError(
-      429,
-      'SUGGESTION_LIMIT',
-      `You have used today's ${SUGGESTIONS_PER_DAY} translation suggestions. Try again tomorrow, or write the text yourself.`,
-    );
+    throw new AppError(429, 'SUGGESTION_LIMIT', ERRORS.suggestionLimit(SUGGESTIONS_PER_DAY));
   }
 }
 
@@ -61,22 +58,22 @@ export async function suggest(
 ) {
   const rule = fieldRule(input.entityType, input.field);
   if (!rule || !isLocaleCode(input.locale))
-    throw new AppError(400, 'BAD_REQUEST', 'Not translatable');
+    throw new AppError(400, 'BAD_REQUEST', ERRORS.notTranslatable);
 
   const profile = await prisma.profile.findUnique({
     where: { id: profileId },
     select: { defaultLocale: true, locales: true },
   });
   if (!profile?.locales.includes(input.locale)) {
-    throw new AppError(400, 'LANGUAGE_NOT_ENABLED', 'Add this language first');
+    throw new AppError(400, 'LANGUAGE_NOT_ENABLED', ERRORS.languageNotEnabled);
   }
   const { texts } = await loadSource(profileId);
   const text = texts.get(translationKey(input.entityType, input.entityId, input.field));
-  if (!text) throw new AppError(400, 'NOTHING_TO_TRANSLATE', 'There is no text to translate here');
+  if (!text) throw new AppError(400, 'NOTHING_TO_TRANSLATE', ERRORS.nothingToTranslate);
 
   const provider = getLlmProvider();
   if (!provider) {
-    throw new AppError(503, 'SUGGESTIONS_UNAVAILABLE', 'Translation suggestions are not available');
+    throw new AppError(503, 'SUGGESTIONS_UNAVAILABLE', ERRORS.suggestionsUnavailable);
   }
 
   await takeSuggestion(userId);
@@ -89,39 +86,23 @@ export async function suggest(
     });
   } catch (err) {
     if (err instanceof LlmError && err.kind === 'busy') {
-      throw new AppError(
-        503,
-        'SUGGESTIONS_BUSY',
-        'The translation service is busy. Try again in a minute.',
-      );
+      throw new AppError(503, 'SUGGESTIONS_BUSY', ERRORS.suggestionsBusy);
     }
     if (err instanceof LlmError && err.kind === 'timeout') {
-      throw new AppError(
-        504,
-        'SUGGESTIONS_TIMEOUT',
-        'The translation took too long. Please try again.',
-      );
+      throw new AppError(504, 'SUGGESTIONS_TIMEOUT', ERRORS.suggestionsTimeout);
     }
     if (err instanceof LlmError) console.error(`Translation: ${provider.name} ${err.kind}`);
-    throw new AppError(503, 'SUGGESTIONS_UNAVAILABLE', 'Translation suggestions are not available');
+    throw new AppError(503, 'SUGGESTIONS_UNAVAILABLE', ERRORS.suggestionsUnavailable);
   }
 
   const value = parseTranslation(reply);
   if (!value) {
-    throw new AppError(
-      502,
-      'SUGGESTION_FAILED',
-      "We couldn't get a usable translation. Please try again.",
-    );
+    throw new AppError(502, 'SUGGESTION_FAILED', ERRORS.suggestionFailed);
   }
   // Plain text within the field's limit, like anything the owner types.
   const clean = rule.multiline ? value.trim() : value.replace(/\s+/g, ' ').trim();
   if (clean.length > rule.max) {
-    throw new AppError(
-      422,
-      'SUGGESTION_TOO_LONG',
-      `The suggestion was longer than the ${rule.max} character limit. Write it yourself, or shorten the original.`,
-    );
+    throw new AppError(422, 'SUGGESTION_TOO_LONG', ERRORS.suggestionTooLong(rule.max));
   }
   return { value: clean };
 }

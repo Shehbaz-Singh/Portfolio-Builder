@@ -22,6 +22,7 @@ import { Badge, Button, Card, EmptyState, Switch, useConfirm } from '../../ui';
 import { EditorForm } from '../EditorForm';
 import { ListManager, type FormProps } from '../SectionManager';
 import { errorText, useEditor, useTestimonials } from '../editor-context';
+import { NOTICES, CONFIRMS } from '@/lib/messages';
 
 type Fields = {
   authorName: string;
@@ -52,7 +53,7 @@ function TestimonialForm({ item, onDone, onSaved }: FormProps<MyTestimonial>) {
 
   async function onSubmit(values: TestimonialInput) {
     await (item ? updateItem(item.id, values) : create(values));
-    notify('success', item ? 'Testimonial saved.' : 'Testimonial added to your page.');
+    notify('success', item ? NOTICES.testimonialSaved : NOTICES.testimonialAdded);
     onSaved?.();
     onDone();
   }
@@ -195,7 +196,7 @@ export function TestimonialsStep() {
     run(
       'accepting',
       () => t.setAccepting(!t.accepting),
-      t.accepting ? 'No longer accepting testimonials.' : 'Now accepting testimonials.',
+      t.accepting ? NOTICES.testimonialsOff : NOTICES.testimonialsOn,
     );
 
   // Switches the page section on, the same as the switch in the Sections step.
@@ -212,26 +213,21 @@ export function TestimonialsStep() {
         });
         update((p) => ({ ...p, sectionConfig: saved.sections }));
       },
-      'The Testimonials section is now shown on your page.',
+      NOTICES.testimonialsShown,
     );
 
   const confirmDelete = async (item: MyTestimonial, done: () => void) => {
     const sure = await confirm({
       title: 'Delete this testimonial?',
-      message: `The testimonial from ${item.authorName} will be deleted. This cannot be undone.`,
+      message: CONFIRMS.deleteTestimonial(item.authorName),
       confirmLabel: 'Delete',
       danger: true,
     });
-    if (sure) void run(item.id, () => t.remove(item.id), 'Testimonial deleted.', done);
+    if (sure) void run(item.id, () => t.remove(item.id), NOTICES.testimonialDeleted, done);
   };
 
   const approve = (item: MyTestimonial, done: () => void) =>
-    run(
-      item.id,
-      () => t.approve(item.id),
-      `Approved the testimonial from ${item.authorName}.`,
-      done,
-    );
+    run(item.id, () => t.approve(item.id), NOTICES.testimonialApproved(item.authorName), done);
 
   const remaining = MAX_TESTIMONIALS - t.pending.length - t.rejected.length;
 
@@ -294,7 +290,7 @@ export function TestimonialsStep() {
                 run(
                   item.id,
                   () => t.reject(item.id),
-                  `Rejected the testimonial from ${item.authorName}.`,
+                  NOTICES.testimonialRejected(item.authorName),
                   done,
                 )
               }
@@ -341,11 +337,7 @@ export function TestimonialsStep() {
               variant="ghost"
               disabled={busy === item.id}
               onClick={() =>
-                run(
-                  item.id,
-                  () => t.reject(item.id),
-                  `Removed ${item.authorName}'s testimonial from your page.`,
-                )
+                run(item.id, () => t.reject(item.id), NOTICES.testimonialRemoved(item.authorName))
               }
               aria-label={`Reject the testimonial from ${item.authorName}`}
             >

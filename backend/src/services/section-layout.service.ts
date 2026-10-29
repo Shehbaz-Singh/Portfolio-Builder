@@ -7,6 +7,7 @@ import {
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
+import { ERRORS } from '../lib/messages';
 
 // The page layout: Profile.sectionConfig, which orders and shows or hides every section, the
 // built-in ones and the custom ones ("custom:<id>").
@@ -34,7 +35,7 @@ export async function getSections(profileId: string): Promise<SectionConfig> {
       customSections: { select: { id: true }, orderBy: { order: 'asc' } },
     },
   });
-  if (!profile) throw AppError.notFound('Profile not found');
+  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
   return withSections(profile).sectionConfig;
 }
 
@@ -54,7 +55,7 @@ export async function saveSectionConfig(
       customSections: { select: { id: true }, orderBy: [{ order: 'asc' }, { id: 'asc' }] },
     },
   });
-  if (!profile) throw AppError.notFound('Profile not found');
+  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
 
   const config = normalizeSectionConfig(
     requested ?? profile.sectionConfig,

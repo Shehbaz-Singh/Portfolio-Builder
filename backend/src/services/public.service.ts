@@ -10,6 +10,7 @@ import {
   publicTestimonials,
 } from '../lib/selects';
 import { lookupFor, pick, publishableLocales, type Lookup } from './translation.service';
+import { ERRORS } from '../lib/messages';
 
 // Built from an explicit select, so nothing outside this list can reach a visitor. In
 // particular the User row is never touched: no account email, passwordHash or userId.
@@ -53,7 +54,7 @@ async function languageLookup(
   const enabled = await publishableLocales(profile.id, profile.locales);
   if (!lang || lang === profile.defaultLocale)
     return { enabled, locale: profile.defaultLocale, lookup: null };
-  if (!enabled.includes(lang)) throw AppError.notFound('Profile not found');
+  if (!enabled.includes(lang)) throw AppError.notFound(ERRORS.profileNotFound);
   return { enabled, locale: lang, lookup: await lookupFor(profile.id, lang) };
 }
 
@@ -62,7 +63,7 @@ export async function getPublicProfile(slug: string, lang?: string) {
     where: { slug, published: true },
     select: publicSelect,
   });
-  if (!profile) throw AppError.notFound('Profile not found');
+  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
   const { enabled, locale, lookup } = await languageLookup(profile, lang);
   const t = (type: Parameters<typeof pick>[1], id: string, field: string, original: string) =>
     lookup ? pick(lookup, type, id, field, original) : original;
@@ -188,13 +189,13 @@ async function writingContext(slug: string, lang?: string) {
       customSections: { select: { id: true } },
     },
   });
-  if (!profile) throw AppError.notFound('Profile not found');
+  if (!profile) throw AppError.notFound(ERRORS.profileNotFound);
   const layout = normalizeSectionConfig(
     profile.sectionConfig,
     profile.customSections.map((section) => section.id),
   );
   if (!layout.some((item) => item.key === 'writing' && item.visible)) {
-    throw AppError.notFound('Profile not found');
+    throw AppError.notFound(ERRORS.profileNotFound);
   }
   const { lookup } = await languageLookup(profile, lang);
   return { profileId: profile.id, lookup };
@@ -217,7 +218,7 @@ export async function getPublicPost(slug: string, postSlug: string, lang?: strin
     where: { profileId, slug: postSlug, status: 'published' },
     select: { ...publicPostSummarySelect, body: true, updatedAt: true },
   });
-  if (!post) throw AppError.notFound('Post not found');
+  if (!post) throw AppError.notFound(ERRORS.postNotFound);
   const translated = translatedPost(lookup, post);
   return lookup
     ? { ...translated, body: pick(lookup, 'post', post.id, 'body', post.body) }

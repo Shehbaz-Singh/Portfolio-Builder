@@ -8,6 +8,7 @@ import { schemaResolver } from '@/lib/form';
 import { Form, TextArea } from '../../form-fields';
 import { useFormAutosave } from '../autosave';
 import { useEditor, useReportDirty } from '../editor-context';
+import { NOTICES } from '@/lib/messages';
 
 const schema = profileUpdateSchema.pick({ about: true });
 type Fields = { about: string };
@@ -45,7 +46,7 @@ export function AboutStep() {
     await saveFields(values);
     if (reviewing) {
       setReviewing(false);
-      notify('success', 'Saved.');
+      notify('success', NOTICES.saved);
     }
   }
   useFormAutosave(form, save, { enabled: !reviewing });

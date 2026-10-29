@@ -4,11 +4,9 @@ import type { Request } from 'express';
 import { ipKeyGenerator, rateLimit } from 'express-rate-limit';
 import { config } from '../lib/config';
 import { AppError } from '../lib/errors';
+import { ERRORS } from '../lib/messages';
 
-// The browser talks to the Next.js server, which talks to this API, so req.ip is the Next.js
-// server for every user. It forwards the visitor's address in x-client-ip and proves it is the
-// one speaking with the shared secret. Without a valid secret the header is ignored: trusting
-// it blindly would let anyone dodge the limits by spoofing it.
+
 function fromFrontend(req: Request): boolean {
   const expected = config.PROXY_SECRET;
   const given = req.get('x-proxy-secret');
@@ -36,8 +34,7 @@ function limiter(options: {
     ...options,
     standardHeaders: 'draft-7',
     legacyHeaders: false,
-    handler: (_req, _res, next) =>
-      next(new AppError(429, 'RATE_LIMITED', 'Too many attempts, please try again later')),
+    handler: (_req, _res, next) => next(new AppError(429, 'RATE_LIMITED', ERRORS.rateLimited)),
   });
 }
 

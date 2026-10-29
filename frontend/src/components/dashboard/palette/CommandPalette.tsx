@@ -19,6 +19,7 @@ import { GROUPS, buildCommands, type Command, type Group } from './commands';
 import { matchScore } from './fuzzy';
 import { readRecent, rememberCommand } from './recent';
 import { useIsMac } from './platform';
+import { PROBLEMS } from '@/lib/messages';
 
 // The palette itself, loaded the first time it opens. A modal dialog (the page behind it is inert and
 // Tab stays inside) holding the ARIA combobox pattern: the input owns the focus and points at the
@@ -159,9 +160,7 @@ export default function CommandPalette({
       // After the palette has closed and given the focus back, so a dialog the command opens
       // returns the focus to the same place.
       setTimeout(() => {
-        void Promise.resolve(command.run()).catch(() =>
-          notify('error', 'That did not work. Please try again.'),
-        );
+        void Promise.resolve(command.run()).catch(() => notify('error', PROBLEMS.tryAgain));
       }, 40);
     },
     [onClose, notify],

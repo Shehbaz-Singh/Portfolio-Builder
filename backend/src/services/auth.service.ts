@@ -17,6 +17,7 @@ import { isUniqueViolation } from '../lib/prisma-errors';
 import { profileSelect } from '../lib/selects';
 import { deleteAllImagesOf } from './avatar.service';
 import { generateUniqueSlug } from './slug.service';
+import { ERRORS } from '../lib/messages';
 
 // Explicit selects mean passwordHash is never loaded unless login needs it, and the
 // session builder below copies fields by name so it can never leak into a response.
@@ -39,8 +40,7 @@ function toSession(user: SessionUser): SessionResponse {
   };
 }
 
-const emailTaken = () =>
-  AppError.conflict('EMAIL_TAKEN', 'An account with this email already exists');
+const emailTaken = () => AppError.conflict('EMAIL_TAKEN', ERRORS.emailTaken);
 
 export async function register(input: RegisterInput): Promise<AuthResponse> {
   const { email, password } = input;
@@ -88,7 +88,7 @@ export async function login({ email, password }: LoginInput): Promise<AuthRespon
   // Same error and same amount of work whether the email or the password was wrong.
   const valid = await verifyPassword(password, user?.passwordHash ?? null);
   if (!user || !valid) {
-    throw new AppError(401, 'INVALID_CREDENTIALS', 'Invalid email or password');
+    throw new AppError(401, 'INVALID_CREDENTIALS', ERRORS.invalidCredentials);
   }
 
   return { token: signToken(user.id), ...toSession(user) };
@@ -96,7 +96,7 @@ export async function login({ email, password }: LoginInput): Promise<AuthRespon
 
 export async function getSession(userId: string): Promise<SessionResponse> {
   const user = await prisma.user.findUnique({ where: { id: userId }, select: sessionSelect });
-  if (!user) throw AppError.unauthorized('Account no longer exists', 'INVALID_TOKEN');
+  if (!user) throw AppError.unauthorized(ERRORS.accountGone, 'INVALID_TOKEN');
   return toSession(user);
 }
 
@@ -107,9 +107,9 @@ async function confirmPassword(userId: string, password: string) {
     where: { id: userId },
     select: { passwordHash: true, profile: { select: { id: true, avatarUrl: true } } },
   });
-  if (!user) throw AppError.unauthorized('Account no longer exists', 'INVALID_TOKEN');
+  if (!user) throw AppError.unauthorized(ERRORS.accountGone, 'INVALID_TOKEN');
   if (!(await verifyPassword(password, user.passwordHash))) {
-    throw new AppError(403, 'INVALID_PASSWORD', 'Incorrect password');
+    throw new AppError(403, 'INVALID_PASSWORD', ERRORS.incorrectPassword);
   }
   return user;
 }

@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { httpUrl } from './portfolio';
 import { optionalBlock, optionalLine, requiredLine } from './text';
+import { VALIDATION } from './messages';
 
 // The "Writing" section: short posts written here (Markdown), and links to articles published
 // elsewhere. Drafts are only ever seen by their owner; only published posts reach the public API.
@@ -37,14 +38,14 @@ export const postInputSchema = z
       ctx.addIssue({
         code: 'custom',
         path: ['body'],
-        message: 'Write something before you publish, or save it as a draft',
+        message: VALIDATION.postBodyRequired,
       });
     }
     if (post.type === 'link' && !post.externalUrl) {
       ctx.addIssue({
         code: 'custom',
         path: ['externalUrl'],
-        message: 'Add the link to the article before you publish, or save it as a draft',
+        message: VALIDATION.postLinkRequired,
       });
     }
   })

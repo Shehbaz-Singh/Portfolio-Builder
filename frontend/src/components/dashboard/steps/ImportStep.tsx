@@ -5,6 +5,7 @@ import type { ResumeResponse } from '@parichay/shared';
 import { ApiError, api } from '@/lib/client-api';
 import { Button, Card, ErrorText, SlowNotice, useConfirm } from '../../ui';
 import { useEditor } from '../editor-context';
+import { NOTICES, PROBLEMS, CONFIRMS } from '@/lib/messages';
 
 // Larger than the API's 5 MB limit is refused there too; this lower one is what fits through
 // the site's /api proxy on Vercel (its request bodies are capped at 4.5 MB).
@@ -25,14 +26,9 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
     setEmpty(false);
     // The same limits as the API, checked first so a wrong file fails at once.
     if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-      return setError(
-        'That doesn’t look like a PDF. Choose a PDF file, or fill in your details by hand.',
-      );
+      return setError(PROBLEMS.notPdf);
     }
-    if (file.size > MAX_BYTES)
-      return setError(
-        'That PDF is over 4.5 MB. Try a smaller or compressed version, or fill in your details by hand.',
-      );
+    if (file.size > MAX_BYTES) return setError(PROBLEMS.pdfTooLarge);
 
     const form = new FormData();
     form.append('resume', file);
@@ -43,17 +39,10 @@ export function ImportStep({ goTo }: { goTo: (stepId: string) => void }) {
         form,
       });
       applyImport(resume, skipped);
-      notify(
-        'success',
-        'Got it. Take a look through each tab, fix anything that’s off, then save.',
-      );
+      notify('success', NOTICES.importDone);
       goTo('basics');
     } catch (err) {
-      setError(
-        err instanceof ApiError
-          ? err.message
-          : 'We couldn’t read that file. Try again, or fill in your details by hand.',
-      );
+      setError(err instanceof ApiError ? err.message : PROBLEMS.pdfUnread);
       // Only a missing key means "do not try again": offer the manual route clearly.
       setEmpty(err instanceof ApiError && err.code === 'RESUME_IMPORT_UNAVAILABLE');
     } finally {
@@ -155,7 +144,7 @@ export function ImportBanner() {
         onClick={async () => {
           const discard = await confirm({
             title: 'Discard the import?',
-            message: 'Everything read from your resume will be thrown away.',
+            message: CONFIRMS.discardImport,
             confirmLabel: 'Discard',
             danger: true,
           });
