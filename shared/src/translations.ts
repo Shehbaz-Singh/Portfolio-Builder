@@ -5,6 +5,7 @@ import { LOCALE_CODES } from './languages';
 import { POST_BODY_MAX, POST_EXCERPT_MAX, POST_TITLE_MAX } from './posts';
 import { SECTION_TITLE_MAX } from './section-config';
 import { optionalBlock, optionalLine } from './text';
+import { WORK_NOTE_MAX } from './work-card';
 
 // What the owner can translate. Names, companies, institutions, links, dates, tech tags and the
 // location stay as written, and so do testimonials (they are quotes).
@@ -38,6 +39,7 @@ export const TRANSLATABLE: Record<TranslatableEntity, Record<string, Translatabl
     tagline: line(160),
     about: block(5000),
     availabilityMessage: line(AVAILABILITY_MESSAGE_MAX),
+    workNote: line(WORK_NOTE_MAX),
   },
   section: { title: line(SECTION_TITLE_MAX) },
   experience: { title: line(100), description: block(3000) },

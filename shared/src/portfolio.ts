@@ -6,6 +6,14 @@ import {
 } from './availability';
 import { isLocaleCode } from './languages';
 import { optionalLine } from './text';
+import {
+  WORK_NOTE_MAX,
+  closedWeek,
+  preferredContactSchema,
+  replyTimeSchema,
+  timeZoneSchema,
+  workingHoursSchema,
+} from './work-card';
 
 // Request-body schemas for the portfolio models. Dates are accepted as ISO strings
 // (e.g. "2024-06-01") and coerced to Date objects.
@@ -118,6 +126,13 @@ export const profileInputSchema = z.object({
   availabilityMessage: optionalLine(AVAILABILITY_MESSAGE_MAX),
   // Whether the public page offers a "Download resume" PDF made from it (/<slug>/resume.pdf).
   resumeEnabled: z.boolean().default(true),
+  // The "Working together" card (work-card.ts): when to reach the owner. Public only while enabled.
+  workCardEnabled: z.boolean().default(false),
+  timezone: timeZoneSchema.nullish().transform((zone) => zone ?? null),
+  workingHours: workingHoursSchema.nullish().transform((week) => week ?? closedWeek()),
+  replyTime: replyTimeSchema.nullish().transform((reply) => reply ?? null),
+  preferredContact: preferredContactSchema.nullish().transform((contact) => contact ?? null),
+  workNote: optionalLine(WORK_NOTE_MAX),
 });
 export type ProfileInput = z.infer<typeof profileInputSchema>;
 

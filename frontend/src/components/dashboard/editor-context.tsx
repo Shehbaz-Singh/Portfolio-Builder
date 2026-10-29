@@ -41,6 +41,12 @@ export type Draft = Partial<
     | 'availabilityEnabled'
     | 'availabilityStatus'
     | 'availabilityMessage'
+    | 'workCardEnabled'
+    | 'timezone'
+    | 'workingHours'
+    | 'replyTime'
+    | 'preferredContact'
+    | 'workNote'
   >
 >;
 
@@ -117,6 +123,11 @@ interface EditorContextValue {
   // The tab open on the Profile page; kept here so other pages can send you to one.
   tab: string;
   setTab: (tab: string) => void;
+  // A request (from the command palette) to open one item's editor: the list that owns it picks it
+  // up when it appears and clears it. `kind` is a list name ("projects", "post", "testimonial"...).
+  jump: { kind: string; id: string } | null;
+  requestJump: (kind: string, id: string) => void;
+  clearJump: () => void;
   imported: Imported | null;
   hasPendingImport: boolean;
   applyImport: (resume: ParsedResume, skipped: number) => void;
@@ -181,6 +192,9 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
   const [toasts, setToasts] = useState<ToastData[]>([]);
   const nextToast = useRef(0);
   const [tab, setTab] = useState(() => (isBlank(initial) ? 'import' : 'basics'));
+  const [jump, setJump] = useState<{ kind: string; id: string } | null>(null);
+  const requestJump = useCallback((kind: string, id: string) => setJump({ kind, id }), []);
+  const clearJump = useCallback(() => setJump(null), []);
   const dirtyForms = useRef(0);
   const [dirtyCount, setDirtyCount] = useState(0);
   const [saves, setSaves] = useState<Saves>({});
@@ -349,6 +363,17 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
             availabilityStatus: undefined,
             availabilityMessage: undefined,
           }),
+      // The same for the "Working together" card: nothing of it is public while it is switched off.
+      ...((draft?.workCardEnabled ?? profile.workCardEnabled)
+        ? { workCardEnabled: true as const }
+        : {
+            workCardEnabled: undefined,
+            timezone: undefined,
+            workingHours: undefined,
+            replyTime: undefined,
+            preferredContact: undefined,
+            workNote: undefined,
+          }),
       links: profile.links.filter((link) => link.visible),
       // The same layout the public API returns (visible sections in order, custom sections with
       // items), worked out from the unsaved config too.
@@ -432,6 +457,9 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
       unsaved,
       tab,
       setTab,
+      jump,
+      requestJump,
+      clearJump,
       imported,
       hasPendingImport: pendingCount(imported) > 0,
       applyImport,
@@ -456,6 +484,9 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
       reportSave,
       unsaved,
       tab,
+      jump,
+      requestJump,
+      clearJump,
       imported,
       applyImport,
       takeFields,

@@ -55,6 +55,7 @@ interface ListProps<T extends { id: string }, D> {
   summary: (item: T | D) => { title: string; subtitle?: string };
   Form: ComponentType<FormProps<T, D>>;
   extra?: (item: T) => ReactNode; // extra controls in a row (link visibility)
+  jumpKind?: string; // the name the command palette uses for this list's items
 }
 
 // How long a deleted item can be brought back before the delete is sent.
@@ -78,10 +79,11 @@ export function ListManager<T extends { id: string }, D = never>({
   summary,
   Form,
   extra,
+  jumpKind,
 }: ListProps<T, D>) {
   const { items, create, remove, reorder } = list;
   const { suggestions, dismiss, dismissAll } = suggestionApi;
-  const { notify } = useEditor();
+  const { notify, jump, clearJump } = useEditor();
   const canLeave = useLeaveGuard();
   const panelBase = useId();
   // An item id, "new", "s:<suggestion key>", or nothing. One form at a time keeps unsaved
@@ -102,6 +104,13 @@ export function ListManager<T extends { id: string }, D = never>({
   useEffect(() => {
     removeRef.current = remove;
   });
+  // The command palette asked for one of these items: open its editor, and bring it into view.
+  useEffect(() => {
+    if (!jumpKind || jump?.kind !== jumpKind || !items.some((item) => item.id === jump.id)) return;
+    setEditing(jump.id);
+    clearJump();
+    focusNext.current = `[data-toggle="${jump.id}"]`;
+  }, [jump, jumpKind, items, clearJump]);
   useEffect(() => {
     if (!focusNext.current) return;
     root.current?.querySelector<HTMLElement>(focusNext.current)?.focus();
@@ -370,5 +379,5 @@ export function SectionManager<S extends ListSection>({
 }: SectionManagerProps<S>) {
   const list = useSection(section);
   const suggestions = useSuggestions(section);
-  return <ListManager list={list} suggestions={suggestions} {...props} />;
+  return <ListManager list={list} suggestions={suggestions} jumpKind={section} {...props} />;
 }

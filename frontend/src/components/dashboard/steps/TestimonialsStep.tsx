@@ -326,6 +326,7 @@ export function TestimonialsStep() {
         <ListManager
           list={{ items: t.approved, create: t.create, remove: t.remove, reorder: t.reorder }}
           noun="testimonial"
+          jumpKind="testimonial"
           addLabel="Add a testimonial"
           icon={MessageSquareQuote}
           empty="Nothing here yet. Approve one from the list above, or add a kind word someone shared with you."

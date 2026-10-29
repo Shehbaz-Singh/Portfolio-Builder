@@ -121,6 +121,7 @@ function Toolbar({ onFormat }: { onFormat: (format: Format) => void }) {
   return (
     <div
       role="toolbar"
+      data-mod-k-own=""
       aria-label="Formatting"
       aria-controls="post-body"
       className="mb-2 flex flex-wrap gap-1"
@@ -488,6 +489,7 @@ function PostForm({ initial, onClose }: { initial: MyPost | null; onClose: () =>
                 <Toolbar onFormat={format} />
                 <Textarea
                   id="post-body"
+                  data-mod-k-own=""
                   ref={body}
                   rows={14}
                   value={fields.body}

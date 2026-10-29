@@ -12,6 +12,7 @@ import {
 } from './blocks';
 import { uiFor } from '@/lib/i18n';
 import { LeaveTestimonial } from './LeaveTestimonial';
+import { WorkCard } from './WorkCard';
 import {
   Avatar,
   DateRange,
@@ -119,6 +120,14 @@ function Header({ header }: { header: HeaderModel }) {
           dotClassName="bg-accent-fg"
           linkClassName={`font-bold text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`}
         />
+        {header.work && (
+          <WorkCard
+            work={header.work}
+            className="mt-4 rounded-3xl border border-line bg-accent-soft px-4 py-3 text-start text-ink"
+            linkClassName={`font-bold text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`}
+            buttonClassName={`rounded-full bg-ink px-3 py-1 text-xs font-bold text-page hover:opacity-90 ${focusRing}`}
+          />
+        )}
         {header.location && (
           <p className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-[color-mix(in_srgb,var(--accent)_14%,white)] px-3 py-1 text-sm font-semibold">
             <MapPin aria-hidden="true" className="size-4 shrink-0" />

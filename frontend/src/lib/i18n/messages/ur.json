@@ -78,5 +78,34 @@
     "dismiss": "بند کریں"
   },
   "photoOf": "{name} کی تصویر",
-  "minRead": "{count} منٹ کا مطالعہ"
+  "minRead": "{count} منٹ کا مطالعہ",
+  "work": {
+    "title": "مل کر کام کرنا",
+    "localTime": "{name} کے ہاں اس وقت {time} بجے ہیں",
+    "ahead": "آپ سے {difference} آگے",
+    "behind": "آپ سے {difference} پیچھے",
+    "same": "آپ کے وقت کے برابر",
+    "hours": "{count} گھنٹے",
+    "minutes": "{count} منٹ",
+    "statusOpen": "اس وقت کام کے اوقات میں ہیں",
+    "statusOpenUntil": "اس وقت کام کے اوقات میں ہیں، {time} تک",
+    "statusClosed": "کام کے اوقات سے باہر",
+    "statusBack": "کام کے اوقات سے باہر، {day} کو {time} بجے واپس آئیں گے",
+    "statusBackToday": "کام کے اوقات سے باہر، آج {time} بجے واپس آئیں گے",
+    "weeklyHours": "ہفتہ وار اوقات",
+    "shownTheirs": "{name} کے ٹائم زون میں دکھایا گیا ({zone})",
+    "shownYours": "آپ کے ٹائم زون میں دکھایا گیا ({zone})",
+    "showMine": "میرے ٹائم زون میں دکھائیں",
+    "showTheirs": "{name} کے ٹائم زون میں دکھائیں",
+    "closed": "بند",
+    "closedAllWeek": "کام کے اوقات مقرر نہیں ہیں",
+    "replyLabel": "جواب کا عمومی وقت",
+    "reply": {
+      "same_day": "اسی دن کے اندر",
+      "within_2_days": "2 دن کے اندر",
+      "within_a_week": "ایک ہفتے کے اندر"
+    },
+    "reachLabel": "{name} سے رابطے کا بہترین طریقہ",
+    "reachVia": "{link}"
+  }
 }

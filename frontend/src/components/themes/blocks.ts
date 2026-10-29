@@ -1,11 +1,13 @@
 import {
   SECTION_LABELS,
+  closedWeek,
   customIdOf,
   isCustomKey,
   type PublicLink,
   type PublicPostSummary,
   type PublicProfile,
   type SectionKey,
+  type WorkingHours,
 } from '@parichay/shared';
 import { SITE_URL } from '@/lib/config';
 import { contactTarget, initials, linkTarget, safeHttpUrl } from '@/lib/format';
@@ -365,7 +367,50 @@ export function buildBlocks(profile: PublicProfile, idPrefix = ''): Block[] {
   return blocks;
 }
 
+// The "Working together" card, ready to draw. null while it is switched off (or has no time zone).
+export interface WorkModel {
+  locale: string;
+  ui: Ui;
+  name: string; // the owner's first name, for "It's 3:42 pm for Ayush"
+  timezone: string;
+  hours: WorkingHours;
+  serverNow: string; // the moment this was built: what the server draws, so the browser matches it
+  reply: string | null;
+  contact: { href: string; label: string; external: boolean } | null;
+  note: string | null;
+}
+
+// The link the owner prefers to be reached by, among the ones they show.
+function workContact(profile: PublicProfile) {
+  const targets = profile.links.flatMap((link) => {
+    const target = linkTarget(link);
+    return target ? [{ type: link.type, target }] : [];
+  });
+  const wanted = profile.preferredContact;
+  if (!wanted) return null;
+  if (wanted === 'any_visible_link')
+    return contactTarget(profile.links) ?? targets[0]?.target ?? null;
+  return targets.find((entry) => entry.type === wanted)?.target ?? null;
+}
+
+export function buildWork(profile: PublicProfile): WorkModel | null {
+  if (!profile.workCardEnabled || !profile.timezone) return null;
+  const ui = uiFor(profile.locale);
+  return {
+    locale: profile.locale,
+    ui,
+    name: profile.fullName.trim().split(/\s+/)[0] ?? profile.fullName,
+    timezone: profile.timezone,
+    hours: profile.workingHours ?? closedWeek(),
+    serverNow: new Date().toISOString(),
+    reply: profile.replyTime ? ui.work.reply[profile.replyTime] : null,
+    contact: workContact(profile),
+    note: profile.workNote ?? null,
+  };
+}
+
 export interface HeaderModel {
+  work: WorkModel | null;
   locale: string;
   ui: Ui;
   name: string;
@@ -391,6 +436,7 @@ export function buildHeader(profile: PublicProfile): HeaderModel {
   const status = profile.availabilityStatus ?? 'open_to_work';
   const note = profile.availabilityMessage?.trim() || null;
   return {
+    work: buildWork(profile),
     locale: profile.locale,
     ui,
     name: profile.fullName,

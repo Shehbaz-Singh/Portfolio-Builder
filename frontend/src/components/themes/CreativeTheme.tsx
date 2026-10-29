@@ -12,6 +12,7 @@ import {
 } from './blocks';
 import { uiFor } from '@/lib/i18n';
 import { LeaveTestimonial } from './LeaveTestimonial';
+import { WorkCard } from './WorkCard';
 import {
   Avatar,
   DateRange,
@@ -84,6 +85,14 @@ function Header({ header }: { header: HeaderModel }) {
             dotClassName="bg-accent"
             linkClassName="underline underline-offset-2 hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           />
+          {header.work && (
+            <WorkCard
+              work={header.work}
+              className="mt-4 w-full max-w-sm rounded-2xl border-2 border-current bg-on-accent px-4 py-3 text-sm font-bold text-accent"
+              linkClassName={`underline underline-offset-2 hover:no-underline ${focusRing}`}
+              buttonClassName={`rounded-full border-2 border-current px-3 py-1 text-xs font-bold hover:bg-accent hover:text-on-accent ${focusRing}`}
+            />
+          )}
           <ul className="mt-8 flex flex-wrap gap-3">
             {header.links.map((link) => (
               <li key={link.id} className="max-w-full">

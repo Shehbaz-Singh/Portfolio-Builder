@@ -78,5 +78,34 @@
     "dismiss": "மூடுக"
   },
   "photoOf": "{name} அவர்களின் புகைப்படம்",
-  "minRead": "{count} நிமிட வாசிப்பு"
+  "minRead": "{count} நிமிட வாசிப்பு",
+  "work": {
+    "title": "இணைந்து பணியாற்றுதல்",
+    "localTime": "{name} இடத்தில் இப்போது {time}",
+    "ahead": "உங்களை விட {difference} முன்னால்",
+    "behind": "உங்களை விட {difference} பின்னால்",
+    "same": "உங்கள் நேரமே",
+    "hours": "{count} மணி",
+    "minutes": "{count} நிமி",
+    "statusOpen": "தற்போது பணி நேரத்தில் உள்ளார்",
+    "statusOpenUntil": "தற்போது பணி நேரத்தில் உள்ளார், {time} வரை",
+    "statusClosed": "பணி நேரத்திற்கு வெளியே",
+    "statusBack": "பணி நேரத்திற்கு வெளியே, {day} {time} மணிக்குத் திரும்புவார்",
+    "statusBackToday": "பணி நேரத்திற்கு வெளியே, இன்று {time} மணிக்குத் திரும்புவார்",
+    "weeklyHours": "வாராந்திர நேரம்",
+    "shownTheirs": "{name} நேர மண்டலத்தில் காட்டப்படுகிறது ({zone})",
+    "shownYours": "உங்கள் நேர மண்டலத்தில் காட்டப்படுகிறது ({zone})",
+    "showMine": "என் நேர மண்டலத்தில் காட்டு",
+    "showTheirs": "{name} நேர மண்டலத்தில் காட்டு",
+    "closed": "மூடப்பட்டது",
+    "closedAllWeek": "பணி நேரம் அமைக்கப்படவில்லை",
+    "replyLabel": "வழக்கமான பதில் நேரம்",
+    "reply": {
+      "same_day": "அதே நாளுக்குள்",
+      "within_2_days": "2 நாட்களுக்குள்",
+      "within_a_week": "ஒரு வாரத்திற்குள்"
+    },
+    "reachLabel": "{name} ஐத் தொடர்பு கொள்ள சிறந்த வழி",
+    "reachVia": "{link}"
+  }
 }

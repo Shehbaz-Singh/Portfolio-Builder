@@ -78,5 +78,34 @@
     "dismiss": "Schließen"
   },
   "photoOf": "Foto von {name}",
-  "minRead": "{count} Min. Lesezeit"
+  "minRead": "{count} Min. Lesezeit",
+  "work": {
+    "title": "Zusammenarbeit",
+    "localTime": "Bei {name} ist es {time}",
+    "ahead": "{difference} vor Ihnen",
+    "behind": "{difference} hinter Ihnen",
+    "same": "Gleiche Uhrzeit wie bei Ihnen",
+    "hours": "{count} Std.",
+    "minutes": "{count} Min.",
+    "statusOpen": "Aktuell innerhalb der Arbeitszeit",
+    "statusOpenUntil": "Aktuell innerhalb der Arbeitszeit, bis {time}",
+    "statusClosed": "Außerhalb der Arbeitszeit",
+    "statusBack": "Außerhalb der Arbeitszeit, wieder da: {day} um {time}",
+    "statusBackToday": "Außerhalb der Arbeitszeit, wieder da: heute um {time}",
+    "weeklyHours": "Wöchentliche Arbeitszeiten",
+    "shownTheirs": "Angezeigt in der Zeitzone von {name} ({zone})",
+    "shownYours": "Angezeigt in Ihrer Zeitzone ({zone})",
+    "showMine": "In meiner Zeitzone anzeigen",
+    "showTheirs": "In der Zeitzone von {name} anzeigen",
+    "closed": "Geschlossen",
+    "closedAllWeek": "Keine Arbeitszeiten festgelegt",
+    "replyLabel": "Übliche Antwortzeit",
+    "reply": {
+      "same_day": "Am selben Tag",
+      "within_2_days": "Innerhalb von 2 Tagen",
+      "within_a_week": "Innerhalb einer Woche"
+    },
+    "reachLabel": "So erreichen Sie {name} am besten",
+    "reachVia": "{link}"
+  }
 }

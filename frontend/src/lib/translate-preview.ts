@@ -40,6 +40,9 @@ export function applyTranslations(
       'availabilityMessage',
       preview.availabilityMessage,
     ),
+    workNote: preview.workCardEnabled
+      ? tn('profile', profileId, 'workNote', preview.workNote ?? null)
+      : undefined,
     skills: preview.skills.map((row) => ({ ...row, name: t('skill', row.id, 'name', row.name) })),
     experience: preview.experience.map((row) => ({
       ...row,

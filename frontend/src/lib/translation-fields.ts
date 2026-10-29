@@ -41,7 +41,12 @@ export const fieldKey = (spec: Pick<FieldSpec, 'entityType' | 'entityId' | 'fiel
   `${spec.entityType}:${spec.entityId}:${spec.field}`;
 
 const LABELS: Partial<Record<TranslatableEntity, Record<string, string>>> = {
-  profile: { tagline: 'Tagline', about: 'About', availabilityMessage: 'Availability message' },
+  profile: {
+    tagline: 'Tagline',
+    about: 'About',
+    availabilityMessage: 'Availability message',
+    workNote: 'Working together note',
+  },
   section: { title: 'Heading' },
   experience: { title: 'Job title', description: 'Description' },
   education: { degree: 'Degree' },
@@ -92,6 +97,7 @@ export function buildGroups(profile: MyProfile): FieldGroup[] {
       spec('profile', profile.id, 'tagline', profile.tagline),
       spec('profile', profile.id, 'about', profile.about),
       spec('profile', profile.id, 'availabilityMessage', profile.availabilityMessage),
+      spec('profile', profile.id, 'workNote', profile.workCardEnabled ? profile.workNote : null),
     ]),
   ]);
 

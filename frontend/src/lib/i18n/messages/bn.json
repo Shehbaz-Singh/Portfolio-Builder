@@ -78,5 +78,34 @@
     "dismiss": "বন্ধ করুন"
   },
   "photoOf": "{name}-এর ছবি",
-  "minRead": "{count} মিনিটের পাঠ"
+  "minRead": "{count} মিনিটের পাঠ",
+  "work": {
+    "title": "একসাথে কাজ করা",
+    "localTime": "{name}-এর ওখানে এখন {time}",
+    "ahead": "আপনার চেয়ে {difference} এগিয়ে",
+    "behind": "আপনার চেয়ে {difference} পিছিয়ে",
+    "same": "আপনার সময়ের সমান",
+    "hours": "{count} ঘণ্টা",
+    "minutes": "{count} মিনিট",
+    "statusOpen": "এখন কর্মসময়ে আছেন",
+    "statusOpenUntil": "এখন কর্মসময়ে আছেন, {time} পর্যন্ত",
+    "statusClosed": "কর্মসময়ের বাইরে",
+    "statusBack": "কর্মসময়ের বাইরে, {day} {time}-এ ফিরবেন",
+    "statusBackToday": "কর্মসময়ের বাইরে, আজ {time}-এ ফিরবেন",
+    "weeklyHours": "সাপ্তাহিক সময়",
+    "shownTheirs": "{name}-এর সময় অঞ্চলে দেখানো হচ্ছে ({zone})",
+    "shownYours": "আপনার সময় অঞ্চলে দেখানো হচ্ছে ({zone})",
+    "showMine": "আমার সময় অঞ্চলে দেখান",
+    "showTheirs": "{name}-এর সময় অঞ্চলে দেখান",
+    "closed": "বন্ধ",
+    "closedAllWeek": "কর্মসময় নির্ধারণ করা নেই",
+    "replyLabel": "সাধারণ উত্তরের সময়",
+    "reply": {
+      "same_day": "একই দিনের মধ্যে",
+      "within_2_days": "২ দিনের মধ্যে",
+      "within_a_week": "এক সপ্তাহের মধ্যে"
+    },
+    "reachLabel": "{name}-এর সঙ্গে যোগাযোগের সেরা উপায়",
+    "reachVia": "{link}"
+  }
 }

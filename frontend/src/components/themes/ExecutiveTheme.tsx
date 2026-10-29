@@ -12,6 +12,7 @@ import {
 } from './blocks';
 import { uiFor } from '@/lib/i18n';
 import { LeaveTestimonial } from './LeaveTestimonial';
+import { WorkCard } from './WorkCard';
 import {
   Avatar,
   DateRange,
@@ -89,6 +90,14 @@ function Sidebar({
         dotClassName="bg-accent-fg"
         linkClassName={`font-semibold underline underline-offset-2 hover:no-underline ${focusRing}`}
       />
+      {header.work && (
+        <WorkCard
+          work={header.work}
+          className="mt-4 rounded-md border border-s-4 border-line border-s-accent bg-surface px-3 py-3 text-ink"
+          linkClassName={`font-semibold underline underline-offset-2 hover:no-underline ${focusRing}`}
+          buttonClassName={`rounded border border-line px-2.5 py-1 text-xs font-semibold hover:bg-page ${focusRing}`}
+        />
+      )}
 
       <section
         aria-labelledby={`${idPrefix}exec-contact`}

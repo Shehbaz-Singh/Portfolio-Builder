@@ -3,6 +3,7 @@ import { availabilityStatusSchema } from './availability';
 import { linkTypeSchema, profileSchema } from './portfolio';
 import { myPostSummarySchema, publicPostSummarySchema } from './posts';
 import { myTestimonialSchema, publicTestimonialSchema } from './testimonials';
+import { preferredContactSchema, replyTimeSchema, workingHoursSchema } from './work-card';
 import {
   SECTION_KEYS,
   customIdOf,
@@ -101,12 +102,25 @@ export const publicProfileSchema = profileSchema
     availabilityEnabled: true,
     availabilityStatus: true,
     availabilityMessage: true,
+    workCardEnabled: true,
+    timezone: true,
+    workingHours: true,
+    replyTime: true,
+    preferredContact: true,
+    workNote: true,
   })
   .extend({
     // Present only while the owner has the badge switched on; the API leaves all three out otherwise.
     availabilityEnabled: z.literal(true).optional(),
     availabilityStatus: availabilityStatusSchema.optional(),
     availabilityMessage: z.string().nullable().optional(),
+    // The "Working together" card: all of these are left out unless the owner has it switched on.
+    workCardEnabled: z.literal(true).optional(),
+    timezone: z.string().nullable().optional(),
+    workingHours: workingHoursSchema.optional(),
+    replyTime: replyTimeSchema.nullable().optional(),
+    preferredContact: preferredContactSchema.nullable().optional(),
+    workNote: z.string().nullable().optional(),
     // The language this response is in (one of `locales`, or the default). `locales` here lists only
     // the extra languages that are ready for visitors.
     locale: z.string().default('en'),

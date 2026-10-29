@@ -59,7 +59,7 @@ function PostRow({
 
 // The Writing tab: your posts and links to articles, newest first, and the editor for one.
 export function WritingStep() {
-  const { profile, update, notify } = useEditor();
+  const { profile, update, notify, jump, clearJump } = useEditor();
   const confirm = useConfirm();
   const go = useGo();
   // A post id, "new", or nothing (the list).
@@ -67,6 +67,13 @@ export function WritingStep() {
   const [deleting, setDeleting] = useState<string | null>(null);
   const heading = useRef<HTMLHeadingElement>(null);
   const wasEditing = useRef(false);
+
+  // The command palette asked for one post: open its editor.
+  useEffect(() => {
+    if (jump?.kind !== 'post' || !(profile.posts ?? []).some((post) => post.id === jump.id)) return;
+    setEditing(jump.id);
+    clearJump();
+  }, [jump, profile.posts, clearJump]);
 
   // Coming back to the list puts the keyboard at the top of it, not nowhere.
   useEffect(() => {

@@ -14,6 +14,7 @@ import {
 } from './blocks';
 import { uiFor } from '@/lib/i18n';
 import { LeaveTestimonial } from './LeaveTestimonial';
+import { WorkCard } from './WorkCard';
 import {
   Avatar,
   DateRange,
@@ -247,6 +248,14 @@ function identityTile(header: HeaderModel): Tile {
             dotClassName="bg-accent-fg"
             linkClassName={`font-semibold text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`}
           />
+          {header.work && (
+            <WorkCard
+              work={header.work}
+              className="mt-4 w-full max-w-sm rounded-2xl bg-surface px-4 py-3.5 text-ink"
+              linkClassName={`font-semibold text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`}
+              buttonClassName={`rounded-full border border-line px-3 py-1 text-xs font-semibold hover:bg-page ${focusRing}`}
+            />
+          )}
         </div>
       </div>
     ),

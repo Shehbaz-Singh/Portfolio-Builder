@@ -78,5 +78,34 @@
     "dismiss": "ਬੰਦ ਕਰੋ"
   },
   "photoOf": "{name} ਦੀ ਫੋਟੋ",
-  "minRead": "{count} ਮਿੰਟ ਦਾ ਪਾਠ"
+  "minRead": "{count} ਮਿੰਟ ਦਾ ਪਾਠ",
+  "work": {
+    "title": "ਮਿਲ ਕੇ ਕੰਮ ਕਰਨਾ",
+    "localTime": "{name} ਕੋਲ ਹੁਣ {time} ਹੋਏ ਹਨ",
+    "ahead": "ਤੁਹਾਡੇ ਤੋਂ {difference} ਅੱਗੇ",
+    "behind": "ਤੁਹਾਡੇ ਤੋਂ {difference} ਪਿੱਛੇ",
+    "same": "ਤੁਹਾਡੇ ਸਮੇਂ ਦੇ ਬਰਾਬਰ",
+    "hours": "{count} ਘੰਟੇ",
+    "minutes": "{count} ਮਿੰਟ",
+    "statusOpen": "ਇਸ ਵੇਲੇ ਕੰਮ ਦੇ ਸਮੇਂ ਵਿੱਚ ਹਨ",
+    "statusOpenUntil": "ਇਸ ਵੇਲੇ ਕੰਮ ਦੇ ਸਮੇਂ ਵਿੱਚ ਹਨ, {time} ਤੱਕ",
+    "statusClosed": "ਕੰਮ ਦੇ ਸਮੇਂ ਤੋਂ ਬਾਹਰ",
+    "statusBack": "ਕੰਮ ਦੇ ਸਮੇਂ ਤੋਂ ਬਾਹਰ, {day} {time} ਵਜੇ ਵਾਪਸ ਆਉਣਗੇ",
+    "statusBackToday": "ਕੰਮ ਦੇ ਸਮੇਂ ਤੋਂ ਬਾਹਰ, ਅੱਜ {time} ਵਜੇ ਵਾਪਸ ਆਉਣਗੇ",
+    "weeklyHours": "ਹਫ਼ਤਾਵਾਰੀ ਸਮਾਂ",
+    "shownTheirs": "{name} ਦੇ ਸਮਾਂ ਖੇਤਰ ਵਿੱਚ ਦਿਖਾਇਆ ਗਿਆ ({zone})",
+    "shownYours": "ਤੁਹਾਡੇ ਸਮਾਂ ਖੇਤਰ ਵਿੱਚ ਦਿਖਾਇਆ ਗਿਆ ({zone})",
+    "showMine": "ਮੇਰੇ ਸਮਾਂ ਖੇਤਰ ਵਿੱਚ ਦਿਖਾਓ",
+    "showTheirs": "{name} ਦੇ ਸਮਾਂ ਖੇਤਰ ਵਿੱਚ ਦਿਖਾਓ",
+    "closed": "ਬੰਦ",
+    "closedAllWeek": "ਕੰਮ ਦੇ ਘੰਟੇ ਤੈਅ ਨਹੀਂ ਕੀਤੇ ਗਏ",
+    "replyLabel": "ਆਮ ਜਵਾਬ ਸਮਾਂ",
+    "reply": {
+      "same_day": "ਉਸੇ ਦਿਨ ਦੇ ਅੰਦਰ",
+      "within_2_days": "2 ਦਿਨਾਂ ਦੇ ਅੰਦਰ",
+      "within_a_week": "ਇੱਕ ਹਫ਼ਤੇ ਦੇ ਅੰਦਰ"
+    },
+    "reachLabel": "{name} ਨਾਲ ਸੰਪਰਕ ਕਰਨ ਦਾ ਸਭ ਤੋਂ ਵਧੀਆ ਤਰੀਕਾ",
+    "reachVia": "{link}"
+  }
 }

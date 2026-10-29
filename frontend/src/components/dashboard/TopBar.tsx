@@ -11,6 +11,8 @@ import { Button, Modal, Switch, buttonStyles } from '../ui';
 import { errorText, useEditor, type SaveStatus } from './editor-context';
 import { useGo } from './navigation';
 import { PublishCelebration } from './PublishCelebration';
+import { useRegisterDashboardActions } from './palette/actions';
+import { PaletteButton } from './palette/PaletteHost';
 import { QrCodeDialog } from './QrCodeDialog';
 
 // The fields a portfolio is not much use without, and the Profile tab that fills each in.
@@ -125,6 +127,13 @@ function PublishControls() {
     }
   }
 
+  // The command palette does these through the same code as the buttons here.
+  useRegisterDashboardActions({
+    togglePublish: onToggle,
+    copyUrl: () => void copy(),
+    openQr: () => setShowQr(true),
+  });
+
   return (
     <>
       <div className="flex items-center gap-2">
@@ -228,6 +237,7 @@ export function TopBar() {
       </p>
       <SaveIndicator />
       <div className="ms-auto flex flex-wrap items-center gap-x-5 gap-y-2">
+        <PaletteButton />
         <PublishControls />
       </div>
     </header>

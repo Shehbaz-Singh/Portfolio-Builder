@@ -78,5 +78,34 @@
     "dismiss": "మూసివేయండి"
   },
   "photoOf": "{name} ఫోటో",
-  "minRead": "{count} నిమిషాల పఠనం"
+  "minRead": "{count} నిమిషాల పఠనం",
+  "work": {
+    "title": "కలిసి పని చేయడం",
+    "localTime": "{name} వద్ద ఇప్పుడు సమయం {time}",
+    "ahead": "మీ కంటే {difference} ముందు",
+    "behind": "మీ కంటే {difference} వెనుక",
+    "same": "మీ సమయమే",
+    "hours": "{count} గం",
+    "minutes": "{count} నిమి",
+    "statusOpen": "ప్రస్తుతం పని వేళల్లో ఉన్నారు",
+    "statusOpenUntil": "ప్రస్తుతం పని వేళల్లో ఉన్నారు, {time} వరకు",
+    "statusClosed": "పని వేళల వెలుపల",
+    "statusBack": "పని వేళల వెలుపల, {day} {time}కి తిరిగి వస్తారు",
+    "statusBackToday": "పని వేళల వెలుపల, ఈ రోజు {time}కి తిరిగి వస్తారు",
+    "weeklyHours": "వారపు పని గంటలు",
+    "shownTheirs": "{name} సమయ మండలంలో చూపబడింది ({zone})",
+    "shownYours": "మీ సమయ మండలంలో చూపబడింది ({zone})",
+    "showMine": "నా సమయ మండలంలో చూపించు",
+    "showTheirs": "{name} సమయ మండలంలో చూపించు",
+    "closed": "మూసివేయబడింది",
+    "closedAllWeek": "పని గంటలు సెట్ చేయలేదు",
+    "replyLabel": "సాధారణ ప్రత్యుత్తర సమయం",
+    "reply": {
+      "same_day": "అదే రోజులో",
+      "within_2_days": "2 రోజుల్లో",
+      "within_a_week": "ఒక వారంలో"
+    },
+    "reachLabel": "{name}ని సంప్రదించడానికి ఉత్తమ మార్గం",
+    "reachVia": "{link}"
+  }
 }

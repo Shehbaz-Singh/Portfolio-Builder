@@ -1,4 +1,4 @@
-import { normalizeSectionConfig, publicLayout } from '@parichay/shared';
+import { normalizeSectionConfig, publicLayout, readWorkingHours } from '@parichay/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
@@ -84,13 +84,31 @@ export async function getPublicProfile(slug: string, lang?: string) {
   const { sections, customSections } = publicLayout(layout, own);
   const has = (key: string) => sections.some((section) => section.key === key);
   // The badge is only part of the page while it is switched on.
-  const { availabilityEnabled, availabilityStatus, availabilityMessage, ...visible } = rest;
+  const { availabilityEnabled, availabilityStatus, availabilityMessage, ...withoutBadge } = rest;
+  // Likewise the "Working together" card: nothing of it is public while it is switched off.
+  const {
+    workCardEnabled,
+    timezone,
+    workingHours,
+    replyTime,
+    preferredContact,
+    workNote,
+    ...visible
+  } = withoutBadge;
   return {
     ...visible,
     ...(availabilityEnabled && {
       availabilityEnabled,
       availabilityStatus,
       availabilityMessage: tn('profile', id, 'availabilityMessage', availabilityMessage),
+    }),
+    ...(workCardEnabled && {
+      workCardEnabled,
+      timezone,
+      workingHours: readWorkingHours(workingHours),
+      replyTime,
+      preferredContact,
+      workNote: tn('profile', id, 'workNote', workNote),
     }),
     // Only the languages a visitor can actually open.
     locales: enabled,

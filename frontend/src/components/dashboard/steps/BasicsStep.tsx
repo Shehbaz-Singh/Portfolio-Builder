@@ -25,6 +25,7 @@ import { errorText, useEditor, useReportDirty, useSection } from '../editor-cont
 import { SectionManager, type ItemFormProps } from '../SectionManager';
 import { AvailabilityCard } from './AvailabilityCard';
 import { ResumeCard } from './ResumeCard';
+import { WorkingTogetherCard } from './WorkingTogetherCard';
 
 const AVATAR_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
 const AVATAR_MAX_BYTES = 2 * 1024 * 1024;
@@ -356,6 +357,13 @@ export function BasicsStep() {
           Availability
         </h2>
         <AvailabilityCard />
+      </section>
+
+      <section aria-labelledby="work-heading" className="space-y-4">
+        <h2 id="work-heading" className="type-section">
+          Working together
+        </h2>
+        <WorkingTogetherCard />
       </section>
 
       <section aria-labelledby="resume-heading" className="space-y-4">

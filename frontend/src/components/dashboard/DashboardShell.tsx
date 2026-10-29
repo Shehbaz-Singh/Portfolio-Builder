@@ -10,6 +10,8 @@ import { ConfirmProvider } from '../ui';
 import { cx } from '../ui/cx';
 import { EditorProvider } from './editor-context';
 import { BottomNav, Sidebar } from './Nav';
+import { DashboardActionsProvider } from './palette/actions';
+import { PaletteProvider } from './palette/PaletteHost';
 import { Preview } from './Preview';
 import { Onboarding } from './Onboarding';
 import { LoadFailed, Loading } from './screens';
@@ -92,8 +94,7 @@ function Frame({ children }: { children: ReactNode }) {
 
 // Loads the profile in the browser, through the /api proxy, so a sleeping free-tier API shows a
 // waiting screen with a retry instead of a blank page that is still loading on the server. The
-// route guard (src/proxy.ts) keeps signed-out users out. The profile and everything around it live
-// here, above the pages, so moving between pages keeps them.
+// route guard (src/proxy.ts) keeps signed-out users out.
 export function DashboardShell({ children }: { children: ReactNode }) {
   const { state, retry } = useLoad(loadProfile);
 
@@ -106,7 +107,11 @@ export function DashboardShell({ children }: { children: ReactNode }) {
   return (
     <EditorProvider initial={state.data}>
       <ConfirmProvider>
-        <Frame>{children}</Frame>
+        <DashboardActionsProvider>
+          <PaletteProvider>
+            <Frame>{children}</Frame>
+          </PaletteProvider>
+        </DashboardActionsProvider>
       </ConfirmProvider>
     </EditorProvider>
   );

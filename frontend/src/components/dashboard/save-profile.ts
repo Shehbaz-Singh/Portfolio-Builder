@@ -7,6 +7,8 @@ export function saveProfile(profile: MyProfile, changes: Partial<ProfileUpdateIn
   const { fullName, tagline, about, location, avatarUrl, theme, accentColor } = profile;
   const { availabilityEnabled, availabilityStatus, availabilityMessage } = profile;
   const { resumeEnabled } = profile;
+  const { workCardEnabled, timezone, workingHours, replyTime, preferredContact, workNote } =
+    profile;
   return api<MyProfile>('/profile/me', {
     method: 'PUT',
     body: {
@@ -21,6 +23,12 @@ export function saveProfile(profile: MyProfile, changes: Partial<ProfileUpdateIn
       availabilityStatus,
       availabilityMessage,
       resumeEnabled,
+      workCardEnabled,
+      timezone,
+      workingHours,
+      replyTime,
+      preferredContact,
+      workNote,
       ...changes,
     },
   });

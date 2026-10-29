@@ -22,6 +22,19 @@ enum AvailabilityStatus {
   custom
 }
 
+enum ReplyTime {
+  same_day
+  within_2_days
+  within_a_week
+}
+
+enum PreferredContact {
+  email
+  linkedin
+  phone
+  any_visible_link
+}
+
 enum PostType {
   post
   link
@@ -72,6 +85,13 @@ model Profile {
   resumeEnabled       Boolean            @default(true)
   // The language the profile is written in, and up to MAX_EXTRA_LANGUAGES more it is offered in
   // (shared/src/languages.ts). The words of the extra languages are in Translation.
+  // The "Working together" card (shared/src/work-card.ts). Public only while workCardEnabled.
+  workCardEnabled     Boolean            @default(false)
+  timezone            String?
+  workingHours        Json               @default("{\"mon\":[],\"tue\":[],\"wed\":[],\"thu\":[],\"fri\":[],\"sat\":[],\"sun\":[]}")
+  replyTime           ReplyTime?
+  preferredContact    PreferredContact?
+  workNote            String?            @db.VarChar(140)
   defaultLocale       String             @default("en")
   locales             String[]           @default([])
   // Whether visitors may submit testimonials (POST /public/:slug/testimonials).

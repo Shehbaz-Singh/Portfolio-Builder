@@ -1,4 +1,4 @@
-import type { ProfileUpdateInput } from '@parichay/shared';
+import { contactAvailable, type ProfileUpdateInput } from '@parichay/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
@@ -39,9 +39,46 @@ export async function getProfile(profileId: string) {
   return withSections(profile);
 }
 
+// The "Working together" card has to make sense before it is saved: it needs a time zone to be of
+// any use, and a preferred way to be reached has to be a link the owner is showing.
+async function assertWorkCard(profileId: string, input: ProfileUpdateInput) {
+  if (input.workCardEnabled && !input.timezone) {
+    throw new AppError(
+      400,
+      'VALIDATION_ERROR',
+      'Choose a time zone to show the Working together card',
+      [{ path: 'timezone', message: 'Choose a time zone' }],
+    );
+  }
+  if (!input.preferredContact) return;
+  const links = await prisma.link.findMany({
+    where: { profileId, visible: true },
+    select: { type: true },
+  });
+  if (
+    !contactAvailable(
+      input.preferredContact,
+      links.map((link) => link.type),
+    )
+  ) {
+    throw new AppError(
+      400,
+      'VALIDATION_ERROR',
+      'That contact option is not one of your visible links',
+      [
+        {
+          path: 'preferredContact',
+          message: 'Add and show that link first, or choose another way to be reached',
+        },
+      ],
+    );
+  }
+}
+
 export async function updateProfile(profileId: string, input: ProfileUpdateInput) {
   const { slug, ...fields } = input;
   if (slug) await assertSlugAvailable(slug, profileId);
+  await assertWorkCard(profileId, input);
 
   try {
     return withSections(

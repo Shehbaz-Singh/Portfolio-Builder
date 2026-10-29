@@ -78,5 +78,34 @@
     "dismiss": "Fechar"
   },
   "photoOf": "Foto de {name}",
-  "minRead": "{count} min de leitura"
+  "minRead": "{count} min de leitura",
+  "work": {
+    "title": "Trabalhar em conjunto",
+    "localTime": "São {time} para {name}",
+    "ahead": "{difference} à frente de você",
+    "behind": "{difference} atrás de você",
+    "same": "Mesmo horário que você",
+    "hours": "{count} h",
+    "minutes": "{count} min",
+    "statusOpen": "Dentro do horário de trabalho",
+    "statusOpenUntil": "Dentro do horário de trabalho, até às {time}",
+    "statusClosed": "Fora do horário de trabalho",
+    "statusBack": "Fora do horário de trabalho, volta {day} às {time}",
+    "statusBackToday": "Fora do horário de trabalho, volta hoje às {time}",
+    "weeklyHours": "Horário semanal",
+    "shownTheirs": "Exibido no fuso horário de {name} ({zone})",
+    "shownYours": "Exibido no seu fuso horário ({zone})",
+    "showMine": "Mostrar no meu fuso horário",
+    "showTheirs": "Mostrar no fuso horário de {name}",
+    "closed": "Fechado",
+    "closedAllWeek": "Nenhum horário de trabalho definido",
+    "replyLabel": "Tempo de resposta habitual",
+    "reply": {
+      "same_day": "No mesmo dia",
+      "within_2_days": "Em até 2 dias",
+      "within_a_week": "Em até uma semana"
+    },
+    "reachLabel": "Melhor forma de contatar {name}",
+    "reachVia": "{link}"
+  }
 }

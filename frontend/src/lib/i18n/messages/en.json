@@ -78,5 +78,34 @@
     "dismiss": "Dismiss"
   },
   "photoOf": "Photo of {name}",
-  "minRead": "{count} min read"
+  "minRead": "{count} min read",
+  "work": {
+    "title": "Working together",
+    "localTime": "It's {time} for {name}",
+    "ahead": "{difference} ahead of you",
+    "behind": "{difference} behind you",
+    "same": "Same time as you",
+    "hours": "{count} hr",
+    "minutes": "{count} min",
+    "statusOpen": "Currently within working hours",
+    "statusOpenUntil": "Currently within working hours, until {time}",
+    "statusClosed": "Outside working hours",
+    "statusBack": "Outside working hours, back {day} {time}",
+    "statusBackToday": "Outside working hours, back today {time}",
+    "weeklyHours": "Weekly hours",
+    "shownTheirs": "Shown in {name}'s time zone ({zone})",
+    "shownYours": "Shown in your time zone ({zone})",
+    "showMine": "Show in my time zone",
+    "showTheirs": "Show in {name}'s time zone",
+    "closed": "Closed",
+    "closedAllWeek": "No working hours set",
+    "replyLabel": "Typical reply time",
+    "reply": {
+      "same_day": "Within the same day",
+      "within_2_days": "Within 2 days",
+      "within_a_week": "Within a week"
+    },
+    "reachLabel": "Best way to reach {name}",
+    "reachVia": "{link}"
+  }
 }

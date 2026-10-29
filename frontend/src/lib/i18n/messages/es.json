@@ -78,5 +78,34 @@
     "dismiss": "Cerrar"
   },
   "photoOf": "Foto de {name}",
-  "minRead": "{count} min de lectura"
+  "minRead": "{count} min de lectura",
+  "work": {
+    "title": "Trabajar juntos",
+    "localTime": "Son las {time} para {name}",
+    "ahead": "{difference} por delante de ti",
+    "behind": "{difference} por detrás de ti",
+    "same": "Misma hora que tú",
+    "hours": "{count} h",
+    "minutes": "{count} min",
+    "statusOpen": "Dentro del horario laboral",
+    "statusOpenUntil": "Dentro del horario laboral, hasta las {time}",
+    "statusClosed": "Fuera del horario laboral",
+    "statusBack": "Fuera del horario laboral, vuelve el {day} a las {time}",
+    "statusBackToday": "Fuera del horario laboral, vuelve hoy a las {time}",
+    "weeklyHours": "Horario semanal",
+    "shownTheirs": "Se muestra en la zona horaria de {name} ({zone})",
+    "shownYours": "Se muestra en tu zona horaria ({zone})",
+    "showMine": "Mostrar en mi zona horaria",
+    "showTheirs": "Mostrar en la zona horaria de {name}",
+    "closed": "Cerrado",
+    "closedAllWeek": "Sin horario laboral definido",
+    "replyLabel": "Tiempo de respuesta habitual",
+    "reply": {
+      "same_day": "El mismo día",
+      "within_2_days": "En menos de 2 días",
+      "within_a_week": "En menos de una semana"
+    },
+    "reachLabel": "La mejor forma de contactar con {name}",
+    "reachVia": "{link}"
+  }
 }

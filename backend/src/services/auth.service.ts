@@ -6,6 +6,7 @@ import {
   LoginInput,
   RegisterInput,
   SessionResponse,
+  readWorkingHours,
 } from '@parichay/shared';
 import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
@@ -31,7 +32,10 @@ type SessionUser = Prisma.UserGetPayload<{ select: typeof sessionSelect }>;
 function toSession(user: SessionUser): SessionResponse {
   return {
     user: { id: user.id, email: user.email, createdAt: user.createdAt.toISOString() },
-    profile: user.profile && { ...user.profile },
+    profile: user.profile && {
+      ...user.profile,
+      workingHours: readWorkingHours(user.profile.workingHours),
+    },
   };
 }
 

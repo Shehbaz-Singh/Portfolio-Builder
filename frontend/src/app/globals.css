@@ -339,6 +339,12 @@ button,
   outline-offset: 2px;
 }
 
+/* The command palette's search field shows its focus on the row around it (the accent line under it),
+   so the field itself does not also draw a box. */
+.palette-input:focus-visible {
+  outline: none;
+}
+
 /* "Skip to main content": the first thing keyboard and screen reader users reach. Hidden until
    it has focus. */
 /* The skip link moves focus to <main>; that needs no visible ring, it is not a control. */

@@ -16,6 +16,7 @@ import { api } from '@/lib/client-api';
 import { schemaResolver } from '@/lib/form';
 import { useLoad } from '@/lib/hooks';
 import { Form, TextField } from '../form-fields';
+import { downloadMyData } from '@/lib/download-export';
 import { Button, Card } from '../ui';
 import { LogOutButton } from './Nav';
 import { ContentSkeleton, LoadFailed } from './screens';
@@ -95,21 +96,10 @@ function ChangePassword() {
 function YourData() {
   const [state, setState] = useState<'idle' | 'working' | 'done' | 'failed'>('idle');
 
-  // A plain fetch, not api(): the answer is a file, not JSON. The cookie goes along by itself.
   async function download() {
     setState('working');
     try {
-      const res = await fetch('/api/profile/me/export', { credentials: 'same-origin' });
-      if (!res.ok) throw new Error(String(res.status));
-      const name =
-        /filename="([^"]+)"/.exec(res.headers.get('content-disposition') ?? '')?.[1] ??
-        'portfolio-data.json';
-      const url = URL.createObjectURL(await res.blob());
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = name;
-      a.click();
-      URL.revokeObjectURL(url);
+      await downloadMyData();
       setState('done');
     } catch {
       setState('failed');
