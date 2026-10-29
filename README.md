@@ -33,6 +33,9 @@ It is a full-stack TypeScript project: a Next.js frontend, an Express API, a Pos
 - **Writing.** Publish short posts in Markdown with a cover image, or link to articles you wrote elsewhere. Each post gets its own page and share image.
 - **Testimonials.** Let visitors leave one, and approve each before it appears. Their email is never public.
 - **Availability badge.** Say you are open to work, freelance or collaboration, with a message of your own.
+- **Working together card.** Show your local time, whether you are within working hours, your weekly schedule, how soon you reply and the best way to reach you. Visitors see your time next to theirs, with the difference worked out for them.
+- **Multiple languages.** Offer your page in a main language plus up to four more, from Hindi, Telugu, Tamil, Bengali, Marathi, Gujarati, Punjabi, Urdu, Spanish, French, German, Portuguese and Arabic. You translate your own text (tagline, about, jobs, projects, posts and so on) field by field, with an optional AI suggestion you review before anything is saved. Anything not translated shows in your main language. Each language has its own address (`/your-name/hi`), the right fonts and text direction (including right-to-left for Urdu and Arabic), a language switcher, and search-engine language tags. See [docs/i18n.md](docs/i18n.md).
+- **Command palette.** Press Ctrl+K (Cmd+K on a Mac) in the dashboard to jump to any page or item, publish, copy your link, or change your theme.
 
 **Share it**
 
@@ -82,7 +85,7 @@ It is an npm workspaces monorepo, and the `shared` package holds the Zod schemas
 ```
 parichay/
 ├── frontend/   Next.js app: landing page, public portfolio pages, dashboard
-├── backend/    Express API, Prisma schema and migrations, seed script
+├── backend/    Express API, Prisma schema and migrations
 ├── shared/     Zod schemas and types used by both sides
 └── docs/       Brand guide: palette, fonts, logo and voice
 ```
@@ -109,9 +112,8 @@ npm install
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env.local
 
-# 3. Create the tables, and optionally add the demo profiles
+# 3. Create the tables
 npm run prisma:deploy -w @parichay/backend
-npm run db:seed -w @parichay/backend
 
 # 4. Run everything: API on :4000, site on :3000
 npm run dev
@@ -124,10 +126,6 @@ npm run dev
 | `npm run typecheck` | Type-checks the backend and frontend             |
 | `npm run lint`      | ESLint across the repo                           |
 | `npm run format`    | Prettier (`format:check` only checks)            |
-
-### Demo profiles
-
-The seed script adds five demo portfolios, one for each theme, so you can see what a page looks like: `tanisha-walia` (Editorial), `ayush-gill` (Bento), `syed-abraar` (Soft), `sameer-bhatia` (Executive) and `navjot-singh` (Creative). Their content lives in `shared/src/samples.ts`. Running the seed again refreshes them and touches nothing else. They are labeled "Sample profile" on their pages, nobody can sign in as them, and their addresses are reserved.
 
 ## Privacy
 
