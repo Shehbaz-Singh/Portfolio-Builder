@@ -1,0 +1,82 @@
+{
+  "skipLink": "Aller au contenu principal",
+  "sections": {
+    "about": "À propos",
+    "skills": "Compétences",
+    "experience": "Expérience",
+    "projects": "Projets",
+    "education": "Formation",
+    "testimonials": "Témoignages",
+    "writing": "Écrits"
+  },
+  "availabilityStatus": {
+    "open_to_work": "Ouvert à de nouvelles opportunités",
+    "open_to_freelance": "Disponible pour des missions freelance",
+    "open_to_collaborate": "Ouvert à la collaboration",
+    "custom": "Disponible"
+  },
+  "present": "Aujourd’hui",
+  "viewAll": "Tout voir",
+  "viewProject": "Voir le projet",
+  "getInTouch": "Me contacter",
+  "via": "via {label}",
+  "availability": "Disponibilité",
+  "downloadResume": "Télécharger le CV",
+  "noTestimonials": "Aucun témoignage pour le moment.",
+  "portfolio": "Portfolio",
+  "emptyPage": "Ce portfolio est encore en cours de préparation.",
+  "linkBadge": "Lien",
+  "linkBadgeNote": ", un article sur un autre site",
+  "totalExperience": "Expérience totale",
+  "years": "{count, plural, one {# an} other {# ans}}",
+  "months": "{count, plural, one {# mois} other {# mois}}",
+  "footerCta": "Créez votre propre portfolio",
+  "shareTitle": "Portfolio de {name}",
+  "newTab": " (s’ouvre dans un nouvel onglet)",
+  "writing": {
+    "title": "Écrits",
+    "intro": "Publications et articles de {name}.",
+    "nothing": "Rien ici pour le moment. Revenez bientôt.",
+    "back": "Retour à tous les écrits",
+    "all": "Tous les écrits",
+    "read": "Lire l’article"
+  },
+  "share": {
+    "label": "Partager",
+    "copyLink": "Copier le lien",
+    "copied": "Lien copié",
+    "copyFailed": "Impossible de copier le lien",
+    "email": "E-mail"
+  },
+  "leave": {
+    "open": "Laisser un témoignage",
+    "intro": "Il apparaîtra sur cette page une fois approuvé par le propriétaire.",
+    "send": "Envoyer le témoignage",
+    "sending": "Envoi en cours…",
+    "cancel": "Annuler",
+    "name": "Votre nom",
+    "role": "Votre fonction (facultatif)",
+    "company": "Votre entreprise (facultatif)",
+    "message": "Votre témoignage",
+    "messageHint": "De {min} à {max} caractères, texte brut.",
+    "email": "Votre e-mail (facultatif)",
+    "emailHint": "Seul le propriétaire le voit. Il n’est jamais affiché sur la page.",
+    "honeypot": "Laissez ce champ vide",
+    "thanks": "Merci ! Votre témoignage a bien été envoyé."
+  },
+  "sample": {
+    "label": "Profil d’exemple.",
+    "text": "La personne et tous les détails sont fictifs.",
+    "cta": "Créez le vôtre avec Parichay"
+  },
+  "switcher": {
+    "label": "Langue"
+  },
+  "banner": {
+    "text": "Cette page est aussi disponible en {language}.",
+    "go": "Voir en {language}",
+    "dismiss": "Fermer"
+  },
+  "photoOf": "Photo de {name}",
+  "minRead": "{count} min de lecture"
+}

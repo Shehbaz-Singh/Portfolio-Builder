@@ -8,6 +8,7 @@ import { prisma } from '../lib/prisma';
 import { orNotFound } from '../lib/prisma-errors';
 import { myPostSummaries } from '../lib/selects';
 import { slugifyTitle } from '../lib/slug';
+import { deleteTranslationsFor } from './translation.service';
 
 // Posts and links in the Writing section. Ownership: a post is always looked up by (id, profileId),
 // so one that belongs to someone else looks exactly like one that does not exist (404).
@@ -103,6 +104,7 @@ export async function deletePost(profileId: string, id: string) {
   });
   if (!post) throw notFound();
   await orNotFound(prisma.post.delete({ where: { id, profileId } }), notFound);
+  await prisma.$transaction((tx) => deleteTranslationsFor(tx, profileId, 'post', [id]));
   await deleteCoverQuietly(post.coverImageUrl, profileId);
 }
 

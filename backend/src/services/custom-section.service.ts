@@ -11,6 +11,7 @@ import { prisma } from '../lib/prisma';
 import { orNotFound } from '../lib/prisma-errors';
 import { customItems } from '../lib/selects';
 import { saveSectionConfig } from './section-layout.service';
+import { deleteTranslationsFor } from './translation.service';
 
 // User-made sections and their items. Ownership: a section is always looked up by
 // (id, profileId), and an item by (id, sectionId) only after that. A record that belongs to
@@ -93,8 +94,19 @@ export function updateSection(profileId: string, id: string, input: CustomSectio
 // Deletes the section and its items (cascade), and removes it from the page layout.
 export function deleteSection(profileId: string, id: string) {
   return prisma.$transaction(async (tx) => {
+    const items = await tx.customSectionItem.findMany({
+      where: { sectionId: id, section: { profileId } },
+      select: { id: true },
+    });
     const { count } = await tx.customSection.deleteMany({ where: { id, profileId } });
     if (count === 0) throw sectionNotFound();
+    await deleteTranslationsFor(tx, profileId, 'customSection', [id]);
+    await deleteTranslationsFor(
+      tx,
+      profileId,
+      'customItem',
+      items.map((item) => item.id),
+    );
     return { sections: await saveSectionConfig(tx, profileId) };
   }, WAIT);
 }
@@ -158,6 +170,7 @@ export async function updateItem(
 export async function deleteItem(profileId: string, sectionId: string, id: string) {
   await assertOwnSection(prisma, profileId, sectionId);
   await orNotFound(prisma.customSectionItem.delete({ where: { id, sectionId } }), itemNotFound);
+  await prisma.$transaction((tx) => deleteTranslationsFor(tx, profileId, 'customItem', [id]));
 }
 
 // `ids` is the new order. It must list every item in the section exactly once, which also

@@ -1,0 +1,82 @@
+{
+  "skipLink": "Ir para o conteúdo principal",
+  "sections": {
+    "about": "Sobre",
+    "skills": "Habilidades",
+    "experience": "Experiência",
+    "projects": "Projetos",
+    "education": "Formação",
+    "testimonials": "Depoimentos",
+    "writing": "Escritos"
+  },
+  "availabilityStatus": {
+    "open_to_work": "Aberto a novas oportunidades",
+    "open_to_freelance": "Disponível para projetos freelance",
+    "open_to_collaborate": "Aberto a colaborações",
+    "custom": "Disponível"
+  },
+  "present": "Atual",
+  "viewAll": "Ver tudo",
+  "viewProject": "Ver projeto",
+  "getInTouch": "Entrar em contato",
+  "via": "via {label}",
+  "availability": "Disponibilidade",
+  "downloadResume": "Baixar currículo",
+  "noTestimonials": "Ainda não há depoimentos.",
+  "portfolio": "Portfólio",
+  "emptyPage": "Este portfólio ainda está sendo preparado.",
+  "linkBadge": "Link",
+  "linkBadgeNote": ", um artigo em outro site",
+  "totalExperience": "Experiência total",
+  "years": "{count, plural, one {# ano} other {# anos}}",
+  "months": "{count, plural, one {# mês} other {# meses}}",
+  "footerCta": "Crie o seu próprio portfólio",
+  "shareTitle": "Portfólio de {name}",
+  "newTab": " (abre em uma nova aba)",
+  "writing": {
+    "title": "Escritos",
+    "intro": "Publicações e artigos de {name}.",
+    "nothing": "Ainda não há nada aqui. Volte em breve.",
+    "back": "Voltar para todos os escritos",
+    "all": "Todos os escritos",
+    "read": "Ler o artigo"
+  },
+  "share": {
+    "label": "Compartilhar",
+    "copyLink": "Copiar link",
+    "copied": "Link copiado",
+    "copyFailed": "Não foi possível copiar o link",
+    "email": "E-mail"
+  },
+  "leave": {
+    "open": "Deixar um depoimento",
+    "intro": "Ele aparecerá nesta página depois que o proprietário aprovar.",
+    "send": "Enviar depoimento",
+    "sending": "Enviando…",
+    "cancel": "Cancelar",
+    "name": "Seu nome",
+    "role": "Seu cargo (opcional)",
+    "company": "Sua empresa (opcional)",
+    "message": "Seu depoimento",
+    "messageHint": "De {min} a {max} caracteres, texto simples.",
+    "email": "Seu e-mail (opcional)",
+    "emailHint": "Somente o proprietário vê isso. Nunca é exibido na página.",
+    "honeypot": "Deixe este campo vazio",
+    "thanks": "Obrigado! Seu depoimento foi enviado."
+  },
+  "sample": {
+    "label": "Perfil de exemplo.",
+    "text": "A pessoa e todos os detalhes são fictícios.",
+    "cta": "Crie o seu com o Parichay"
+  },
+  "switcher": {
+    "label": "Idioma"
+  },
+  "banner": {
+    "text": "Esta página também está disponível em {language}.",
+    "go": "Ver em {language}",
+    "dismiss": "Fechar"
+  },
+  "photoOf": "Foto de {name}",
+  "minRead": "{count} min de leitura"
+}

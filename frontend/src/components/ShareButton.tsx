@@ -2,6 +2,7 @@
 
 import { Share2 } from 'lucide-react';
 import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { uiFor, type Ui } from '@/lib/i18n';
 
 interface Props {
   url: string; // the canonical profile URL
@@ -9,6 +10,9 @@ interface Props {
   // pill: filled with the accent color (public page); outline: a plain button (dashboard);
   // inverse: for use on an accent-colored background, where an accent button would vanish
   variant?: 'pill' | 'outline' | 'inverse';
+  // The words, in the page's language (English when left out, as in the dashboard).
+  ui?: Ui['share'];
+  newTab?: string; // " (opens in a new tab)"
 }
 
 const noSubscription = () => () => {};
@@ -16,12 +20,18 @@ const noSubscription = () => () => {};
 const hasWebShare = () => typeof navigator.share === 'function';
 
 const itemClass =
-  'block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-fg';
+  'block w-full rounded-lg px-3 py-2 text-start text-sm hover:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-fg';
 
 // Share button. Where the device has the Web Share API it opens the system share sheet;
 // otherwise it opens a small menu (copy link, LinkedIn, X, WhatsApp, email). The menu is a
 // disclosure: Escape closes it and returns focus to the button, as does tabbing out of it.
-export function ShareButton({ url, title, variant = 'pill' }: Props) {
+export function ShareButton({
+  url,
+  title,
+  variant = 'pill',
+  ui = uiFor('en').share,
+  newTab = uiFor('en').newTab,
+}: Props) {
   const native = useSyncExternalStore(noSubscription, hasWebShare, () => false);
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState('');
@@ -92,9 +102,9 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
   async function copy() {
     try {
       await navigator.clipboard.writeText(url);
-      announce('Link copied');
+      announce(ui.copied);
     } catch {
-      announce('Could not copy the link');
+      announce(ui.copyFailed);
     }
     setOpen(false);
     trigger.current?.focus();
@@ -106,7 +116,7 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
     { label: 'LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${u}` },
     { label: 'X', href: `https://x.com/intent/post?url=${u}&text=${t}` },
     { label: 'WhatsApp', href: `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}` },
-    { label: 'Email', href: `mailto:?subject=${t}&body=${u}`, external: false },
+    { label: ui.email, href: `mailto:?subject=${t}&body=${u}`, external: false },
   ];
 
   const look = {
@@ -128,7 +138,7 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
         className={`inline-flex items-center gap-2 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-2 ${look}`}
       >
         <Share2 aria-hidden="true" className="size-4" />
-        Share
+        {ui.label}
       </button>
 
       {open && (
@@ -139,7 +149,7 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
         >
           <li>
             <button type="button" onClick={copy} className={itemClass}>
-              Copy link
+              {ui.copyLink}
             </button>
           </li>
           {targets.map(({ label, href, external = true }) => (
@@ -151,7 +161,7 @@ export function ShareButton({ url, title, variant = 'pill' }: Props) {
                 className={itemClass}
               >
                 {label}
-                {external && <span className="sr-only"> (opens in a new tab)</span>}
+                {external && <span className="sr-only">{newTab}</span>}
               </a>
             </li>
           ))}

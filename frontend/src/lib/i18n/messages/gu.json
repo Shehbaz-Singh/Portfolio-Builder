@@ -1,0 +1,82 @@
+{
+  "skipLink": "મુખ્ય સામગ્રી પર જાઓ",
+  "sections": {
+    "about": "પરિચય",
+    "skills": "કૌશલ્યો",
+    "experience": "અનુભવ",
+    "projects": "પ્રોજેક્ટ",
+    "education": "શિક્ષણ",
+    "testimonials": "પ્રશંસાપત્રો",
+    "writing": "લેખન"
+  },
+  "availabilityStatus": {
+    "open_to_work": "નવી તકો માટે ઉપલબ્ધ",
+    "open_to_freelance": "ફ્રીલાન્સ પ્રોજેક્ટ માટે ઉપલબ્ધ",
+    "open_to_collaborate": "સહયોગ માટે તૈયાર",
+    "custom": "ઉપલબ્ધ"
+  },
+  "present": "હાલ",
+  "viewAll": "બધું જુઓ",
+  "viewProject": "પ્રોજેક્ટ જુઓ",
+  "getInTouch": "સંપર્ક કરો",
+  "via": "{label} દ્વારા",
+  "availability": "ઉપલબ્ધતા",
+  "downloadResume": "રેઝ્યૂમે ડાઉનલોડ કરો",
+  "noTestimonials": "હજી સુધી કોઈ પ્રશંસાપત્ર નથી.",
+  "portfolio": "પોર્ટફોલિયો",
+  "emptyPage": "આ પોર્ટફોલિયો હજી તૈયાર થઈ રહ્યો છે.",
+  "linkBadge": "લિંક",
+  "linkBadgeNote": ", બીજી સાઇટ પરનો લેખ",
+  "totalExperience": "કુલ અનુભવ",
+  "years": "{count, plural, one {# વર્ષ} other {# વર્ષ}}",
+  "months": "{count, plural, one {# મહિનો} other {# મહિના}}",
+  "footerCta": "તમારો પોતાનો પોર્ટફોલિયો બનાવો",
+  "shareTitle": "{name}નો પોર્ટફોલિયો",
+  "newTab": " (નવા ટૅબમાં ખુલે છે)",
+  "writing": {
+    "title": "લેખન",
+    "intro": "{name}ની પોસ્ટ અને લેખો.",
+    "nothing": "અહીં હજી કંઈ નથી. થોડા સમયમાં ફરી જુઓ.",
+    "back": "બધા લેખન પર પાછા જાઓ",
+    "all": "બધું લેખન",
+    "read": "લેખ વાંચો"
+  },
+  "share": {
+    "label": "શેર કરો",
+    "copyLink": "લિંક કૉપી કરો",
+    "copied": "લિંક કૉપી થઈ ગઈ",
+    "copyFailed": "લિંક કૉપી થઈ શકી નથી",
+    "email": "ઇમેઇલ"
+  },
+  "leave": {
+    "open": "પ્રશંસાપત્ર લખો",
+    "intro": "માલિકની મંજૂરી પછી તે આ પેજ પર દેખાશે.",
+    "send": "પ્રશંસાપત્ર મોકલો",
+    "sending": "મોકલી રહ્યા છીએ…",
+    "cancel": "રદ કરો",
+    "name": "તમારું નામ",
+    "role": "તમારી ભૂમિકા (વૈકલ્પિક)",
+    "company": "તમારી કંપની (વૈકલ્પિક)",
+    "message": "તમારું પ્રશંસાપત્ર",
+    "messageHint": "{min} થી {max} અક્ષરો, સાદો ટેક્સ્ટ.",
+    "email": "તમારો ઇમેઇલ (વૈકલ્પિક)",
+    "emailHint": "આ ફક્ત માલિક જ જોઈ શકે છે. તે પેજ પર ક્યારેય દેખાતું નથી.",
+    "honeypot": "આ ખાનું ખાલી રાખો",
+    "thanks": "આભાર! તમારું પ્રશંસાપત્ર મોકલી દેવામાં આવ્યું છે."
+  },
+  "sample": {
+    "label": "નમૂના પ્રોફાઇલ.",
+    "text": "આ વ્યક્તિ અને બધી વિગતો કાલ્પનિક છે.",
+    "cta": "Parichay પર તમારો પોતાનો બનાવો"
+  },
+  "switcher": {
+    "label": "ભાષા"
+  },
+  "banner": {
+    "text": "આ પેજ {language} માં પણ ઉપલબ્ધ છે.",
+    "go": "{language} માં જુઓ",
+    "dismiss": "બંધ કરો"
+  },
+  "photoOf": "{name}નો ફોટો",
+  "minRead": "{count} મિનિટનું વાંચન"
+}

@@ -1,6 +1,5 @@
 import {
   SECTION_LABELS,
-  availabilityText,
   customIdOf,
   isCustomKey,
   type PublicLink,
@@ -10,6 +9,7 @@ import {
 } from '@parichay/shared';
 import { SITE_URL } from '@/lib/config';
 import { contactTarget, initials, linkTarget, safeHttpUrl } from '@/lib/format';
+import { fill, pagePath, translatorFor, uiFor, type Ui } from '@/lib/i18n';
 
 // Everything a theme needs from a profile, worked out in one place. A theme never looks at the
 // raw section list, the custom sections, empty content or URL safety: it draws the header and
@@ -18,8 +18,15 @@ import { contactTarget, initials, linkTarget, safeHttpUrl } from '@/lib/format';
 
 // One entry of a dated list: a job, a degree, or an item of a custom section.
 // One position within a company the person stayed at (see groupJobs).
+// How a date is written: the language, and the word for an open end date.
+export interface DateFmt {
+  locale: string;
+  present: string;
+}
+
 export interface Role {
   id: string;
+  fmt: DateFmt;
   title: string;
   start: string | null;
   end: string | null;
@@ -28,6 +35,7 @@ export interface Role {
 
 export interface Entry {
   id: string;
+  fmt: DateFmt;
   // Set when several jobs in a row were at the same company. The entry is then the company (title),
   // with the whole stay as its dates, and the jobs listed here. Subtitle and description are empty.
   roles?: Role[];
@@ -68,6 +76,8 @@ export interface WritingEntry {
 }
 
 interface BlockBase {
+  locale: string; // the language of the page
+  ui: Ui; // the interface text in that language
   id: string; // unique on the page, for aria-labelledby and anchors
   title: string; // the owner's heading, or the default one
 }
@@ -99,30 +109,29 @@ export type Block =
 
 // Whole months from start to end (or to now, for an open job), counting both months, the way
 // LinkedIn does: Jan 2020 to Dec 2020 is 12 months.
-function stay(start: string | null, end: string | null): string | undefined {
+function stay(start: string | null, end: string | null, t: Translator): string | undefined {
   if (!start) return undefined;
   const from = new Date(start);
   const to = end ? new Date(end) : new Date();
-  return formatMonths(monthIndex(to) - monthIndex(from) + 1);
+  return formatMonths(monthIndex(to) - monthIndex(from) + 1, t);
 }
 
 const monthIndex = (date: Date) => date.getUTCFullYear() * 12 + date.getUTCMonth();
 
-function formatMonths(months: number): string | undefined {
+type Translator = ReturnType<typeof translatorFor>;
+
+function formatMonths(months: number, t: Translator): string | undefined {
   if (!(months > 0)) return undefined;
   const years = Math.floor(months / 12);
   const rest = months % 12;
-  return [
-    years > 0 && `${years} ${years === 1 ? 'year' : 'years'}`,
-    rest > 0 && `${rest} ${rest === 1 ? 'month' : 'months'}`,
-  ]
+  return [years > 0 && t('years', { count: years }), rest > 0 && t('months', { count: rest })]
     .filter(Boolean)
     .join(' ');
 }
 
 // All the jobs together. Months worked at two jobs at once count once, so overlapping or back-to-back
 // jobs add up to the time actually spent working.
-function totalExperience(jobs: PublicProfile['experience']): string | undefined {
+function totalExperience(jobs: PublicProfile['experience'], t: Translator): string | undefined {
   const now = monthIndex(new Date());
   const spans = jobs
     .filter((job) => job.startDate)
@@ -138,7 +147,7 @@ function totalExperience(jobs: PublicProfile['experience']): string | undefined 
     if (to >= begin) months += to - begin + 1;
     reached = Math.max(reached, to);
   }
-  return formatMonths(months);
+  return formatMonths(months, t);
 }
 
 const sameCompany = (a: string, b: string) =>
@@ -148,7 +157,7 @@ const sameCompany = (a: string, b: string) =>
 // employer: the company once, then each position under it. Only neighbours are joined, so the
 // owner's order is kept (a return to a company later stays a separate entry). A stay is open-ended
 // if any of its jobs is; otherwise it ends with the latest end.
-function groupJobs(jobs: PublicProfile['experience']): Entry[] {
+function groupJobs(jobs: PublicProfile['experience'], fmt: DateFmt, t: Translator): Entry[] {
   const groups: PublicProfile['experience'][] = [];
   for (const job of jobs) {
     const last = groups.at(-1);
@@ -160,11 +169,12 @@ function groupJobs(jobs: PublicProfile['experience']): Entry[] {
       const [job] = group;
       return {
         id: job.id,
+        fmt,
         title: job.title,
         subtitle: job.company,
         start: job.startDate,
         end: job.endDate,
-        duration: stay(job.startDate, job.endDate),
+        duration: stay(job.startDate, job.endDate, t),
         href: null,
         description: job.description || null,
       };
@@ -175,7 +185,8 @@ function groupJobs(jobs: PublicProfile['experience']): Entry[] {
     const end = ends.length < group.length ? null : ends.reduce((a, b) => (a > b ? a : b));
     return {
       id: group[0].id,
-      duration: stay(start, end),
+      fmt,
+      duration: stay(start, end, t),
       title: group[0].company,
       subtitle: null,
       start,
@@ -184,6 +195,7 @@ function groupJobs(jobs: PublicProfile['experience']): Entry[] {
       description: null,
       roles: group.map((job) => ({
         id: job.id,
+        fmt,
         title: job.title,
         start: job.startDate,
         end: job.endDate,
@@ -195,10 +207,14 @@ function groupJobs(jobs: PublicProfile['experience']): Entry[] {
 
 // Published posts as entries to draw. A link to an article that cannot be shown safely (not http or
 // https) is left out. Used by the page's Writing section and by the Writing list page.
-export function writingEntries(slug: string, posts: PublicPostSummary[]): WritingEntry[] {
+export function writingEntries(
+  slug: string,
+  posts: PublicPostSummary[],
+  base = `/${slug}`,
+): WritingEntry[] {
   return posts.flatMap((post): WritingEntry[] => {
     const href =
-      post.type === 'link' ? safeHttpUrl(post.externalUrl) : `/${slug}/writing/${post.slug}`;
+      post.type === 'link' ? safeHttpUrl(post.externalUrl) : `${base}/writing/${post.slug}`;
     if (!href) return [];
     return [
       {
@@ -223,6 +239,10 @@ const isBuiltIn = (key: string): key is SectionKey => Object.hasOwn(SECTION_LABE
 // theme picker shows each theme in a small card next to the live preview).
 export function buildBlocks(profile: PublicProfile, idPrefix = ''): Block[] {
   const blocks: Block[] = [];
+  const { locale } = profile;
+  const ui = uiFor(locale);
+  const t = translatorFor(locale);
+  const fmt: DateFmt = { locale, present: ui.present };
 
   for (const { key, title } of profile.sections) {
     if (isCustomKey(key)) {
@@ -232,9 +252,12 @@ export function buildBlocks(profile: PublicProfile, idPrefix = ''): Block[] {
         kind: 'entries',
         variant: 'custom',
         id: `${idPrefix}custom-${section.id}`,
+        locale,
+        ui,
         title: section.title,
         entries: section.items.map((item) => ({
           id: item.id,
+          fmt,
           title: item.title,
           subtitle: item.subtitle,
           start: item.startDate,
@@ -247,7 +270,7 @@ export function buildBlocks(profile: PublicProfile, idPrefix = ''): Block[] {
     }
     if (!isBuiltIn(key)) continue;
 
-    const base = { id: idPrefix + key, title: title ?? SECTION_LABELS[key] };
+    const base = { id: idPrefix + key, locale, ui, title: title ?? ui.sections[key] };
     switch (key) {
       case 'about':
         if (profile.about) blocks.push({ kind: 'about', ...base, text: profile.about });
@@ -267,8 +290,9 @@ export function buildBlocks(profile: PublicProfile, idPrefix = ''): Block[] {
             kind: 'entries',
             variant: 'experience',
             ...base,
-            entries: groupJobs(profile.experience),
-            total: profile.experience.length > 1 ? totalExperience(profile.experience) : undefined,
+            entries: groupJobs(profile.experience, fmt, t),
+            total:
+              profile.experience.length > 1 ? totalExperience(profile.experience, t) : undefined,
           });
         }
         break;
@@ -304,14 +328,15 @@ export function buildBlocks(profile: PublicProfile, idPrefix = ''): Block[] {
         }
         break;
       case 'writing': {
-        const posts = writingEntries(profile.slug, profile.writing);
+        const root = pagePath(profile.slug, locale, profile.defaultLocale);
+        const posts = writingEntries(profile.slug, profile.writing, root);
         if (posts.length > 0) {
           blocks.push({
             kind: 'writing',
             ...base,
             posts,
             more: profile.writingMore,
-            allHref: `/${profile.slug}/writing`,
+            allHref: `${root}/writing`,
           });
         }
         break;
@@ -324,6 +349,7 @@ export function buildBlocks(profile: PublicProfile, idPrefix = ''): Block[] {
             ...base,
             entries: profile.education.map((item) => ({
               id: item.id,
+              fmt,
               title: item.degree,
               subtitle: item.institution,
               start: item.startDate,
@@ -340,6 +366,8 @@ export function buildBlocks(profile: PublicProfile, idPrefix = ''): Block[] {
 }
 
 export interface HeaderModel {
+  locale: string;
+  ui: Ui;
   name: string;
   tagline: string | null;
   location: string | null;
@@ -347,7 +375,7 @@ export interface HeaderModel {
   links: { id: string; type: PublicLink['type']; href: string; label: string; external: boolean }[];
   share: { url: string; title: string };
   // The "Download resume" link, while the owner has it switched on.
-  resume: { href: string } | null;
+  resume: { href: string; label: string } | null;
   // The "open to work" badge: what it says, and the contact option the owner has made visible (an
   // email first, then phone, LinkedIn or website) for its link. null while it is switched off.
   availability: {
@@ -359,27 +387,36 @@ export interface HeaderModel {
 
 // The top of the page. Links that cannot be shown (an unsafe address) are dropped here.
 export function buildHeader(profile: PublicProfile): HeaderModel {
+  const ui = uiFor(profile.locale);
+  const status = profile.availabilityStatus ?? 'open_to_work';
+  const note = profile.availabilityMessage?.trim() || null;
   return {
+    locale: profile.locale,
+    ui,
     name: profile.fullName,
     tagline: profile.tagline,
     location: profile.location,
     avatar: {
       src: safeHttpUrl(profile.avatarUrl),
-      alt: `Photo of ${profile.fullName}`,
+      alt: fill(ui.photoOf, { name: profile.fullName }),
       initials: initials(profile.fullName),
     },
     links: profile.links.flatMap((link) => {
       const target = linkTarget(link);
       return target ? [{ id: link.id, type: link.type, ...target }] : [];
     }),
-    share: { url: `${SITE_URL}/${profile.slug}`, title: `${profile.fullName}'s portfolio` },
-    resume: profile.resumeEnabled ? { href: `/${profile.slug}/resume.pdf` } : null,
+    share: {
+      url: `${SITE_URL}${pagePath(profile.slug, profile.locale, profile.defaultLocale)}`,
+      title: fill(ui.shareTitle, { name: profile.fullName }),
+    },
+    resume: profile.resumeEnabled
+      ? { href: `/${profile.slug}/resume.pdf`, label: ui.downloadResume }
+      : null,
     availability: profile.availabilityEnabled
       ? {
-          ...availabilityText(
-            profile.availabilityStatus ?? 'open_to_work',
-            profile.availabilityMessage,
-          ),
+          ...(status === 'custom'
+            ? { label: note ?? ui.availabilityStatus.custom, detail: null }
+            : { label: ui.availabilityStatus[status], detail: note }),
           contact: contactTarget(profile.links),
         }
       : null,
@@ -388,6 +425,8 @@ export function buildHeader(profile: PublicProfile): HeaderModel {
 
 // The bottom of the page: the owner's name and a line about where the page came from.
 export interface FooterModel {
+  locale: string;
+  ui: Ui;
   name: string;
   year: number;
   message: string;
@@ -395,10 +434,13 @@ export interface FooterModel {
 }
 
 export function buildFooter(profile: PublicProfile): FooterModel {
+  const ui = uiFor(profile.locale);
   return {
+    locale: profile.locale,
+    ui,
     name: profile.fullName,
     year: new Date().getFullYear(),
     message: 'by a developer, for all developers.',
-    cta: { href: '/', label: 'Make your own portfolio' },
+    cta: { href: '/', label: ui.footerCta },
   };
 }

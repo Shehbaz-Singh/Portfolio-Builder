@@ -20,8 +20,10 @@ import {
   type PublicProfile,
   type Section,
   type SectionConfig,
+  type StoredTranslation,
 } from '@parichay/shared';
 import { ApiError, api } from '@/lib/client-api';
+import { applyTranslations } from '@/lib/translate-preview';
 import { ToastRegion, type ToastData } from '../ui';
 import { saveProfile } from './save-profile';
 
@@ -88,6 +90,15 @@ const pendingCount = (imported: Imported | null) =>
 interface EditorContextValue {
   profile: MyProfile; // what is saved on the server
   preview: PublicProfile; // saved profile + draft, minus hidden links
+  // The same in the language chosen for the preview (the default language, or an extra one with its
+  // translations merged in, unsaved typing included).
+  localizedPreview: PublicProfile;
+  previewLocale: string; // always the default language or one of the profile's extra ones
+  setPreviewLocale: (locale: string) => void;
+  // The translation editor hands in the texts of one language as they are being typed, for the
+  // preview; dropTranslations forgets a language that was removed.
+  setTranslations: (locale: string, entries: StoredTranslation[]) => void;
+  dropTranslations: (locale: string) => void;
   update: (change: (profile: MyProfile) => MyProfile) => void;
   // Saves profile fields (PUT /profile/me), one request at a time and always on top of the latest
   // saved profile, so two autosaves can never overwrite each other's fields.
@@ -150,6 +161,22 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
   const draft = useMemo<Draft | null>(
     () => (Object.keys(drafts).length > 0 ? Object.assign({}, ...Object.values(drafts)) : null),
     [drafts],
+  );
+  const [wantedLocale, setPreviewLocale] = useState(initial.defaultLocale);
+  const [translations, setTranslationsState] = useState<Record<string, StoredTranslation[]>>({});
+  const setTranslations = useCallback(
+    (locale: string, entries: StoredTranslation[]) =>
+      setTranslationsState((all) => ({ ...all, [locale]: entries })),
+    [],
+  );
+  const dropTranslations = useCallback(
+    (locale: string) =>
+      setTranslationsState((all) => {
+        const rest = { ...all };
+        delete rest[locale];
+        return rest;
+      }),
+    [],
   );
   const [toasts, setToasts] = useState<ToastData[]>([]);
   const nextToast = useRef(0);
@@ -313,6 +340,7 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
     return {
       ...profile,
       ...draft,
+      locale: profile.defaultLocale,
       // Like the public API, the badge is only there while it is switched on.
       ...((draft?.availabilityEnabled ?? profile.availabilityEnabled)
         ? { availabilityEnabled: true as const }
@@ -351,10 +379,47 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
     };
   }, [profile, draft]);
 
+  // A language that was removed (or never added) falls back to the default one.
+  const previewLocale =
+    wantedLocale === profile.defaultLocale || profile.locales.includes(wantedLocale)
+      ? wantedLocale
+      : profile.defaultLocale;
+  const isExtra = previewLocale !== profile.defaultLocale;
+  const loaded = translations[previewLocale] !== undefined;
+  // The preview needs the saved texts of the language it shows, also when the translation editor is
+  // not open. What the editor has already put in is kept.
+  useEffect(() => {
+    if (!isExtra || loaded) return;
+    const controller = new AbortController();
+    api<{ entries: StoredTranslation[] }>(`/profile/me/translations/${previewLocale}`, {
+      signal: controller.signal,
+    }).then(
+      ({ entries }) =>
+        setTranslationsState((all) =>
+          all[previewLocale] ? all : { ...all, [previewLocale]: entries },
+        ),
+      () => {}, // the preview then shows the default-language text
+    );
+    return () => controller.abort();
+  }, [isExtra, loaded, previewLocale]);
+
+  const localizedPreview = useMemo(
+    () =>
+      isExtra
+        ? applyTranslations(preview, translations[previewLocale] ?? [], previewLocale)
+        : preview,
+    [isExtra, preview, translations, previewLocale],
+  );
+
   const value = useMemo(
     () => ({
       profile,
       preview,
+      localizedPreview,
+      previewLocale,
+      setPreviewLocale,
+      setTranslations,
+      dropTranslations,
       update,
       saveFields,
       setDraft,
@@ -377,6 +442,10 @@ export function EditorProvider({ initial, children }: { initial: MyProfile; chil
     [
       profile,
       preview,
+      localizedPreview,
+      previewLocale,
+      setTranslations,
+      dropTranslations,
       update,
       saveFields,
       notify,

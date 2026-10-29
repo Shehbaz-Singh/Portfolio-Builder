@@ -3,7 +3,8 @@ import Link from 'next/link';
 import { FileDown, Globe, Link2, Mail, Phone } from 'lucide-react';
 import type { PublicLink } from '@parichay/shared';
 import { formatDate, formatMonthYear, initials } from '@/lib/format';
-import type { Block, Entry, HeaderModel, Role } from './blocks';
+import { fill } from '@/lib/i18n';
+import type { Block, DateFmt, Entry, HeaderModel, Role } from './blocks';
 
 // Small pieces every theme uses, so the markup that matters (dates as <time>, links that open in a
 // new tab, the photo or the initials, the icon on a link) is the same everywhere. Layout and
@@ -15,18 +16,19 @@ export function DateRange({
   end,
   openEnded = false,
   duration,
-}: Pick<Entry, 'start' | 'end'> & { openEnded?: boolean; duration?: string }) {
+  fmt,
+}: Pick<Entry, 'start' | 'end'> & { openEnded?: boolean; duration?: string; fmt: DateFmt }) {
   if (!start) return null;
   return (
     <>
-      <time dateTime={start}>{formatMonthYear(start)}</time>
+      <time dateTime={start}>{formatMonthYear(start, fmt.locale)}</time>
       {end ? (
         <>
           {' – '}
-          <time dateTime={end}>{formatMonthYear(end)}</time>
+          <time dateTime={end}>{formatMonthYear(end, fmt.locale)}</time>
         </>
       ) : (
-        openEnded && ' – Present'
+        openEnded && ` – ${fmt.present}`
       )}
       {duration && ` · ${duration}`}
     </>
@@ -61,7 +63,7 @@ export function RoleList({
           <Heading className={titleClassName}>{role.title}</Heading>
           {role.start && (
             <p className={datesClassName}>
-              <DateRange start={role.start} end={role.end} openEnded />
+              <DateRange start={role.start} end={role.end} openEnded fmt={role.fmt} />
             </p>
           )}
           {role.description && (
@@ -76,11 +78,19 @@ export function RoleList({
 }
 
 // "Total experience: 6 years 2 months", above the jobs. Nothing if the total is unknown.
-export function TotalExperience({ total, className }: { total?: string; className?: string }) {
+export function TotalExperience({
+  total,
+  label,
+  className,
+}: {
+  total?: string;
+  label: string; // "Total experience"
+  className?: string;
+}) {
   if (!total) return null;
   return (
     <p className={className}>
-      Total experience: <strong className="font-semibold">{total}</strong>
+      {label}: <strong className="font-semibold">{total}</strong>
     </p>
   );
 }
@@ -197,7 +207,7 @@ export function ResumeLink({
       <span aria-hidden="true" className="inline-flex shrink-0">
         <FileDown className="size-4" />
       </span>
-      Download resume
+      {resume.label}
       <span className="rounded-sm border border-current px-1 text-[0.65rem] leading-4 font-semibold">
         PDF
       </span>
@@ -233,8 +243,8 @@ export function HeaderLink({
 }
 
 // A page with nothing in it yet (a new or emptied profile): say so instead of ending after the header.
-export function EmptyPage({ className }: { className?: string }) {
-  return <p className={className}>This portfolio is still being put together.</p>;
+export function EmptyPage({ text, className }: { text: string; className?: string }) {
+  return <p className={className}>{text}</p>;
 }
 
 // "Open to new opportunities", with a dot and a link to the best way to get in touch. A plain group
@@ -244,11 +254,13 @@ export function EmptyPage({ className }: { className?: string }) {
 // the link inherit.
 export function AvailabilityBadge({
   availability,
+  ui,
   className,
   dotClassName,
   linkClassName,
 }: {
   availability: HeaderModel['availability'];
+  ui: HeaderModel['ui'];
   className: string;
   dotClassName: string;
   linkClassName: string;
@@ -258,7 +270,7 @@ export function AvailabilityBadge({
   return (
     <div
       role="group"
-      aria-label="Availability"
+      aria-label={ui.availability}
       className={`flex max-w-full flex-wrap items-start gap-x-3 gap-y-1 ${className}`}
     >
       <span className="flex min-w-0 items-start gap-2.5">
@@ -276,14 +288,14 @@ export function AvailabilityBadge({
           <NewTabLink
             href={contact.href}
             className={linkClassName}
-            context={`via ${contact.label}`}
+            context={fill(ui.via, { label: contact.label })}
           >
-            Get in touch
+            {ui.getInTouch}
           </NewTabLink>
         ) : (
           <a href={contact.href} className={linkClassName}>
-            Get in touch
-            <span className="sr-only"> via {contact.label}</span>
+            {ui.getInTouch}
+            <span className="sr-only"> {fill(ui.via, { label: contact.label })}</span>
           </a>
         ))}
     </div>
@@ -344,12 +356,13 @@ export function WritingList({
               )}
             </h3>
             <p className={metaClassName}>
-              <time dateTime={post.date}>{formatDate(post.date)}</time>
+              <time dateTime={post.date}>{formatDate(post.date, block.locale)}</time>
               {post.external && (
                 <>
                   {' '}
                   <span className="ms-1 inline-flex items-center rounded-full bg-accent-soft px-2 py-0.5 text-xs font-semibold text-accent-fg not-italic">
-                    Link<span className="sr-only">, an article on another site</span>
+                    {block.ui.linkBadge}
+                    <span className="sr-only">{block.ui.linkBadgeNote}</span>
                   </span>
                 </>
               )}
@@ -360,7 +373,7 @@ export function WritingList({
       </ul>
       {moreClassName && block.more && (
         <Link href={block.allHref} className={moreClassName}>
-          View all
+          {block.ui.viewAll}
         </Link>
       )}
     </>

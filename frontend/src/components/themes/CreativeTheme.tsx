@@ -10,6 +10,7 @@ import {
   type FooterModel,
   type HeaderModel,
 } from './blocks';
+import { uiFor } from '@/lib/i18n';
 import { LeaveTestimonial } from './LeaveTestimonial';
 import {
   Avatar,
@@ -34,12 +35,18 @@ import type { ThemeProps } from './types';
 
 // preload is off: every theme's fonts are known to the page bundle, and preloading would fetch all
 // of them. Only the faces a page draws are downloaded, when it draws them.
-const display = Bricolage_Grotesque({ subsets: ['latin'], display: 'swap', preload: false });
+const display = Bricolage_Grotesque({
+  subsets: ['latin'],
+  display: 'swap',
+  fallback: ['var(--font-script, sans-serif)'],
+  preload: false,
+});
 const mono = Space_Mono({
   subsets: ['latin'],
   weight: ['400', '700'],
   variable: '--font-theme-mono',
   display: 'swap',
+  fallback: ['var(--font-script, sans-serif)'],
   preload: false,
 });
 // The class that sets this theme's fonts; the Writing pages use it too.
@@ -72,6 +79,7 @@ function Header({ header }: { header: HeaderModel }) {
           )}
           <AvailabilityBadge
             availability={header.availability}
+            ui={header.ui}
             className="mt-6 w-fit rounded-2xl border-2 border-current bg-on-accent px-4 py-2.5 text-sm font-bold text-accent"
             dotClassName="bg-accent"
             linkClassName="underline underline-offset-2 hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
@@ -88,7 +96,12 @@ function Header({ header }: { header: HeaderModel }) {
               </li>
             )}
             <li>
-              <ShareButton url={header.share.url} title={header.share.title} variant="inverse" />
+              <ShareButton
+                url={header.share.url}
+                title={header.share.title}
+                ui={header.ui.share}
+                variant="inverse"
+              />
             </li>
           </ul>
         </div>
@@ -173,8 +186,8 @@ function BlockView({ block }: { block: Block }) {
                   aria-hidden="true"
                   className="mt-5 inline-flex items-center gap-1 text-sm font-black tracking-wide uppercase"
                 >
-                  View project
-                  <ArrowUpRight className="size-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                  {block.ui.viewProject}
+                  <ArrowUpRight className="rtl:-scale-x-100 size-5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
                 </span>
               )}
             </li>
@@ -221,11 +234,12 @@ function BlockView({ block }: { block: Block }) {
               ))}
             </ul>
           ) : (
-            <p className="text-lg font-medium text-muted">No testimonials yet.</p>
+            <p className="text-lg font-medium text-muted">{block.ui.noTestimonials}</p>
           )}
           {block.submitTo && (
             <LeaveTestimonial
               slug={block.submitTo}
+              ui={block.ui.leave}
               buttonClassName={`inline-flex items-center rounded-full border-2 border-ink px-5 py-2 font-bold transition hover:bg-ink hover:text-page motion-safe:hover:-translate-y-0.5 ${focusRing}`}
             />
           )}
@@ -234,7 +248,11 @@ function BlockView({ block }: { block: Block }) {
     case 'entries':
       return (
         <>
-          <TotalExperience total={block.total} className="mb-6 font-bold" />
+          <TotalExperience
+            total={block.total}
+            label={block.ui.totalExperience}
+            className="mb-6 font-bold"
+          />
           <ol className="space-y-8">
             {block.entries.map((entry) => (
               <li key={entry.id} className="min-w-0 border-s-4 border-accent ps-5">
@@ -247,6 +265,7 @@ function BlockView({ block }: { block: Block }) {
                       end={entry.end}
                       openEnded={block.variant !== 'custom'}
                       duration={entry.duration}
+                      fmt={entry.fmt}
                     />
                   </p>
                 )}
@@ -272,7 +291,7 @@ function BlockView({ block }: { block: Block }) {
                       className={`inline-flex items-center gap-1 font-bold text-accent-fg underline underline-offset-4 ${focusRing}`}
                     >
                       View
-                      <ArrowUpRight aria-hidden="true" className="size-5" />
+                      <ArrowUpRight aria-hidden="true" className="rtl:-scale-x-100 size-5" />
                     </NewTabLink>
                   </p>
                 )}
@@ -299,7 +318,10 @@ function Footer({ footer }: { footer: FooterModel }) {
             href={footer.cta.href}
             className="mt-1 inline-block font-bold underline underline-offset-4 hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-page"
           >
-            {footer.cta.label} →
+            {footer.cta.label}{' '}
+            <span aria-hidden="true" className="inline-block rtl:-scale-x-100">
+              →
+            </span>
           </a>
         </div>
       </div>
@@ -320,7 +342,10 @@ export default function CreativeTheme({ profile, idPrefix = '' }: ThemeProps) {
           </Reveal>
         ))}
         {blocks.length === 0 && (
-          <EmptyPage className="py-16 text-2xl font-black text-balance sm:text-3xl" />
+          <EmptyPage
+            text={uiFor(profile.locale).emptyPage}
+            className="py-16 text-2xl font-black text-balance sm:text-3xl"
+          />
         )}
       </main>
       <Footer footer={buildFooter(profile)} />

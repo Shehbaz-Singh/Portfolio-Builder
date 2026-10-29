@@ -10,6 +10,7 @@ import {
   type FooterModel,
   type HeaderModel,
 } from './blocks';
+import { uiFor } from '@/lib/i18n';
 import { LeaveTestimonial } from './LeaveTestimonial';
 import {
   Avatar,
@@ -37,11 +38,17 @@ import type { ThemeProps } from './types';
 
 // preload is off: every theme's fonts are known to the page bundle, and preloading would fetch all
 // of them. Only the faces a page draws are downloaded, when it draws them.
-const sans = Nunito_Sans({ subsets: ['latin'], display: 'swap', preload: false });
+const sans = Nunito_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  fallback: ['var(--font-script, sans-serif)'],
+  preload: false,
+});
 const fredoka = Fredoka({
   subsets: ['latin'],
   variable: '--font-theme-display',
   display: 'swap',
+  fallback: ['var(--font-script, sans-serif)'],
   preload: false,
 });
 
@@ -107,6 +114,7 @@ function Header({ header }: { header: HeaderModel }) {
         )}
         <AvailabilityBadge
           availability={header.availability}
+          ui={header.ui}
           className="mt-5 justify-center rounded-3xl border border-line bg-accent-soft px-4 py-2.5 text-start text-sm text-ink sm:justify-start"
           dotClassName="bg-accent-fg"
           linkClassName={`font-bold text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`}
@@ -129,7 +137,12 @@ function Header({ header }: { header: HeaderModel }) {
             </li>
           )}
           <li>
-            <ShareButton url={header.share.url} title={header.share.title} variant="outline" />
+            <ShareButton
+              url={header.share.url}
+              title={header.share.title}
+              ui={header.ui.share}
+              variant="outline"
+            />
           </li>
         </ul>
       </div>
@@ -210,7 +223,7 @@ function BlockView({ block }: { block: Block }) {
                   aria-hidden="true"
                   className="absolute end-6 top-6 flex size-11 items-center justify-center rounded-full bg-accent text-on-accent transition-transform duration-300 motion-safe:group-hover:rotate-45"
                 >
-                  <ArrowUpRight className="size-5" />
+                  <ArrowUpRight className="rtl:-scale-x-100 size-5" />
                 </span>
               )}
               {project.description && (
@@ -281,11 +294,12 @@ function BlockView({ block }: { block: Block }) {
               ))}
             </ul>
           ) : (
-            <p className="text-muted">No testimonials yet.</p>
+            <p className="text-muted">{block.ui.noTestimonials}</p>
           )}
           {block.submitTo && (
             <LeaveTestimonial
               slug={block.submitTo}
+              ui={block.ui.leave}
               buttonClassName={`mt-10 inline-flex items-center rounded-full bg-ink px-6 py-2.5 text-sm font-bold text-page transition duration-200 hover:opacity-90 motion-safe:hover:-translate-y-0.5 ${focusRing}`}
             />
           )}
@@ -296,6 +310,7 @@ function BlockView({ block }: { block: Block }) {
         <>
           <TotalExperience
             total={block.total}
+            label={block.ui.totalExperience}
             className="mb-5 inline-block rounded-full bg-accent-soft px-4 py-1 text-sm font-semibold"
           />
           <ol className="space-y-5">
@@ -313,6 +328,7 @@ function BlockView({ block }: { block: Block }) {
                       end={entry.end}
                       openEnded={block.variant !== 'custom'}
                       duration={entry.duration}
+                      fmt={entry.fmt}
                     />
                   </p>
                 )}
@@ -342,7 +358,7 @@ function BlockView({ block }: { block: Block }) {
                       className={`inline-flex items-center gap-1 text-sm font-bold underline underline-offset-4 hover:no-underline ${focusRing}`}
                     >
                       View
-                      <ArrowUpRight aria-hidden="true" className="size-4" />
+                      <ArrowUpRight aria-hidden="true" className="rtl:-scale-x-100 size-4" />
                     </NewTabLink>
                   </p>
                 )}
@@ -384,7 +400,12 @@ export default function SoftTheme({ profile, idPrefix = '' }: ThemeProps) {
             <BlockView block={block} />
           </Section>
         ))}
-        {blocks.length === 0 && <EmptyPage className="mt-16 text-center text-muted" />}
+        {blocks.length === 0 && (
+          <EmptyPage
+            text={uiFor(profile.locale).emptyPage}
+            className="mt-16 text-center text-muted"
+          />
+        )}
       </main>
       <Footer footer={buildFooter(profile)} />
     </ThemeWrapper>

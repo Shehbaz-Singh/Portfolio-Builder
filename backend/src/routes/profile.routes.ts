@@ -1,14 +1,18 @@
 import { Router } from 'express';
 import {
+  addLanguageSchema,
   customItemInputSchema,
   customSectionInputSchema,
   postInputSchema,
   profileUpdateSchema,
   publishSchema,
   reorderSchema,
+  languageSettingsSchema,
   sectionsUpdateSchema,
+  suggestRequestSchema,
   testimonialInputSchema,
   testimonialSettingsSchema,
+  translationsSaveSchema,
 } from '@parichay/shared';
 import {
   createCustomItem,
@@ -60,6 +64,15 @@ import {
   updatePost,
   uploadCover,
 } from '../controllers/post.controller';
+import {
+  addLanguage,
+  getLanguages,
+  getTranslations,
+  removeLanguage,
+  saveTranslations,
+  setDefaultLanguage,
+  suggestTranslation,
+} from '../controllers/translation.controller';
 import { requireAuth } from '../middleware/auth';
 import { resumeLimiter, uploadLimiter } from '../middleware/rate-limit';
 import { avatarUpload, coverUpload, resumeUpload } from '../middleware/upload';
@@ -146,6 +159,24 @@ profileRouter.put('/me/posts/:id', validateBody(postInputSchema), updatePost);
 profileRouter.delete('/me/posts/:id', deletePost);
 profileRouter.post('/me/posts/:id/cover', uploadLimiter, coverUpload, uploadCover);
 profileRouter.delete('/me/posts/:id/cover', deleteCover);
+
+// Languages: which ones the page is offered in, and the translated texts of each. Declared before
+// /me/:section like the others.
+profileRouter.get('/me/languages', getLanguages);
+profileRouter.post('/me/languages', validateBody(addLanguageSchema), addLanguage);
+profileRouter.put('/me/languages', validateBody(languageSettingsSchema), setDefaultLanguage);
+profileRouter.delete('/me/languages/:locale', removeLanguage);
+profileRouter.post(
+  '/me/translations/suggest',
+  validateBody(suggestRequestSchema),
+  suggestTranslation,
+);
+profileRouter.get('/me/translations/:locale', getTranslations);
+profileRouter.put(
+  '/me/translations/:locale',
+  validateBody(translationsSaveSchema),
+  saveTranslations,
+);
 
 // :section is one of experience | education | projects | skills | links
 profileRouter.patch('/me/:section/reorder', validateBody(reorderSchema), reorderSection);

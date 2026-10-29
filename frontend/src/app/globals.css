@@ -301,6 +301,9 @@ button,
     transition: background-size 0.3s ease;
   }
 }
+:is([dir='rtl']) .ed-underline {
+  background-position: 100% 100%;
+}
 .ed-underline:hover,
 .ed-underline:focus-visible,
 .ed-hover:hover .ed-underline,
@@ -577,4 +580,55 @@ html:has(.dashboard-root) {
 .wordmark-hi {
   font-size: 0.98em;
   line-height: 1;
+}
+
+/* ---- Languages (see lib/locale-fonts.ts): taller lines for scripts with
+   marks above and below the line, and no letter-spacing where letters join. Unlayered, so it wins
+   over the theme's utilities. The font of the script is the last fallback of each theme's fonts
+   (fallback: var(--font-script) in the themes), so Latin text keeps the theme's own face. */
+:is(
+    [data-script='devanagari'],
+    [data-script='telugu'],
+    [data-script='tamil'],
+    [data-script='bengali'],
+    [data-script='gujarati'],
+    [data-script='gurmukhi']
+  )
+  :is(p, li, dd, blockquote, div, span) {
+  line-height: 1.8;
+}
+:is(
+    [data-script='devanagari'],
+    [data-script='telugu'],
+    [data-script='tamil'],
+    [data-script='bengali'],
+    [data-script='gujarati'],
+    [data-script='gurmukhi']
+  )
+  :is(h1, h2, h3, h4) {
+  line-height: 1.5;
+}
+[data-script='arabic'] :is(p, li, dd, blockquote, div, span) {
+  line-height: 1.9;
+}
+[data-script='arabic'] :is(h1, h2, h3, h4) {
+  line-height: 1.6;
+}
+[data-script='nastaliq'] :is(p, li, dd, blockquote, div, span) {
+  line-height: 2.3;
+}
+[data-script='nastaliq'] :is(h1, h2, h3, h4) {
+  line-height: 2;
+}
+[data-script]:not([data-script='latin']) * {
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+/* The Editorial drop cap floats the first letter, which would tear a conjunct or a joined word apart. */
+[data-script]:not([data-script='latin']) *::first-letter {
+  float: none !important;
+  margin: 0 !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  color: inherit !important;
 }

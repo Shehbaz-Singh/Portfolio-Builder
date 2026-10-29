@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { PublicProfile } from '@parichay/shared';
+import { languageOf, type PublicProfile } from '@parichay/shared';
+import { HtmlLang } from '@/components/portfolio/HtmlLang';
 import { THEME_COMPONENTS } from '@/lib/theme-components';
 import { getTheme } from '@/lib/themes';
 
@@ -27,8 +28,11 @@ export default function PreviewFramePage() {
 
   if (!profile) return null;
   const Theme = THEME_COMPONENTS[getTheme(profile.theme).key];
+  // The language and direction of the page being previewed, so an RTL language mirrors.
+  const language = languageOf(profile.locale);
   return (
-    <div inert>
+    <div inert lang={language.code} dir={language.dir} data-script={language.script}>
+      <HtmlLang lang={language.code} dir={language.dir} />
       <Theme profile={profile} idPrefix="preview-" />
     </div>
   );

@@ -10,6 +10,7 @@ import {
   type FooterModel,
   type HeaderModel,
 } from './blocks';
+import { uiFor } from '@/lib/i18n';
 import { LeaveTestimonial } from './LeaveTestimonial';
 import {
   Avatar,
@@ -36,12 +37,18 @@ import type { ThemeProps } from './types';
 
 // preload is off: every theme's fonts are known to the page bundle, and preloading would fetch all
 // of them. Only the faces a page draws are downloaded, when it draws them.
-const sans = Hanken_Grotesk({ subsets: ['latin'], display: 'swap', preload: false });
+const sans = Hanken_Grotesk({
+  subsets: ['latin'],
+  display: 'swap',
+  fallback: ['var(--font-script, sans-serif)'],
+  preload: false,
+});
 const serif = Newsreader({
   subsets: ['latin'],
   style: ['normal', 'italic'],
   variable: '--font-theme-display',
   display: 'swap',
+  fallback: ['var(--font-script, sans-serif)'],
   preload: false,
 });
 
@@ -98,7 +105,7 @@ function Masthead({ header }: { header: HeaderModel }) {
               <span>{header.location}</span>
             </>
           ) : (
-            <span>Portfolio</span>
+            <span>{header.ui.portfolio}</span>
           )}
         </p>
       </div>
@@ -125,6 +132,7 @@ function Masthead({ header }: { header: HeaderModel }) {
         <div className="min-w-0">
           <AvailabilityBadge
             availability={header.availability}
+            ui={header.ui}
             className="mx-auto mt-6 w-fit lg:mx-0 justify-center border border-line px-4 py-2.5 text-start text-sm text-ink"
             dotClassName="bg-accent-fg"
             linkClassName={`text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`}
@@ -144,7 +152,12 @@ function Masthead({ header }: { header: HeaderModel }) {
               </li>
             )}
             <li>
-              <ShareButton url={header.share.url} title={header.share.title} variant="outline" />
+              <ShareButton
+                url={header.share.url}
+                title={header.share.title}
+                ui={header.ui.share}
+                variant="outline"
+              />
             </li>
           </ul>
         </div>
@@ -243,11 +256,12 @@ function BlockView({ block }: { block: Block }) {
               ))}
             </ul>
           ) : (
-            <p className="text-muted">No testimonials yet.</p>
+            <p className="text-muted">{block.ui.noTestimonials}</p>
           )}
           {block.submitTo && (
             <LeaveTestimonial
               slug={block.submitTo}
+              ui={block.ui.leave}
               buttonClassName={`mt-10 inline-flex items-center text-sm font-medium ${link}`}
             />
           )}
@@ -256,7 +270,11 @@ function BlockView({ block }: { block: Block }) {
     case 'entries':
       return (
         <>
-          <TotalExperience total={block.total} className="mb-5 text-sm text-muted" />
+          <TotalExperience
+            total={block.total}
+            label={block.ui.totalExperience}
+            className="mb-5 text-sm text-muted"
+          />
           <ol className="divide-y divide-line border-y border-line 2xl:grid 2xl:grid-cols-2 2xl:gap-x-16 2xl:divide-y-0 2xl:border-y-0">
             {block.entries.map((entry) => (
               <li
@@ -270,6 +288,7 @@ function BlockView({ block }: { block: Block }) {
                       end={entry.end}
                       openEnded={block.variant !== 'custom'}
                       duration={entry.duration}
+                      fmt={entry.fmt}
                     />
                   </p>
                 )}
@@ -343,7 +362,10 @@ export default function EditorialTheme({ profile, idPrefix = '' }: ThemeProps) {
           </Section>
         ))}
         {blocks.length === 0 && (
-          <EmptyPage className={`${display} mt-16 text-center text-muted italic`} />
+          <EmptyPage
+            text={uiFor(profile.locale).emptyPage}
+            className={`${display} mt-16 text-center text-muted italic`}
+          />
         )}
       </main>
       <Footer footer={buildFooter(profile)} />

@@ -51,6 +51,7 @@ model User {
   termsAcceptedAt DateTime?
   termsVersion    String?
   profile         Profile?
+  aiUsage         AiUsage[]
 }
 
 model Profile {
@@ -69,6 +70,10 @@ model Profile {
   isSample            Boolean            @default(false)
   // Whether the public page offers a PDF resume generated from it (/<slug>/resume.pdf).
   resumeEnabled       Boolean            @default(true)
+  // The language the profile is written in, and up to MAX_EXTRA_LANGUAGES more it is offered in
+  // (shared/src/languages.ts). The words of the extra languages are in Translation.
+  defaultLocale       String             @default("en")
+  locales             String[]           @default([])
   // Whether visitors may submit testimonials (POST /public/:slug/testimonials).
   acceptTestimonials  Boolean            @default(false)
   // The availability badge on the public page (see shared/src/availability.ts).
@@ -88,6 +93,7 @@ model Profile {
   customSections CustomSection[]
   testimonials   Testimonial[]
   posts          Post[]
+  translations   Translation[]
 }
 
 model Link {
@@ -231,4 +237,49 @@ model Post {
 
   @@unique([profileId, slug])
   @@index([profileId, status, publishedAt])
+}
+
+enum TranslatableEntity {
+  profile
+  section
+  experience
+  education
+  project
+  skill
+  customSection
+  customItem
+  post
+}
+
+// One owner-written text in one extra language. There is no foreign key to the thing translated
+// (it spans several tables), so whoever deletes an experience, project, post and so on deletes its
+// translations too (translation.service.ts). `entityId` is the row id; for the profile it is the
+// profile id and for a built-in section heading it is the section key.
+model Translation {
+  id          String             @id @default(cuid())
+  profileId   String
+  locale      String
+  entityType  TranslatableEntity
+  entityId    String
+  field       String
+  value       String
+  // Written by the AI suggestion and not yet edited or confirmed by the owner.
+  needsReview Boolean            @default(false)
+  updatedAt   DateTime           @updatedAt
+
+  profile Profile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, locale, entityType, entityId, field])
+  @@index([profileId, locale])
+}
+
+// How many AI translation suggestions a user has asked for on a day (UTC), for the daily limit.
+model AiUsage {
+  userId String
+  day    String
+  count  Int    @default(0)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, day])
 }

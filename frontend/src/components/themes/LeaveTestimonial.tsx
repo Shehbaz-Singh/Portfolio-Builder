@@ -14,6 +14,7 @@ import {
 } from '@parichay/shared';
 import { api } from '@/lib/client-api';
 import { schemaResolver } from '@/lib/form';
+import { fill, uiFor, type Ui } from '@/lib/i18n';
 import { Form, TextArea, TextField } from '../form-fields';
 
 type Fields = {
@@ -40,9 +41,11 @@ const EMPTY: Fields = {
 export function LeaveTestimonial({
   slug,
   buttonClassName,
+  ui = uiFor('en').leave,
 }: {
   slug: string;
   buttonClassName: string;
+  ui?: Ui['leave'];
 }) {
   const [step, setStep] = useState<'closed' | 'open' | 'sent'>('closed');
   const headingId = useId();
@@ -85,8 +88,8 @@ export function LeaveTestimonial({
         role="status"
         className="mt-8 rounded-xl border border-line p-5 focus-visible:outline-2 focus-visible:outline-accent-fg"
       >
-        <p className="font-semibold">Thank you! Your testimonial has been sent.</p>
-        <p className="mt-1 text-muted">It will appear on this page after the owner approves it.</p>
+        <p className="font-semibold">{ui.thanks}</p>
+        <p className="mt-1 text-muted">{ui.intro}</p>
       </div>
     );
   }
@@ -100,7 +103,7 @@ export function LeaveTestimonial({
           className={buttonClassName}
           onClick={() => setStep('open')}
         >
-          Leave a testimonial
+          {ui.open}
         </button>
       </div>
     );
@@ -114,21 +117,20 @@ export function LeaveTestimonial({
       className="mt-8 rounded-xl border border-line bg-page p-5"
     >
       <h3 id={headingId} className="mb-1 text-lg font-semibold">
-        Leave a testimonial
+        {ui.open}
       </h3>
-      <p className="mb-4 text-sm text-muted">
-        It will appear on this page after the owner approves it.
-      </p>
+      <p className="mb-4 text-sm text-muted">{ui.intro}</p>
       <Form
         form={form}
         onSubmit={onSubmit}
-        submitLabel="Send testimonial"
-        pendingLabel="Sending…"
+        submitLabel={ui.send}
+        pendingLabel={ui.sending}
         onCancel={() => setStep('closed')}
+        cancelLabel={ui.cancel}
       >
         <TextField
           name="authorName"
-          label="Your name"
+          label={ui.name}
           maxLength={TESTIMONIAL_NAME_MAX}
           autoComplete="name"
           required
@@ -136,38 +138,38 @@ export function LeaveTestimonial({
         <div className="grid gap-4 sm:grid-cols-2">
           <TextField
             name="authorRole"
-            label="Your role (optional)"
+            label={ui.role}
             maxLength={TESTIMONIAL_ROLE_MAX}
             autoComplete="organization-title"
           />
           <TextField
             name="authorCompany"
-            label="Your company (optional)"
+            label={ui.company}
             maxLength={TESTIMONIAL_COMPANY_MAX}
             autoComplete="organization"
           />
         </div>
         <TextArea
           name="message"
-          label="Your testimonial"
+          label={ui.message}
           rows={5}
           maxLength={TESTIMONIAL_MESSAGE_MAX}
-          hint={`20 to ${TESTIMONIAL_MESSAGE_MAX} characters, plain text.`}
+          hint={fill(ui.messageHint, { min: 20, max: TESTIMONIAL_MESSAGE_MAX })}
           required
         />
         <TextField
           name="contactEmail"
-          label="Your email (optional)"
+          label={ui.email}
           type="email"
           maxLength={TESTIMONIAL_EMAIL_MAX}
           autoComplete="email"
-          hint="Only the owner sees this. It is never shown on the page."
+          hint={ui.emailHint}
         />
         {/* The honeypot: people never see or reach it, bots fill it in. It comes last, so the
             first input of the panel is the name. */}
         <div aria-hidden="true" className="sr-only">
           <label>
-            Leave this field empty
+            {ui.honeypot}
             <input
               type="text"
               tabIndex={-1}

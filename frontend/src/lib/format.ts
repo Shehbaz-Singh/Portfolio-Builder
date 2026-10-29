@@ -1,21 +1,34 @@
 import type { PublicLink } from '@parichay/shared';
+import { intlLocale } from './i18n';
 
 // UTC, so "2022-03-01" shows as Mar 2022 in every timezone.
-const monthYear = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  year: 'numeric',
-  timeZone: 'UTC',
-});
-
-export const formatMonthYear = (iso: string) => monthYear.format(new Date(iso));
+const monthYearFormats = new Map<string, Intl.DateTimeFormat>();
+export function formatMonthYear(iso: string, locale = 'en') {
+  let format = monthYearFormats.get(locale);
+  if (!format) {
+    format = new Intl.DateTimeFormat(intlLocale(locale), {
+      month: 'short',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+    monthYearFormats.set(locale, format);
+  }
+  return format.format(new Date(iso));
+}
 
 // "Mar 2022 – Present". With no end date: "Present" when `openEnded`, else just the start.
-export const formatRange = (start: string, end: string | null, openEnded = true) =>
+export const formatRange = (
+  start: string,
+  end: string | null,
+  openEnded = true,
+  locale = 'en',
+  present = 'Present',
+) =>
   end
-    ? `${formatMonthYear(start)} – ${formatMonthYear(end)}`
+    ? `${formatMonthYear(start, locale)} – ${formatMonthYear(end, locale)}`
     : openEnded
-      ? `${formatMonthYear(start)} – Present`
-      : formatMonthYear(start);
+      ? `${formatMonthYear(start, locale)} – ${present}`
+      : formatMonthYear(start, locale);
 
 // "Asha Q. Rao" -> "AR"
 export function initials(name: string): string {
@@ -92,11 +105,17 @@ export function contactTarget(
 }
 
 // "Mar 12, 2026". UTC, like formatMonthYear, so a date reads the same in every timezone.
-const fullDate = new Intl.DateTimeFormat('en-US', {
-  month: 'short',
-  day: 'numeric',
-  year: 'numeric',
-  timeZone: 'UTC',
-});
-
-export const formatDate = (iso: string) => fullDate.format(new Date(iso));
+const fullFormats = new Map<string, Intl.DateTimeFormat>();
+export function formatDate(iso: string, locale = 'en') {
+  let format = fullFormats.get(locale);
+  if (!format) {
+    format = new Intl.DateTimeFormat(intlLocale(locale), {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+      timeZone: 'UTC',
+    });
+    fullFormats.set(locale, format);
+  }
+  return format.format(new Date(iso));
+}

@@ -107,6 +107,9 @@ export const publicProfileSchema = profileSchema
     availabilityEnabled: z.literal(true).optional(),
     availabilityStatus: availabilityStatusSchema.optional(),
     availabilityMessage: z.string().nullable().optional(),
+    // The language this response is in (one of `locales`, or the default). `locales` here lists only
+    // the extra languages that are ready for visitors.
+    locale: z.string().default('en'),
     sections: z.array(publicSectionSchema).default(() => SECTION_KEYS.map((key) => ({ key }))),
     // The visible custom sections that have items, in page order. Each has an entry in `sections`.
     customSections: z.array(publicCustomSectionSchema).default([]),

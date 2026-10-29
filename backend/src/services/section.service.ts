@@ -3,6 +3,7 @@ import type { Prisma } from '../generated/prisma/client';
 import { AppError } from '../lib/errors';
 import { prisma } from '../lib/prisma';
 import { orNotFound } from '../lib/prisma-errors';
+import { deleteTranslationsFor } from './translation.service';
 
 // experience, education, projects, skills and links all follow the same rules, so one
 // service handles them. This is the minimal slice of a Prisma model delegate it relies on.
@@ -76,8 +77,21 @@ export function updateItem(section: Section, profileId: string, id: string, inpu
   );
 }
 
+// The entity types that have translations, by the section they are in (links have none).
+const translated = {
+  experience: 'experience',
+  education: 'education',
+  projects: 'project',
+  skills: 'skill',
+} as const;
+
 export async function deleteItem(section: Section, profileId: string, id: string) {
   await orNotFound(delegates[section].delete({ where: { id, profileId } }), notFound);
+  if (section !== 'links') {
+    await prisma.$transaction((tx) =>
+      deleteTranslationsFor(tx, profileId, translated[section], [id]),
+    );
+  }
 }
 
 // `ids` is the new order. It must list every item in the section exactly once, which also

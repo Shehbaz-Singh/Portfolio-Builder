@@ -4,6 +4,7 @@ import {
   DEFAULT_AVAILABILITY_STATUS,
   availabilityStatusSchema,
 } from './availability';
+import { isLocaleCode } from './languages';
 import { optionalLine } from './text';
 
 // Request-body schemas for the portfolio models. Dates are accepted as ISO strings
@@ -58,7 +59,8 @@ export const SAMPLE_SLUGS = [
 
 export const isReservedSlug = (slug: string) =>
   (RESERVED_SLUGS as readonly string[]).includes(slug) ||
-  (SAMPLE_SLUGS as readonly string[]).includes(slug);
+  (SAMPLE_SLUGS as readonly string[]).includes(slug) ||
+  isLocaleCode(slug);
 
 // The shape of an address, for reading one (a public page may be a reserved sample address).
 export const slugFormatSchema = z
@@ -131,6 +133,10 @@ export const profileSchema = profileInputSchema.extend({
   // A made-up example profile (samples.ts). Set by the seed script only: it is not in
   // profileInputSchema, so no request can change it.
   isSample: z.boolean().default(false),
+  // The language the profile is written in, and the extra ones it offers (languages.ts). Changed by
+  // the languages endpoints only, so they are not in profileInputSchema.
+  defaultLocale: z.string().default('en'),
+  locales: z.array(z.string()).default([]),
 });
 export type Profile = z.infer<typeof profileSchema>;
 

@@ -12,6 +12,7 @@ import {
   type FooterModel,
   type HeaderModel,
 } from './blocks';
+import { uiFor } from '@/lib/i18n';
 import { LeaveTestimonial } from './LeaveTestimonial';
 import {
   Avatar,
@@ -39,11 +40,17 @@ import type { ThemeProps } from './types';
 
 // preload is off: every theme's fonts are known to the page bundle, and preloading would fetch all
 // of them. Only the faces a page draws are downloaded, when it draws them.
-const sans = Plus_Jakarta_Sans({ subsets: ['latin'], display: 'swap', preload: false });
+const sans = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  display: 'swap',
+  fallback: ['var(--font-script, sans-serif)'],
+  preload: false,
+});
 const sora = Sora({
   subsets: ['latin'],
   variable: '--font-theme-display',
   display: 'swap',
+  fallback: ['var(--font-script, sans-serif)'],
   preload: false,
 });
 
@@ -125,11 +132,21 @@ function EntriesTile({ block }: { block: Extract<Block, { kind: 'entries' }> }) 
   const open = block.variant !== 'custom';
   const dates = (entry: Entry) =>
     entry.start && (
-      <DateRange start={entry.start} end={entry.end} openEnded={open} duration={entry.duration} />
+      <DateRange
+        start={entry.start}
+        end={entry.end}
+        openEnded={open}
+        duration={entry.duration}
+        fmt={entry.fmt}
+      />
     );
   return (
     <TileBody id={block.id} title={block.title}>
-      <TotalExperience total={block.total} className="mb-3 text-sm text-muted" />
+      <TotalExperience
+        total={block.total}
+        label={block.ui.totalExperience}
+        className="mb-3 text-sm text-muted"
+      />
       <div className="min-w-0">
         {latest.start && (
           <p className="mb-2 inline-block rounded-full bg-accent-soft px-3 py-0.5 text-xs font-semibold text-ink tabular-nums">
@@ -158,7 +175,7 @@ function EntriesTile({ block }: { block: Extract<Block, { kind: 'entries' }> }) 
               className={`inline-flex items-center gap-1 font-semibold underline underline-offset-4 hover:no-underline ${focusRing}`}
             >
               View
-              <ArrowUpRight aria-hidden="true" className="size-4" />
+              <ArrowUpRight aria-hidden="true" className="rtl:-scale-x-100 size-4" />
             </NewTabLink>
           </p>
         )}
@@ -225,6 +242,7 @@ function identityTile(header: HeaderModel): Tile {
           )}
           <AvailabilityBadge
             availability={header.availability}
+            ui={header.ui}
             className="mt-5 w-fit rounded-2xl bg-surface px-3.5 py-2.5 text-sm text-ink"
             dotClassName="bg-accent-fg"
             linkClassName={`font-semibold text-accent-fg underline underline-offset-2 hover:no-underline ${focusRing}`}
@@ -256,7 +274,12 @@ function linksTile(header: HeaderModel, idPrefix: string): Tile {
           )}
         </ul>
         <div className="mt-auto pt-4">
-          <ShareButton url={header.share.url} title={header.share.title} variant="inverse" />
+          <ShareButton
+            url={header.share.url}
+            title={header.share.title}
+            ui={header.ui.share}
+            variant="inverse"
+          />
         </div>
       </TileBody>
     ),
@@ -341,7 +364,10 @@ function blockTiles(block: Block): Tile[] {
                   >
                     {project.name}
                   </NewTabLink>
-                  <ArrowUpRight aria-hidden="true" className="mt-1 size-5 shrink-0 text-muted" />
+                  <ArrowUpRight
+                    aria-hidden="true"
+                    className="rtl:-scale-x-100 mt-1 size-5 shrink-0 text-muted"
+                  />
                 </>
               ) : (
                 project.name
@@ -420,10 +446,11 @@ function blockTiles(block: Block): Tile[] {
           tone: 'strong',
           node: (
             <TileBody id={block.id} title={block.title}>
-              {tiles.length === 0 && <p className="mb-4 text-muted">No testimonials yet.</p>}
+              {tiles.length === 0 && <p className="mb-4 text-muted">{block.ui.noTestimonials}</p>}
               {block.submitTo && (
                 <LeaveTestimonial
                   slug={block.submitTo}
+                  ui={block.ui.leave}
                   buttonClassName={`inline-flex items-center rounded-full border border-line bg-page/70 px-5 py-2 text-sm font-semibold transition-colors hover:bg-page ${focusRing}`}
                 />
               )}
@@ -502,7 +529,12 @@ export default function BentoTheme({
               </li>
             ))}
           </ul>
-          {empty && <EmptyPage className="mt-6 text-center text-muted" />}
+          {empty && (
+            <EmptyPage
+              text={uiFor(profile.locale).emptyPage}
+              className="mt-6 text-center text-muted"
+            />
+          )}
         </main>
         <Footer footer={buildFooter(profile)} />
       </div>

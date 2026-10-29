@@ -27,6 +27,16 @@ export async function exportAccountData(userId: string) {
             orderBy: [{ order: 'asc' }, { id: 'asc' }],
           },
           testimonials: myTestimonials,
+          // The translated texts of every extra language (each says which thing it translates).
+          translations: {
+            omit: { id: true, profileId: true },
+            orderBy: [
+              { locale: 'asc' },
+              { entityType: 'asc' },
+              { entityId: 'asc' },
+              { field: 'asc' },
+            ],
+          },
           // All posts with their bodies, drafts included.
           posts: { omit: { profileId: true }, orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] },
         },

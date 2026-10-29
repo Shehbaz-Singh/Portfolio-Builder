@@ -1,5 +1,5 @@
 import type { Request } from 'express';
-import { slugFormatSchema, type TestimonialInput } from '@parichay/shared';
+import { isLocaleCode, slugFormatSchema, type TestimonialInput } from '@parichay/shared';
 import { asyncHandler } from '../lib/async-handler';
 import { config } from '../lib/config';
 import { AppError } from '../lib/errors';
@@ -17,8 +17,16 @@ function slugOf(req: Request) {
   return slug.data;
 }
 
+// ?lang=xx. Anything that is not a known language code is a language that is not offered.
+function langOf(req: Request) {
+  const lang = req.query.lang;
+  if (lang === undefined) return undefined;
+  if (typeof lang !== 'string' || !isLocaleCode(lang)) throw AppError.notFound('Profile not found');
+  return lang;
+}
+
 export const getPublicProfile = asyncHandler(async (req, res) => {
-  const profile = await publicService.getPublicProfile(slugOf(req));
+  const profile = await publicService.getPublicProfile(slugOf(req), langOf(req));
   res.set('Cache-Control', CACHE_CONTROL);
   res.json(profile);
 });
@@ -46,7 +54,7 @@ export const getSiteInfo = asyncHandler(async (_req, res) => {
 const POST_SLUG = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export const getPublicPosts = asyncHandler(async (req, res) => {
-  const posts = await publicService.getPublicPosts(slugOf(req));
+  const posts = await publicService.getPublicPosts(slugOf(req), langOf(req));
   res.set('Cache-Control', CACHE_CONTROL);
   res.json(posts);
 });
@@ -54,7 +62,7 @@ export const getPublicPosts = asyncHandler(async (req, res) => {
 export const getPublicPost = asyncHandler(async (req, res) => {
   const postSlug = req.params.postSlug as string;
   if (postSlug.length > 80 || !POST_SLUG.test(postSlug)) throw AppError.notFound('Post not found');
-  const post = await publicService.getPublicPost(slugOf(req), postSlug);
+  const post = await publicService.getPublicPost(slugOf(req), postSlug, langOf(req));
   res.set('Cache-Control', CACHE_CONTROL);
   res.json(post);
 });
@@ -62,4 +70,9 @@ export const getPublicPost = asyncHandler(async (req, res) => {
 export const getSitemapPosts = asyncHandler(async (_req, res) => {
   res.set('Cache-Control', CACHE_CONTROL);
   res.json(await publicService.getPostsForSitemap());
+});
+
+export const getSitemapLocales = asyncHandler(async (_req, res) => {
+  res.set('Cache-Control', CACHE_CONTROL);
+  res.json(await publicService.getLocalesForSitemap());
 });

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import type { ReactNode } from 'react';
 import type { PublicProfile } from '@parichay/shared';
+import { pagePath, uiFor } from '@/lib/i18n';
 import { loadThemeFonts } from '@/lib/theme-loader';
 import { getTheme } from '@/lib/themes';
 import { SampleBanner } from '../SampleBanner';
@@ -18,26 +19,28 @@ export async function WritingShell({
 }) {
   const theme = getTheme(profile.theme).key;
   const fonts = await loadThemeFonts(theme);
+  const ui = uiFor(profile.locale);
+  const base = pagePath(profile.slug, profile.locale, profile.defaultLocale);
   // `.wr-display` marks headings that use the theme's display face. Creative has none of its own (its
   // body font is the display font), so there it changes nothing.
   const display =
     theme === 'creative' ? '' : '[&_.wr-display]:font-(family-name:--font-theme-display)';
   return (
     <ThemeWrapper theme={theme} profile={profile} className={`${fonts} ${display}`}>
-      {profile.isSample && <SampleBanner />}
+      {profile.isSample && <SampleBanner ui={ui.sample} />}
       <header className="border-b border-line">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-5 py-4 sm:px-8">
           <Link
-            href={`/${profile.slug}`}
+            href={base}
             className="min-w-0 truncate font-semibold text-ink hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-fg"
           >
             {profile.fullName}
           </Link>
           <Link
-            href={`/${profile.slug}/writing`}
+            href={`${base}/writing`}
             className="shrink-0 text-sm font-medium text-accent-fg underline underline-offset-2 hover:no-underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-fg"
           >
-            All writing
+            {ui.writing.all}
           </Link>
         </div>
       </header>

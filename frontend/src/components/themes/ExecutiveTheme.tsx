@@ -10,6 +10,7 @@ import {
   type FooterModel,
   type HeaderModel,
 } from './blocks';
+import { uiFor } from '@/lib/i18n';
 import { LeaveTestimonial } from './LeaveTestimonial';
 import {
   Avatar,
@@ -35,11 +36,17 @@ import type { ThemeProps } from './types';
 
 // preload is off: every theme's fonts are known to the page bundle, and preloading would fetch all
 // of them. Only the faces a page draws are downloaded, when it draws them.
-const sans = Source_Sans_3({ subsets: ['latin'], display: 'swap', preload: false });
+const sans = Source_Sans_3({
+  subsets: ['latin'],
+  display: 'swap',
+  fallback: ['var(--font-script, sans-serif)'],
+  preload: false,
+});
 const serif = Source_Serif_4({
   subsets: ['latin'],
   variable: '--font-theme-display',
   display: 'swap',
+  fallback: ['var(--font-script, sans-serif)'],
   preload: false,
 });
 
@@ -77,6 +84,7 @@ function Sidebar({
       )}
       <AvailabilityBadge
         availability={header.availability}
+        ui={header.ui}
         className="mt-5 rounded-md border border-line bg-surface px-3 py-2.5 text-sm"
         dotClassName="bg-accent-fg"
         linkClassName={`font-semibold underline underline-offset-2 hover:no-underline ${focusRing}`}
@@ -108,7 +116,12 @@ function Sidebar({
           )}
         </ul>
         <div className="mt-4 print:hidden">
-          <ShareButton url={header.share.url} title={header.share.title} variant="outline" />
+          <ShareButton
+            url={header.share.url}
+            title={header.share.title}
+            ui={header.ui.share}
+            variant="outline"
+          />
         </div>
       </section>
 
@@ -171,7 +184,7 @@ function BlockView({ block }: { block: Block }) {
                     {project.name}
                     <ArrowUpRight
                       aria-hidden="true"
-                      className="size-3.5 shrink-0 self-center print:hidden"
+                      className="rtl:-scale-x-100 size-3.5 shrink-0 self-center print:hidden"
                     />
                   </NewTabLink>
                 ) : (
@@ -221,12 +234,13 @@ function BlockView({ block }: { block: Block }) {
               ))}
             </ul>
           ) : (
-            <p className="text-muted">No testimonials yet.</p>
+            <p className="text-muted">{block.ui.noTestimonials}</p>
           )}
           {block.submitTo && (
             <div className="mt-6 print:hidden">
               <LeaveTestimonial
                 slug={block.submitTo}
+                ui={block.ui.leave}
                 buttonClassName={`inline-flex items-center rounded border border-ink px-4 py-1.5 text-sm font-semibold transition-colors hover:bg-page ${focusRing}`}
               />
             </div>
@@ -236,7 +250,11 @@ function BlockView({ block }: { block: Block }) {
     case 'entries':
       return (
         <>
-          <TotalExperience total={block.total} className="mb-4 text-sm text-muted" />
+          <TotalExperience
+            total={block.total}
+            label={block.ui.totalExperience}
+            className="mb-4 text-sm text-muted"
+          />
           <ol className="space-y-6">
             {block.entries.map((entry) => (
               <li key={entry.id} className="min-w-0 break-inside-avoid">
@@ -250,6 +268,7 @@ function BlockView({ block }: { block: Block }) {
                         end={entry.end}
                         openEnded={block.variant !== 'custom'}
                         duration={entry.duration}
+                        fmt={entry.fmt}
                       />
                     </p>
                   )}
@@ -321,7 +340,9 @@ export default function ExecutiveTheme({ profile, idPrefix = '' }: ThemeProps) {
                 </Section>
               ))}
             </div>
-            {main.length === 0 && <EmptyPage className="text-muted" />}
+            {main.length === 0 && (
+              <EmptyPage text={uiFor(profile.locale).emptyPage} className="text-muted" />
+            )}
             <Footer footer={buildFooter(profile)} />
           </main>
         </div>

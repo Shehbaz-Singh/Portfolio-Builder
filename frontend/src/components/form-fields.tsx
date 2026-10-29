@@ -24,6 +24,7 @@ interface FormProps<TIn extends FieldValues, TOut> {
   danger?: boolean; // styles the submit button as a destructive action
   pendingLabel?: string; // the submit button while sending, "Saving…" by default
   onCancel?: () => void;
+  cancelLabel?: string;
   children: ReactNode;
 }
 
@@ -35,6 +36,7 @@ export function Form<TIn extends FieldValues, TOut>({
   danger,
   pendingLabel = 'Saving…',
   onCancel,
+  cancelLabel = 'Cancel',
   children,
 }: FormProps<TIn, TOut>) {
   const { isSubmitting, errors } = form.formState;
@@ -60,7 +62,7 @@ export function Form<TIn extends FieldValues, TOut>({
             )}
             {onCancel && (
               <Button onClick={onCancel} disabled={isSubmitting}>
-                Cancel
+                {cancelLabel}
               </Button>
             )}
           </div>

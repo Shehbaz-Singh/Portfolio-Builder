@@ -2,7 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Monitor, Smartphone, Tablet } from 'lucide-react';
-import { Skeleton } from '../ui';
+import { languageOf } from '@parichay/shared';
+import { Select, Skeleton } from '../ui';
 import { cx } from '../ui/cx';
 import { useEditor } from './editor-context';
 
@@ -21,7 +22,7 @@ const STAGE_HEIGHT = '(100vh - 12rem)';
 // reacts to that width. The profile being edited, unsaved typing included, is sent to it as a
 // message each time it changes. The frame is shrunk to fit the column and cannot be clicked into.
 export function Preview() {
-  const { preview } = useEditor();
+  const { localizedPreview: preview, profile, previewLocale, setPreviewLocale } = useEditor();
   const [deviceId, setDeviceId] = useState<DeviceId>(() =>
     window.innerWidth >= 1280 ? 'desktop' : 'phone',
   );
@@ -68,8 +69,30 @@ export function Preview() {
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-line bg-surface px-3 py-2">
         <div>
           <p className="text-sm font-semibold">Your page, live</p>
-          <p className="text-xs text-muted">Updates as you type</p>
+          <p className="text-xs text-muted">
+            {previewLocale === profile.defaultLocale
+              ? 'Updates as you type'
+              : `Showing ${languageOf(previewLocale).name}. Texts not translated yet appear in ${languageOf(profile.defaultLocale).name}.`}
+          </p>
         </div>
+        {profile.locales.length > 0 && (
+          <div className="flex items-center gap-2">
+            <label htmlFor="preview-language" className="text-xs font-medium text-muted">
+              Language
+            </label>
+            <div className="min-w-36">
+              <Select
+                id="preview-language"
+                value={previewLocale}
+                onChange={setPreviewLocale}
+                options={[profile.defaultLocale, ...profile.locales].map((code) => ({
+                  value: code,
+                  label: languageOf(code).name,
+                }))}
+              />
+            </div>
+          </div>
+        )}
         <div role="group" aria-label="Preview width" className="flex gap-1">
           {DEVICES.map(({ id, label, Icon }) => (
             <button

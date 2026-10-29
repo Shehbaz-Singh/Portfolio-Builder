@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { Logo } from '@/components/Logo';
 import type { MouseEvent } from 'react';
 import {
+  Languages,
   LayoutList,
   LogOut,
   MessageSquareQuote,
@@ -24,6 +25,7 @@ import { useGo, useLeaveGuard } from './navigation';
 const ITEMS: { href: string; label: string; Icon: LucideIcon }[] = [
   { href: '/dashboard', label: 'Profile', Icon: UserRound },
   { href: '/dashboard/sections', label: 'Sections', Icon: LayoutList },
+  { href: '/dashboard/languages', label: 'Languages', Icon: Languages },
   { href: '/dashboard/themes', label: 'Themes', Icon: Palette },
   { href: '/dashboard/testimonials', label: 'Testimonials', Icon: MessageSquareQuote },
   { href: '/dashboard/settings', label: 'Settings', Icon: Settings },
@@ -54,12 +56,12 @@ function NavLinks({ layout }: { layout: 'side' | 'bottom' }) {
   }
 
   return (
-    <ul className={layout === 'side' ? 'space-y-1' : 'grid grid-cols-5'}>
+    <ul className={layout === 'side' ? 'space-y-1' : 'flex overflow-x-auto'}>
       {ITEMS.map(({ href, label, Icon }) => {
         const current = pathname === href;
         const hint = hints[href];
         return (
-          <li key={href}>
+          <li key={href} className={layout === 'bottom' ? 'min-w-fit flex-1' : undefined}>
             <Link
               href={href}
               onClick={(e) => onClick(e, href)}

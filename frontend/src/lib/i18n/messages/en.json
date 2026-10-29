@@ -1,0 +1,82 @@
+{
+  "skipLink": "Skip to main content",
+  "sections": {
+    "about": "About",
+    "skills": "Skills",
+    "experience": "Experience",
+    "projects": "Projects",
+    "education": "Education",
+    "testimonials": "Testimonials",
+    "writing": "Writing"
+  },
+  "availabilityStatus": {
+    "open_to_work": "Open to new opportunities",
+    "open_to_freelance": "Available for freelance projects",
+    "open_to_collaborate": "Open to collaborating",
+    "custom": "Available"
+  },
+  "present": "Present",
+  "viewAll": "View all",
+  "viewProject": "View project",
+  "getInTouch": "Get in touch",
+  "via": "via {label}",
+  "availability": "Availability",
+  "downloadResume": "Download resume",
+  "noTestimonials": "No testimonials yet.",
+  "portfolio": "Portfolio",
+  "emptyPage": "This portfolio is still being put together.",
+  "linkBadge": "Link",
+  "linkBadgeNote": ", an article on another site",
+  "totalExperience": "Total experience",
+  "years": "{count, plural, one {# year} other {# years}}",
+  "months": "{count, plural, one {# month} other {# months}}",
+  "footerCta": "Make your own portfolio",
+  "shareTitle": "Portfolio of {name}",
+  "newTab": " (opens in a new tab)",
+  "writing": {
+    "title": "Writing",
+    "intro": "Posts and articles by {name}.",
+    "nothing": "Nothing here yet. Check back soon.",
+    "back": "Back to all writing",
+    "all": "All writing",
+    "read": "Read the article"
+  },
+  "share": {
+    "label": "Share",
+    "copyLink": "Copy link",
+    "copied": "Link copied",
+    "copyFailed": "Could not copy the link",
+    "email": "Email"
+  },
+  "leave": {
+    "open": "Leave a testimonial",
+    "intro": "It will appear on this page after the owner approves it.",
+    "send": "Send testimonial",
+    "sending": "Sending…",
+    "cancel": "Cancel",
+    "name": "Your name",
+    "role": "Your role (optional)",
+    "company": "Your company (optional)",
+    "message": "Your testimonial",
+    "messageHint": "{min} to {max} characters, plain text.",
+    "email": "Your email (optional)",
+    "emailHint": "Only the owner sees this. It is never shown on the page.",
+    "honeypot": "Leave this field empty",
+    "thanks": "Thank you! Your testimonial has been sent."
+  },
+  "sample": {
+    "label": "Sample profile.",
+    "text": "The person and all the details are made up.",
+    "cta": "Make your own with Parichay"
+  },
+  "switcher": {
+    "label": "Language"
+  },
+  "banner": {
+    "text": "This page is also available in {language}.",
+    "go": "View in {language}",
+    "dismiss": "Dismiss"
+  },
+  "photoOf": "Photo of {name}",
+  "minRead": "{count} min read"
+}

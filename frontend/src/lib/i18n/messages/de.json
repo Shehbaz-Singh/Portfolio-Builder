@@ -1,0 +1,82 @@
+{
+  "skipLink": "Zum Hauptinhalt springen",
+  "sections": {
+    "about": "Über mich",
+    "skills": "Fähigkeiten",
+    "experience": "Erfahrung",
+    "projects": "Projekte",
+    "education": "Ausbildung",
+    "testimonials": "Empfehlungen",
+    "writing": "Texte"
+  },
+  "availabilityStatus": {
+    "open_to_work": "Offen für neue Möglichkeiten",
+    "open_to_freelance": "Verfügbar für Freelance-Projekte",
+    "open_to_collaborate": "Offen für Zusammenarbeit",
+    "custom": "Verfügbar"
+  },
+  "present": "Heute",
+  "viewAll": "Alle ansehen",
+  "viewProject": "Projekt ansehen",
+  "getInTouch": "Kontakt aufnehmen",
+  "via": "über {label}",
+  "availability": "Verfügbarkeit",
+  "downloadResume": "Lebenslauf herunterladen",
+  "noTestimonials": "Noch keine Empfehlungen.",
+  "portfolio": "Portfolio",
+  "emptyPage": "Dieses Portfolio wird noch zusammengestellt.",
+  "linkBadge": "Link",
+  "linkBadgeNote": ", ein Artikel auf einer anderen Website",
+  "totalExperience": "Gesamterfahrung",
+  "years": "{count, plural, one {# Jahr} other {# Jahre}}",
+  "months": "{count, plural, one {# Monat} other {# Monate}}",
+  "footerCta": "Erstelle dein eigenes Portfolio",
+  "shareTitle": "Portfolio von {name}",
+  "newTab": " (öffnet in einem neuen Tab)",
+  "writing": {
+    "title": "Texte",
+    "intro": "Beiträge und Artikel von {name}.",
+    "nothing": "Hier ist noch nichts. Schau bald wieder vorbei.",
+    "back": "Zurück zu allen Texten",
+    "all": "Alle Texte",
+    "read": "Artikel lesen"
+  },
+  "share": {
+    "label": "Teilen",
+    "copyLink": "Link kopieren",
+    "copied": "Link kopiert",
+    "copyFailed": "Der Link konnte nicht kopiert werden",
+    "email": "E-Mail"
+  },
+  "leave": {
+    "open": "Empfehlung hinterlassen",
+    "intro": "Sie erscheint auf dieser Seite, sobald der Inhaber sie freigegeben hat.",
+    "send": "Empfehlung senden",
+    "sending": "Wird gesendet…",
+    "cancel": "Abbrechen",
+    "name": "Dein Name",
+    "role": "Deine Position (optional)",
+    "company": "Dein Unternehmen (optional)",
+    "message": "Deine Empfehlung",
+    "messageHint": "{min} bis {max} Zeichen, reiner Text.",
+    "email": "Deine E-Mail-Adresse (optional)",
+    "emailHint": "Nur der Inhaber sieht sie. Sie wird nie auf der Seite angezeigt.",
+    "honeypot": "Dieses Feld bitte leer lassen",
+    "thanks": "Vielen Dank! Deine Empfehlung wurde gesendet."
+  },
+  "sample": {
+    "label": "Beispielprofil.",
+    "text": "Die Person und alle Angaben sind frei erfunden.",
+    "cta": "Erstelle dein eigenes mit Parichay"
+  },
+  "switcher": {
+    "label": "Sprache"
+  },
+  "banner": {
+    "text": "Diese Seite ist auch auf {language} verfügbar.",
+    "go": "Auf {language} ansehen",
+    "dismiss": "Schließen"
+  },
+  "photoOf": "Foto von {name}",
+  "minRead": "{count} Min. Lesezeit"
+}

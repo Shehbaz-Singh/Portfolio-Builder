@@ -50,6 +50,9 @@ function toPublic(sample: SampleProfile): PublicProfile {
     theme: sample.theme,
     accentColor: sample.accentColor,
     isSample: true,
+    defaultLocale: 'en',
+    locales: [],
+    locale: 'en',
     acceptTestimonials: false,
     resumeEnabled: true,
     ...(sample.availability && {

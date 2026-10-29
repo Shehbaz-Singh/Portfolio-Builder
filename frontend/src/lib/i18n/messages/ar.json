@@ -1,0 +1,82 @@
+{
+  "skipLink": "انتقل إلى المحتوى الرئيسي",
+  "sections": {
+    "about": "نبذة",
+    "skills": "المهارات",
+    "experience": "الخبرات",
+    "projects": "المشاريع",
+    "education": "التعليم",
+    "testimonials": "التوصيات",
+    "writing": "الكتابات"
+  },
+  "availabilityStatus": {
+    "open_to_work": "متاح لفرص جديدة",
+    "open_to_freelance": "متاح للمشاريع الحرة",
+    "open_to_collaborate": "منفتح على التعاون",
+    "custom": "متاح"
+  },
+  "present": "حتى الآن",
+  "viewAll": "عرض الكل",
+  "viewProject": "عرض المشروع",
+  "getInTouch": "تواصل معي",
+  "via": "عبر {label}",
+  "availability": "التوفر",
+  "downloadResume": "تنزيل السيرة الذاتية",
+  "noTestimonials": "لا توجد توصيات بعد.",
+  "portfolio": "ملف الأعمال",
+  "emptyPage": "ما زال ملف الأعمال هذا قيد الإعداد.",
+  "linkBadge": "رابط",
+  "linkBadgeNote": "، مقال على موقع آخر",
+  "totalExperience": "إجمالي الخبرة",
+  "years": "{count, plural, zero {# سنة} one {سنة واحدة} two {سنتان} few {# سنوات} many {# سنة} other {# سنة}}",
+  "months": "{count, plural, zero {# شهر} one {شهر واحد} two {شهران} few {# أشهر} many {# شهرًا} other {# شهر}}",
+  "footerCta": "أنشئ ملف أعمالك الخاص",
+  "shareTitle": "ملف أعمال {name}",
+  "newTab": " (يُفتح في علامة تبويب جديدة)",
+  "writing": {
+    "title": "الكتابات",
+    "intro": "منشورات ومقالات {name}.",
+    "nothing": "لا يوجد شيء هنا بعد. عد قريبًا.",
+    "back": "العودة إلى كل الكتابات",
+    "all": "كل الكتابات",
+    "read": "اقرأ المقال"
+  },
+  "share": {
+    "label": "مشاركة",
+    "copyLink": "نسخ الرابط",
+    "copied": "تم نسخ الرابط",
+    "copyFailed": "تعذّر نسخ الرابط",
+    "email": "البريد الإلكتروني"
+  },
+  "leave": {
+    "open": "اكتب توصية",
+    "intro": "ستظهر في هذه الصفحة بعد موافقة صاحب الملف.",
+    "send": "إرسال التوصية",
+    "sending": "جارٍ الإرسال…",
+    "cancel": "إلغاء",
+    "name": "اسمك",
+    "role": "منصبك (اختياري)",
+    "company": "شركتك (اختياري)",
+    "message": "توصيتك",
+    "messageHint": "من {min} إلى {max} حرفًا، نص عادي.",
+    "email": "بريدك الإلكتروني (اختياري)",
+    "emailHint": "لا يراه سوى صاحب الملف. ولا يُعرض في الصفحة إطلاقًا.",
+    "honeypot": "اترك هذا الحقل فارغًا",
+    "thanks": "شكرًا لك! تم إرسال توصيتك."
+  },
+  "sample": {
+    "label": "ملف تجريبي.",
+    "text": "الشخص وجميع التفاصيل من وحي الخيال.",
+    "cta": "أنشئ ملفك الخاص مع Parichay"
+  },
+  "switcher": {
+    "label": "اللغة"
+  },
+  "banner": {
+    "text": "هذه الصفحة متاحة أيضًا باللغة {language}.",
+    "go": "العرض بـ{language}",
+    "dismiss": "إغلاق"
+  },
+  "photoOf": "صورة {name}",
+  "minRead": "{count} دقيقة للقراءة"
+}
