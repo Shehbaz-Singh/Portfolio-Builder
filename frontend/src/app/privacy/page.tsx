@@ -177,7 +177,12 @@ export default async function PrivacyPage() {
             <li>
               <strong>Cloudinary</strong> (images): stores and delivers your photo and post cover
               images. Visitors’ browsers load the photo from Cloudinary, so Cloudinary sees their IP
-              address when they do.
+              address when they do. The same goes for an email signature you make with the signature
+              generator: it is built in your browser, and nothing is stored or sent anywhere. Once
+              you paste it into your email, the people who open your messages load your photo from
+              Cloudinary and the badge from this site, and so those two can see their IP address
+              when they do. Many mail apps block such images until the reader allows them. The
+              signature has no tracking of any kind.
             </li>
             <li>
               <strong>{provider ?? 'The AI provider'}</strong> (resume reading): receives resume

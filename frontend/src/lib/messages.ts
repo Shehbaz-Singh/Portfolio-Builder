@@ -39,6 +39,10 @@ export const NOTICES = {
   mainLanguage: (name: string) => `Main language is now ${name}.`,
   languageAdded: (name: string) => `${name} added. Translate its texts below.`,
   languageRemoved: (name: string) => `${name} and its texts were deleted.`,
+  signatureCopied: 'Copied. Paste it into your email signature box.',
+  signatureHtmlCopied: 'Copied the HTML code.',
+  signatureTextCopied: 'Copied the plain text version.',
+  signatureDownloaded: 'Downloaded the signature as an .html file.',
 } as const;
 
 export const PROBLEMS = {
@@ -51,6 +55,8 @@ export const PROBLEMS = {
   colorNotChanged: "We couldn't change the color. Please try again.",
   linkNotUpdated: "We couldn't update that link. Please try again.",
   copyLink: "We couldn't copy the link automatically. Select it and copy it by hand.",
+  signatureCopy:
+    "We couldn't copy that automatically. Select the preview and copy it by hand, or download the .html file.",
   imageType: "That file type won't work. Choose a JPG, PNG or WebP image.",
   avatarTooLarge: `That image is over ${megabytes(IMAGE_MAX_BYTES)}. Choose a smaller one, or shrink it and try again.`,
   coverTooLarge: `That image is over ${megabytes(IMAGE_MAX_BYTES)}. Choose a smaller one, or shrink it first.`,

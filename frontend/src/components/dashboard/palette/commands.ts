@@ -13,6 +13,7 @@ import {
   Languages,
   LayoutList,
   LayoutPanelTop,
+  Mail,
   MessageSquareQuote,
   PenLine,
   Palette,
@@ -190,6 +191,13 @@ const GO_TO: {
     href: '/dashboard/testimonials',
     icon: MessageSquareQuote,
     keywords: ['reviews', 'quotes', 'recommendations', 'approve', 'feedback'],
+  },
+  {
+    id: 'signature',
+    title: 'Email signature',
+    href: '/dashboard/signature',
+    icon: Mail,
+    keywords: ['email', 'mail', 'gmail', 'outlook', 'footer', 'badge', 'html', 'copy'],
   },
   {
     id: 'settings',

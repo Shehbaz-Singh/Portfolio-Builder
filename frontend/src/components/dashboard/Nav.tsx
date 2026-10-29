@@ -8,6 +8,7 @@ import {
   Languages,
   LayoutList,
   LogOut,
+  Mail,
   MessageSquareQuote,
   Palette,
   Settings,
@@ -28,6 +29,7 @@ const ITEMS: { href: string; label: string; Icon: LucideIcon }[] = [
   { href: '/dashboard/languages', label: 'Languages', Icon: Languages },
   { href: '/dashboard/themes', label: 'Themes', Icon: Palette },
   { href: '/dashboard/testimonials', label: 'Testimonials', Icon: MessageSquareQuote },
+  { href: '/dashboard/signature', label: 'Signature', Icon: Mail },
   { href: '/dashboard/settings', label: 'Settings', Icon: Settings },
 ];
 

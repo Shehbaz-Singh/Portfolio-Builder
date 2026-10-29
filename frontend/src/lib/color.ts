@@ -34,13 +34,13 @@ function luminance(hex: string): number {
   return 0.2126 * r + 0.7152 * g + 0.0722 * b;
 }
 
-function contrastRatio(a: string, b: string): number {
+export function contrastRatio(a: string, b: string): number {
   const [light, dark] = [luminance(a), luminance(b)].sort((x, y) => y - x);
   return (light + 0.05) / (dark + 0.05);
 }
 
 // `share` of `a` mixed with the rest of `b` (what CSS color-mix(in srgb) does).
-function mix(a: string, b: string, share: number): string {
+export function mix(a: string, b: string, share: number): string {
   const [ca, cb] = [channels(a), channels(b)];
   return (
     '#' +
@@ -53,7 +53,7 @@ function mix(a: string, b: string, share: number): string {
 
 // Black or white, whichever reads better on this color (for text placed on the accent). Either
 // one reaches at least 4.58:1, so text on the accent is always readable.
-const readableTextOn = (hex: string) =>
+export const readableTextOn = (hex: string) =>
   contrastRatio(hex, '#000000') >= contrastRatio(hex, '#ffffff') ? '#000000' : '#ffffff';
 
 // The accent as the color of text (links, tags) on a theme's page. It has to be readable on the

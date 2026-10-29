@@ -74,8 +74,9 @@ function Workspace({ children }: { children: ReactNode }) {
 }
 
 function Frame({ children }: { children: ReactNode }) {
-  // Account settings have nothing to preview.
-  const withPreview = usePathname() !== '/dashboard/settings';
+  // Account settings and the email signature have no portfolio to preview.
+  const pathname = usePathname();
+  const withPreview = pathname !== '/dashboard/settings' && pathname !== '/dashboard/signature';
   return (
     <div className="dashboard-root min-h-screen lg:flex">
       <Sidebar />
