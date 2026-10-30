@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "check:reading-prefs": "node scripts/check-reading-prefs.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

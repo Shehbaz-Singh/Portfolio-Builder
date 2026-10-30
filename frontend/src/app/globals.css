@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import './reading-prefs.css';
 
 /* ===== Design tokens: the one place the look of the app is defined =====
    Everything below is read by Tailwind as theme values (bg-*, text-*, rounded-*, shadow-*, p-*),

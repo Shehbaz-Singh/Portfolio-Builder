@@ -1,0 +1,79 @@
+/* Visitor reading preferences (lib/reading-prefs.ts, components/portfolio/ReadingPreferences.tsx).
+   The choices are data attributes on <html>, set only by the public pages, so the dashboard never
+   gets them. Two rules keep them out of the way of everything else:
+   - Everything is inside @media screen: printing, and so "save as PDF", ignores them. (The resume
+     PDF is drawn by @react-pdf and never reads any of this. `npm run check:reading-prefs` checks both.)
+   - The text rules only reach inside [data-reading], the wrapper of a public page (LocaleScope). */
+@media screen {
+  /* Text size: the root font size, as a share of the visitor's own browser setting. The themes use
+     rem, so type, spacing and boxes scale together. */
+  html[data-read-text='larger'] {
+    font-size: 115%;
+  }
+  html[data-read-text='largest'] {
+    font-size: 135%;
+  }
+
+  /* Font. A face is only a first choice: the script's own font (--font-script, set on the page
+     wrapper for Hindi, Arabic and the rest) comes next, so letters the first face lacks fall back
+     to the right font one by one instead of to a system default. */
+  html[data-read-font='plain'] [data-reading],
+  html[data-read-font='plain'] [data-reading] *:not(code, kbd, pre, samp) {
+    font-family:
+      var(--font-body), var(--font-script, sans-serif), ui-sans-serif, system-ui, sans-serif;
+  }
+  html[data-read-font='atkinson'] [data-reading],
+  html[data-read-font='atkinson'] [data-reading] *:not(code, kbd, pre, samp) {
+    font-family:
+      var(--font-atkinson), var(--font-script, sans-serif), ui-sans-serif, system-ui, sans-serif;
+  }
+
+  /* Line spacing: running text only. Headings and display lines keep the theme's tight leading.
+     The scripts with marks above and below the line (see the language rules in globals.css) need
+     more than Latin does, so each gets its own figure; these selectors are the more specific ones. */
+  html[data-read-lines='relaxed'] [data-reading] :is(p, li, dd, blockquote) {
+    line-height: 1.8;
+  }
+  html[data-read-lines='relaxed']
+    [data-reading]:is(
+      [data-script='devanagari'],
+      [data-script='telugu'],
+      [data-script='tamil'],
+      [data-script='bengali'],
+      [data-script='gujarati'],
+      [data-script='gurmukhi']
+    )
+    :is(p, li, dd, blockquote, div, span) {
+    line-height: 2.1;
+  }
+  html[data-read-lines='relaxed']
+    [data-reading][data-script='arabic']
+    :is(p, li, dd, blockquote, div, span) {
+    line-height: 2.2;
+  }
+  html[data-read-lines='relaxed']
+    [data-reading][data-script='nastaliq']
+    :is(p, li, dd, blockquote, div, span) {
+    line-height: 2.6;
+  }
+
+  /* Motion: the same as the system setting (globals.css), and the scroll reveals show at once. */
+  html[data-read-motion='reduce'] {
+    scroll-behavior: auto;
+  }
+  html[data-read-motion='reduce'] [data-reading],
+  html[data-read-motion='reduce'] [data-reading] *,
+  html[data-read-motion='reduce'] [data-reading] ::before,
+  html[data-read-motion='reduce'] [data-reading] ::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+  html[data-read-motion='reduce'] [data-reading] [data-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}

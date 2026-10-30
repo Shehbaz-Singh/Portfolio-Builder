@@ -19,7 +19,9 @@ export const viewport: Viewport = { colorScheme: 'light', themeColor: '#fbf7f0' 
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${body.variable} ${fraunces.variable}`}>
+    // suppressHydrationWarning: the public pages put the visitor's reading preferences (data-read-*)
+    // on <html> before React starts, and HtmlLang sets its lang and dir.
+    <html lang="en" className={`${body.variable} ${fraunces.variable}`} suppressHydrationWarning>
       <body className="theme-root brand min-h-screen antialiased">
         <a href="#main" className="skip-link">
           Skip to main content

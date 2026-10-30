@@ -321,7 +321,7 @@ function BlockView({ block }: { block: Block }) {
             {block.entries.map((entry, i) => (
               <li
                 key={entry.id}
-                className={`${card} min-w-0 border-s-[10px] p-6 sm:p-7 ${EDGES[i % EDGES.length]}`}
+                className={`${card} min-w-0 border-s-[0.625rem] p-6 sm:p-7 ${EDGES[i % EDGES.length]}`}
               >
                 {entry.start && (
                   <p

@@ -22,6 +22,8 @@ export function Reveal({
     const el = ref.current;
     if (!enabled || !el || typeof IntersectionObserver === 'undefined') return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    // The visitor's own choice (reading preferences) counts the same as the system setting.
+    if (document.documentElement.dataset.readMotion === 'reduce') return;
     if (el.getBoundingClientRect().top < window.innerHeight) return;
 
     el.dataset.reveal = 'hidden';

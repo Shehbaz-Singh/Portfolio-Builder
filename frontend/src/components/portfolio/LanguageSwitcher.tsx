@@ -9,6 +9,7 @@ export interface LanguageLink {
 // The languages of a portfolio, each named in its own script, as plain links: no cookie, no redirect
 // by browser language, and the page you are on is marked with aria-current. It is a strip above the
 // theme (the five themes have different headers), in the page's own colors so it reads the same on all.
+// LocaleScope draws the strip around it, with the reading preferences button.
 export function LanguageSwitcher({
   links,
   current,
@@ -19,11 +20,8 @@ export function LanguageSwitcher({
   label: string;
 }) {
   return (
-    <nav
-      aria-label={label}
-      className="brand border-b border-[#d8cdbd] bg-[#f4ede2] px-4 py-1.5 text-sm text-[#1f1a17]"
-    >
-      <ul className="mx-auto flex max-w-6xl flex-wrap items-center justify-end gap-x-1 gap-y-1">
+    <nav aria-label={label}>
+      <ul className="flex flex-wrap items-center gap-x-1 gap-y-1">
         {links.map(({ code, href }) => {
           const language = languageOf(code);
           const active = code === current;
