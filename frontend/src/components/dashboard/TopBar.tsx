@@ -14,6 +14,7 @@ import { PublishCelebration } from './PublishCelebration';
 import { useRegisterDashboardActions } from './palette/actions';
 import { PaletteButton } from './palette/PaletteHost';
 import { QrCodeDialog } from './QrCodeDialog';
+import { ShareMessageButton } from './ShareMessage';
 import { NOTICES, PROBLEMS } from '@/lib/messages';
 
 // The fields a portfolio is not much use without, and the Profile tab that fills each in.
@@ -80,6 +81,9 @@ function PublishControls() {
   const [showQr, setShowQr] = useState(false);
 
   const missing = REQUIRED.filter((field) => field.isEmpty(profile));
+  const shareSubject = profile.tagline
+    ? `${profile.fullName} - ${profile.tagline}`
+    : profile.fullName;
   const url = `${SITE_URL}/${profile.slug}`; // the canonical address, not whatever host this tab is on
 
   async function setPublished(published: boolean) {
@@ -171,8 +175,15 @@ function PublishControls() {
               <span className="max-sm:sr-only">Open</span>
               <span className="sr-only"> your portfolio in a new tab</span>
             </a>
-            <span className="hidden lg:block">
-              <ShareButton url={url} title={`${profile.fullName}'s portfolio`} variant="outline" />
+            <span className="hidden items-center gap-2 lg:flex">
+              <ShareButton
+                url={url}
+                title={`${profile.fullName}'s portfolio`}
+                message={profile.shareMessage}
+                subject={shareSubject}
+                variant="outline"
+              />
+              <ShareMessageButton url={url} />
             </span>
           </>
         )}
@@ -193,6 +204,8 @@ function PublishControls() {
         url={url}
         slug={profile.slug}
         name={profile.fullName}
+        message={profile.shareMessage}
+        subject={shareSubject}
       />
 
       <Modal

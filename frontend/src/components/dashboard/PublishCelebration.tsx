@@ -22,12 +22,16 @@ export function PublishCelebration({
   url,
   slug,
   name,
+  message,
+  subject,
 }: {
   open: boolean;
   onClose: () => void;
   url: string;
   slug: string;
   name: string;
+  message: string | null;
+  subject: string;
 }) {
   const [copied, setCopied] = useState(false);
   const shown = url.replace(/^https?:\/\//, '');
@@ -90,7 +94,13 @@ export function PublishCelebration({
             )}
             {copied ? 'Copied' : 'Copy link'}
           </Button>
-          <ShareButton url={url} title={`${name}’s portfolio`} variant="outline" />
+          <ShareButton
+            url={url}
+            title={`${name}’s portfolio`}
+            message={message}
+            subject={subject}
+            variant="outline"
+          />
         </div>
       </div>
     </Modal>

@@ -46,7 +46,13 @@
     "copyLink": "ਲਿੰਕ ਕਾਪੀ ਕਰੋ",
     "copied": "ਲਿੰਕ ਕਾਪੀ ਹੋ ਗਿਆ",
     "copyFailed": "ਲਿੰਕ ਕਾਪੀ ਨਹੀਂ ਹੋ ਸਕਿਆ",
-    "email": "ਈਮੇਲ"
+    "email": "ਈਮੇਲ",
+    "defaultMessage": "ਇਹ ਮੇਰਾ ਨਵਾਂ ਪੋਰਟਫੋਲੀਓ ਹੈ: {url}",
+    "copyMessage": "ਸੁਨੇਹਾ ਕਾਪੀ ਕਰੋ",
+    "copyMessageWithLink": "ਲਿੰਕ ਸਮੇਤ ਸੁਨੇਹਾ ਕਾਪੀ ਕਰੋ",
+    "messageCopied": "ਸੁਨੇਹਾ ਕਾਪੀ ਹੋ ਗਿਆ",
+    "messageWithLinkCopied": "ਸੁਨੇਹਾ ਅਤੇ ਲਿੰਕ ਕਾਪੀ ਹੋ ਗਏ",
+    "linkedinNote": "LinkedIn ਸਿਰਫ਼ ਲਿੰਕ ਸਾਂਝਾ ਕਰਦਾ ਹੈ, ਸੁਨੇਹਾ ਨਹੀਂ। ਸੁਨੇਹਾ ਕਾਪੀ ਕਰਕੇ ਆਪਣੀ ਪੋਸਟ ਵਿੱਚ ਪੇਸਟ ਕਰੋ।"
   },
   "leave": {
     "open": "ਪ੍ਰਸ਼ੰਸਾ-ਪੱਤਰ ਲਿਖੋ",

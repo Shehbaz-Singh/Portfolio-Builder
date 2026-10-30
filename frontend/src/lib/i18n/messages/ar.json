@@ -46,7 +46,13 @@
     "copyLink": "نسخ الرابط",
     "copied": "تم نسخ الرابط",
     "copyFailed": "تعذّر نسخ الرابط",
-    "email": "البريد الإلكتروني"
+    "email": "البريد الإلكتروني",
+    "defaultMessage": "هذا هو معرض أعمالي الجديد: {url}",
+    "copyMessage": "نسخ الرسالة",
+    "copyMessageWithLink": "نسخ الرسالة مع الرابط",
+    "messageCopied": "تم نسخ الرسالة",
+    "messageWithLinkCopied": "تم نسخ الرسالة والرابط",
+    "linkedinNote": "يشارك LinkedIn الرابط فقط دون رسالة. انسخ الرسالة والصقها في منشورك."
   },
   "leave": {
     "open": "اكتب توصية",

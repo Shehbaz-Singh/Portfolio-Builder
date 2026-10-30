@@ -46,7 +46,13 @@
     "copyLink": "Copier le lien",
     "copied": "Lien copié",
     "copyFailed": "Impossible de copier le lien",
-    "email": "E-mail"
+    "email": "E-mail",
+    "defaultMessage": "Voici mon nouveau portfolio : {url}",
+    "copyMessage": "Copier le message",
+    "copyMessageWithLink": "Copier le message avec le lien",
+    "messageCopied": "Message copié",
+    "messageWithLinkCopied": "Message et lien copiés",
+    "linkedinNote": "LinkedIn ne partage que le lien, pas de message. Copiez le message et collez-le dans votre publication."
   },
   "leave": {
     "open": "Laisser un témoignage",

@@ -2,11 +2,17 @@
 
 import { Share2 } from 'lucide-react';
 import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore } from 'react';
+import { composeShare } from '@parichay/shared';
 import { uiFor, type Ui } from '@/lib/i18n';
 
 interface Props {
   url: string; // the canonical profile URL
   title: string;
+  // The suggested message, with {url} where the address goes (it is added at the end when missing).
+  // The default message of the language when left out. Plain text, in the page's language.
+  message?: string | null;
+  // The subject of the email; the title when left out.
+  subject?: string;
   // pill: filled with the accent color (public page); outline: a plain button (dashboard);
   // inverse: for use on an accent-colored background, where an accent button would vanish
   variant?: 'pill' | 'outline' | 'inverse';
@@ -23,11 +29,13 @@ const itemClass =
   'block w-full rounded-lg px-3 py-2 text-start text-sm hover:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-fg';
 
 // Share button. Where the device has the Web Share API it opens the system share sheet;
-// otherwise it opens a small menu (copy link, LinkedIn, X, WhatsApp, email). The menu is a
+// otherwise it opens a small menu (copy link or message, LinkedIn, X, WhatsApp, email). The menu is a
 // disclosure: Escape closes it and returns focus to the button, as does tabbing out of it.
 export function ShareButton({
   url,
   title,
+  message,
+  subject,
   variant = 'pill',
   ui = uiFor('en').share,
   newTab = uiFor('en').newTab,
@@ -43,6 +51,7 @@ export function ShareButton({
   const menu = useRef<HTMLUListElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout>>(undefined);
   const menuId = useId();
+  const noteId = useId();
 
   useEffect(() => () => clearTimeout(timer.current), []);
 
@@ -89,20 +98,24 @@ export function ShareButton({
     timer.current = setTimeout(() => setStatus(''), 2500);
   }
 
+  // The message as the page's language has it. The address is part of it for most places; the system
+  // share sheet and X take it as a separate piece, so they get the message without it.
+  const text = composeShare(message, ui.defaultMessage, url);
+
   async function onTrigger() {
     if (!native) return setOpen((o) => !o);
     try {
-      await navigator.share({ title, url });
+      await navigator.share({ title, ...(text.withoutUrl && { text: text.withoutUrl }), url });
     } catch (err) {
       // Cancelling the share sheet is not an error; anything else falls back to the menu.
       if (!(err instanceof DOMException && err.name === 'AbortError')) setOpen(true);
     }
   }
 
-  async function copy() {
+  async function copy(value: string, done: string) {
     try {
-      await navigator.clipboard.writeText(url);
-      announce(ui.copied);
+      await navigator.clipboard.writeText(value);
+      announce(done);
     } catch {
       announce(ui.copyFailed);
     }
@@ -110,13 +123,21 @@ export function ShareButton({
     trigger.current?.focus();
   }
 
-  const u = encodeURIComponent(url);
-  const t = encodeURIComponent(title);
+  // Every piece is encoded on its own: Hindi, Arabic, emoji, & and = all travel as UTF-8 percent
+  // escapes. Line breaks in a mailto body are CRLF, as mail programs expect.
+  const enc = encodeURIComponent;
+  const u = enc(url);
   const targets = [
-    { label: 'LinkedIn', href: `https://www.linkedin.com/sharing/share-offsite/?url=${u}` },
-    { label: 'X', href: `https://x.com/intent/post?url=${u}&text=${t}` },
-    { label: 'WhatsApp', href: `https://wa.me/?text=${encodeURIComponent(`${title} ${url}`)}` },
-    { label: ui.email, href: `mailto:?subject=${t}&body=${u}`, external: false },
+    {
+      label: 'X',
+      href: `https://x.com/intent/post?${text.withoutUrl ? `text=${enc(text.withoutUrl)}&` : ''}url=${u}`,
+    },
+    { label: 'WhatsApp', href: `https://wa.me/?text=${enc(text.withUrl)}` },
+    {
+      label: ui.email,
+      href: `mailto:?subject=${enc((subject ?? title).replace(/\s+/g, ' '))}&body=${enc(text.withUrl.replace(/\r?\n/g, '\r\n'))}`,
+      external: false,
+    },
   ];
 
   const look = {
@@ -145,12 +166,46 @@ export function ShareButton({
         <ul
           ref={menu}
           id={menuId}
-          className={`absolute top-full z-20 mt-2 w-48 rounded-box border border-line bg-page p-1 text-ink shadow-overlay ${alignEnd ? 'end-0' : 'start-0'}`}
+          className={`absolute top-full z-20 mt-2 w-72 max-w-[calc(100vw-1rem)] rounded-box border border-line bg-page p-1 text-ink shadow-overlay ${alignEnd ? 'end-0' : 'start-0'}`}
         >
           <li>
-            <button type="button" onClick={copy} className={itemClass}>
+            <button type="button" onClick={() => copy(url, ui.copied)} className={itemClass}>
               {ui.copyLink}
             </button>
+          </li>
+          <li>
+            <button
+              type="button"
+              onClick={() => copy(text.withUrl, ui.messageWithLinkCopied)}
+              className={itemClass}
+            >
+              {ui.copyMessageWithLink}
+            </button>
+          </li>
+          {/* LinkedIn takes the address only. The note says so, and the button next to it copies the
+              message (without the address, which LinkedIn adds itself) to paste into the post. */}
+          <li className="flex items-center gap-1">
+            <a
+              href={`https://www.linkedin.com/sharing/share-offsite/?url=${u}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-describedby={noteId}
+              onClick={() => setOpen(false)}
+              className={`${itemClass} flex-1`}
+            >
+              LinkedIn
+              <span className="sr-only">{newTab}</span>
+            </a>
+            <button
+              type="button"
+              onClick={() => copy(text.withoutUrl || text.withUrl, ui.messageCopied)}
+              className="shrink-0 rounded-lg px-3 py-2 text-start text-sm hover:bg-surface focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent-fg"
+            >
+              {ui.copyMessage}
+            </button>
+          </li>
+          <li id={noteId} className="px-3 pb-2 text-xs text-muted">
+            {ui.linkedinNote}
           </li>
           {targets.map(({ label, href, external = true }) => (
             <li key={label}>

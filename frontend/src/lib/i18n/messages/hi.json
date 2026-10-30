@@ -46,7 +46,13 @@
     "copyLink": "लिंक कॉपी करें",
     "copied": "लिंक कॉपी हो गया",
     "copyFailed": "लिंक कॉपी नहीं हो सका",
-    "email": "ईमेल"
+    "email": "ईमेल",
+    "defaultMessage": "यह मेरा नया पोर्टफ़ोलियो है: {url}",
+    "copyMessage": "संदेश कॉपी करें",
+    "copyMessageWithLink": "लिंक सहित संदेश कॉपी करें",
+    "messageCopied": "संदेश कॉपी हो गया",
+    "messageWithLinkCopied": "संदेश और लिंक कॉपी हो गए",
+    "linkedinNote": "LinkedIn केवल लिंक साझा करता है, संदेश नहीं। संदेश कॉपी करें और अपनी पोस्ट में चिपकाएँ।"
   },
   "leave": {
     "open": "प्रशंसापत्र लिखें",

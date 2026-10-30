@@ -218,6 +218,7 @@ export async function PostView({
             <ShareButton
               url={url}
               title={post.title}
+              message={`${post.title}: {url}`}
               variant="outline"
               ui={ui.share}
               newTab={ui.newTab}

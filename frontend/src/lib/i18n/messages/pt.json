@@ -46,7 +46,13 @@
     "copyLink": "Copiar link",
     "copied": "Link copiado",
     "copyFailed": "Não foi possível copiar o link",
-    "email": "E-mail"
+    "email": "E-mail",
+    "defaultMessage": "Este é o meu novo portfólio: {url}",
+    "copyMessage": "Copiar mensagem",
+    "copyMessageWithLink": "Copiar mensagem com link",
+    "messageCopied": "Mensagem copiada",
+    "messageWithLinkCopied": "Mensagem e link copiados",
+    "linkedinNote": "O LinkedIn só compartilha o link, não uma mensagem. Copie a mensagem e cole na sua publicação."
   },
   "leave": {
     "open": "Deixar um depoimento",

@@ -46,7 +46,13 @@
     "copyLink": "لنک کاپی کریں",
     "copied": "لنک کاپی ہو گیا",
     "copyFailed": "لنک کاپی نہیں ہو سکا",
-    "email": "ای میل"
+    "email": "ای میل",
+    "defaultMessage": "یہ میرا نیا پورٹ فولیو ہے: {url}",
+    "copyMessage": "پیغام کاپی کریں",
+    "copyMessageWithLink": "لنک کے ساتھ پیغام کاپی کریں",
+    "messageCopied": "پیغام کاپی ہو گیا",
+    "messageWithLinkCopied": "پیغام اور لنک کاپی ہو گئے",
+    "linkedinNote": "LinkedIn صرف لنک شیئر کرتا ہے، پیغام نہیں۔ پیغام کاپی کر کے اپنی پوسٹ میں پیسٹ کریں۔"
   },
   "leave": {
     "open": "تعریفی کلمات لکھیں",

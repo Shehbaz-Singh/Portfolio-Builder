@@ -418,7 +418,8 @@ export interface HeaderModel {
   location: string | null;
   avatar: { src: string | null; alt: string; initials: string };
   links: { id: string; type: PublicLink['type']; href: string; label: string; external: boolean }[];
-  share: { url: string; title: string };
+  // What the Share menu needs (the message is the owner's own, when they wrote one).
+  share: { url: string; title: string; message: string | null; subject: string };
   // The "Download resume" link, while the owner has it switched on.
   resume: { href: string; label: string } | null;
   // The "open to work" badge: what it says, and the contact option the owner has made visible (an
@@ -454,6 +455,8 @@ export function buildHeader(profile: PublicProfile): HeaderModel {
     share: {
       url: `${SITE_URL}${pagePath(profile.slug, profile.locale, profile.defaultLocale)}`,
       title: fill(ui.shareTitle, { name: profile.fullName }),
+      message: profile.shareMessage ?? null,
+      subject: profile.tagline ? `${profile.fullName} - ${profile.tagline}` : profile.fullName,
     },
     resume: profile.resumeEnabled
       ? { href: `/${profile.slug}/resume.pdf`, label: ui.downloadResume }

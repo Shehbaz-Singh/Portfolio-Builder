@@ -46,7 +46,13 @@
     "copyLink": "Copy link",
     "copied": "Link copied",
     "copyFailed": "Could not copy the link",
-    "email": "Email"
+    "email": "Email",
+    "defaultMessage": "Here's my new portfolio: {url}",
+    "copyMessage": "Copy message",
+    "copyMessageWithLink": "Copy message with link",
+    "messageCopied": "Message copied",
+    "messageWithLinkCopied": "Message and link copied",
+    "linkedinNote": "LinkedIn shares only the link, not a message. Use Copy message and paste it into your post."
   },
   "leave": {
     "open": "Leave a testimonial",

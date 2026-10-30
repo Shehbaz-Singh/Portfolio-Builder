@@ -11,6 +11,7 @@ export const NOTICES = {
   changesSaved: 'Changes saved.',
   draftSaved: 'Draft saved.',
   published: 'Published. It shows on your page while the Writing section is switched on.',
+  shareMessageSaved: 'Share message saved.',
   portfolioLive: 'Your portfolio is live again.',
   portfolioHidden:
     'Your portfolio is hidden. Only you can see it now, and you can publish it again any time.',

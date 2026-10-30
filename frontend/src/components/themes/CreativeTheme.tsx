@@ -105,12 +105,7 @@ function Header({ header }: { header: HeaderModel }) {
               </li>
             )}
             <li>
-              <ShareButton
-                url={header.share.url}
-                title={header.share.title}
-                ui={header.ui.share}
-                variant="inverse"
-              />
+              <ShareButton {...header.share} ui={header.ui.share} variant="inverse" />
             </li>
           </ul>
         </div>

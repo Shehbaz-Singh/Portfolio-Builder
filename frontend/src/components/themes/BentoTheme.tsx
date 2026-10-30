@@ -283,12 +283,7 @@ function linksTile(header: HeaderModel, idPrefix: string): Tile {
           )}
         </ul>
         <div className="mt-auto pt-4">
-          <ShareButton
-            url={header.share.url}
-            title={header.share.title}
-            ui={header.ui.share}
-            variant="inverse"
-          />
+          <ShareButton {...header.share} ui={header.ui.share} variant="inverse" />
         </div>
       </TileBody>
     ),

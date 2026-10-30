@@ -125,12 +125,7 @@ function Sidebar({
           )}
         </ul>
         <div className="mt-4 print:hidden">
-          <ShareButton
-            url={header.share.url}
-            title={header.share.title}
-            ui={header.ui.share}
-            variant="outline"
-          />
+          <ShareButton {...header.share} ui={header.ui.share} variant="outline" />
         </div>
       </section>
 

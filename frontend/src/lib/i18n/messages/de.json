@@ -46,7 +46,13 @@
     "copyLink": "Link kopieren",
     "copied": "Link kopiert",
     "copyFailed": "Der Link konnte nicht kopiert werden",
-    "email": "E-Mail"
+    "email": "E-Mail",
+    "defaultMessage": "Hier ist mein neues Portfolio: {url}",
+    "copyMessage": "Nachricht kopieren",
+    "copyMessageWithLink": "Nachricht mit Link kopieren",
+    "messageCopied": "Nachricht kopiert",
+    "messageWithLinkCopied": "Nachricht und Link kopiert",
+    "linkedinNote": "LinkedIn übernimmt nur den Link, keine Nachricht. Kopiere die Nachricht und füge sie in deinen Beitrag ein."
   },
   "leave": {
     "open": "Empfehlung hinterlassen",
