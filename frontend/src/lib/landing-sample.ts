@@ -55,6 +55,7 @@ function toPublic(sample: SampleProfile): PublicProfile {
     locale: 'en',
     acceptTestimonials: false,
     resumeEnabled: true,
+    shareMessage: null,
     ...(sample.availability && {
       availabilityEnabled: true as const,
       availabilityStatus: sample.availability.status,

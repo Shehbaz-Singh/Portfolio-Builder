@@ -48,6 +48,7 @@ export type Draft = Partial<
     | 'replyTime'
     | 'preferredContact'
     | 'workNote'
+    | 'shareMessage'
   >
 >;
 

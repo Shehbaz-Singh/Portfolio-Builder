@@ -92,6 +92,8 @@ model Profile {
   replyTime           ReplyTime?
   preferredContact    PreferredContact?
   workNote            String?            @db.VarChar(140)
+  // The suggested message of the Share menu (shared/src/share.ts); null uses the default.
+  shareMessage        String?            @db.VarChar(200)
   defaultLocale       String             @default("en")
   locales             String[]           @default([])
   // Whether visitors may submit testimonials (POST /public/:slug/testimonials).

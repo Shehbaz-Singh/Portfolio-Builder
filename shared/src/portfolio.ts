@@ -5,7 +5,8 @@ import {
   availabilityStatusSchema,
 } from './availability';
 import { isLocaleCode } from './languages';
-import { optionalLine } from './text';
+import { optionalBlock, optionalLine } from './text';
+import { SHARE_MESSAGE_MAX } from './share';
 import { VALIDATION } from './messages';
 import {
   WORK_NOTE_MAX,
@@ -139,6 +140,8 @@ export const profileInputSchema = z.object({
   replyTime: replyTimeSchema.nullish().transform((reply) => reply ?? null),
   preferredContact: preferredContactSchema.nullish().transform((contact) => contact ?? null),
   workNote: optionalLine(WORK_NOTE_MAX),
+  // The suggested message of the Share menu (share.ts). Null means the default for the language.
+  shareMessage: optionalBlock(SHARE_MESSAGE_MAX),
 });
 export type ProfileInput = z.infer<typeof profileInputSchema>;
 

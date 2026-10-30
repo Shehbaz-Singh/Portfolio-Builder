@@ -115,6 +115,7 @@ export async function getPublicProfile(slug: string, lang?: string) {
     locales: enabled,
     locale,
     tagline: tn('profile', id, 'tagline', rest.tagline),
+    shareMessage: tn('profile', id, 'shareMessage', rest.shareMessage),
     about: has('about') ? tn('profile', id, 'about', rest.about) : null,
     skills: has('skills')
       ? rest.skills.map((row) => ({ ...row, name: t('skill', row.id, 'name', row.name) }))

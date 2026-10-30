@@ -46,6 +46,7 @@ const LABELS: Partial<Record<TranslatableEntity, Record<string, string>>> = {
     about: 'About',
     availabilityMessage: 'Availability message',
     workNote: 'Working together note',
+    shareMessage: 'Share message',
   },
   section: { title: 'Heading' },
   experience: { title: 'Job title', description: 'Description' },
@@ -98,6 +99,7 @@ export function buildGroups(profile: MyProfile): FieldGroup[] {
       spec('profile', profile.id, 'about', profile.about),
       spec('profile', profile.id, 'availabilityMessage', profile.availabilityMessage),
       spec('profile', profile.id, 'workNote', profile.workCardEnabled ? profile.workNote : null),
+      spec('profile', profile.id, 'shareMessage', profile.shareMessage),
     ]),
   ]);
 

@@ -34,6 +34,7 @@ export async function loadSource(profileId: string): Promise<Source> {
       about: true,
       availabilityMessage: true,
       workNote: true,
+      shareMessage: true,
       workCardEnabled: true,
       sectionConfig: true,
       experience: { select: { id: true, title: true, description: true } },
@@ -67,6 +68,7 @@ export async function loadSource(profileId: string): Promise<Source> {
     availabilityMessage: profile.availabilityMessage,
     // Only while the card is switched on: a note nobody can see is not a text to translate.
     workNote: profile.workCardEnabled ? profile.workNote : null,
+    shareMessage: profile.shareMessage,
   });
   // A built-in heading is translatable when the owner has given it a title of their own; the default
   // headings come from the interface strings of each language.

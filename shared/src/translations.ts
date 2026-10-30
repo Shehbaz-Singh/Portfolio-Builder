@@ -4,6 +4,7 @@ import { CUSTOM_DESCRIPTION_MAX, CUSTOM_SUBTITLE_MAX, CUSTOM_TITLE_MAX } from '.
 import { LOCALE_CODES } from './languages';
 import { POST_BODY_MAX, POST_EXCERPT_MAX, POST_TITLE_MAX } from './posts';
 import { SECTION_TITLE_MAX } from './section-config';
+import { SHARE_MESSAGE_MAX } from './share';
 import { optionalBlock, optionalLine } from './text';
 import { WORK_NOTE_MAX } from './work-card';
 import { VALIDATION } from './messages';
@@ -41,6 +42,7 @@ export const TRANSLATABLE: Record<TranslatableEntity, Record<string, Translatabl
     about: block(5000),
     availabilityMessage: line(AVAILABILITY_MESSAGE_MAX),
     workNote: line(WORK_NOTE_MAX),
+    shareMessage: block(SHARE_MESSAGE_MAX),
   },
   section: { title: line(SECTION_TITLE_MAX) },
   experience: { title: line(100), description: block(3000) },

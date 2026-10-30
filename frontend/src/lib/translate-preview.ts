@@ -34,6 +34,7 @@ export function applyTranslations(
     locale,
     tagline: tn('profile', profileId, 'tagline', preview.tagline),
     about: tn('profile', profileId, 'about', preview.about),
+    shareMessage: tn('profile', profileId, 'shareMessage', preview.shareMessage ?? null),
     availabilityMessage: tn(
       'profile',
       profileId,
