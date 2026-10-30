@@ -18,6 +18,8 @@ export * from './legal';
 export * from './translations';
 export * from './work-card';
 export * from './share';
+export * from './vcard';
+export * from './contact-card';
 export * from './portfolio';
 export * from './public';
 export * from './section-config';

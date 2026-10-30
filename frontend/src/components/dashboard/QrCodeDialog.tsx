@@ -15,9 +15,9 @@ interface Code {
   preview: string; // the SVG as a data URL, for the <img>
 }
 
-async function makeCode(url: string): Promise<Code> {
+async function makeCode(url: string, level: 'H' | 'M'): Promise<Code> {
   const QRCode = (await import('qrcode')).default;
-  const options = { errorCorrectionLevel: 'H', margin: 4 } as const;
+  const options = { errorCorrectionLevel: level, margin: 4 } as const;
   const [svg, png] = await Promise.all([
     QRCode.toString(url, { ...options, type: 'svg' }),
     QRCode.toDataURL(url, { ...options, width: PNG_SIZE }),
@@ -41,6 +41,7 @@ export function QrCodeDialog({
   slug,
   name,
   published,
+  contactCard,
 }: {
   open: boolean;
   onClose: () => void;
@@ -48,12 +49,18 @@ export function QrCodeDialog({
   slug: string;
   name: string;
   published: boolean;
+  // The short vCard text for the alternative code, or null while the contact card is off.
+  contactCard?: string | null;
 }) {
+  // The link is the default. The contact card is an alternative, and only when it is switched on.
+  const [kind, setKind] = useState<'link' | 'card'>('link');
+  const card = contactCard && kind === 'card' ? contactCard : null;
+  const payload = card ?? url;
   const [code, setCode] = useState<Code | null>(null);
   const [failed, setFailed] = useState(false);
   const [copied, setCopied] = useState(false);
   const shown = url.replace(/^https?:\/\//, '');
-  const alt = `QR code linking to ${url}`;
+  const alt = card ? `QR code holding the contact card of ${name}` : `QR code linking to ${url}`;
   const ready = open && published;
 
   useEffect(() => {
@@ -61,18 +68,19 @@ export function QrCodeDialog({
     let current = true;
     setCode(null);
     setFailed(false);
-    makeCode(url).then(
+    // The contact card is long, so it uses the lower error correction (fewer, bigger squares).
+    makeCode(payload, card ? 'M' : 'H').then(
       (made) => current && setCode(made),
       () => current && setFailed(true),
     );
     return () => {
       current = false;
     };
-  }, [ready, url]);
+  }, [ready, payload, card]);
 
   async function copy() {
     try {
-      await navigator.clipboard.writeText(url);
+      await navigator.clipboard.writeText(card ?? url);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
@@ -104,9 +112,12 @@ export function QrCodeDialog({
                   ) : (
                     <Copy aria-hidden="true" className="size-4" />
                   )}
-                  {copied ? 'Copied' : 'Copy link'}
+                  {copied ? 'Copied' : card ? 'Copy card text' : 'Copy link'}
                 </Button>
-                <Button disabled={!code} onClick={() => code && save(code.png, `${slug}-qr.png`)}>
+                <Button
+                  disabled={!code}
+                  onClick={() => code && save(code.png, `${slug}${card ? '-contact' : ''}-qr.png`)}
+                >
                   <Download aria-hidden="true" className="size-4" />
                   PNG
                   <span className="sr-only"> image, {PNG_SIZE} pixels</span>
@@ -117,7 +128,7 @@ export function QrCodeDialog({
                     code &&
                     save(
                       URL.createObjectURL(new Blob([code.svg], { type: 'image/svg+xml' })),
-                      `${slug}-qr.svg`,
+                      `${slug}${card ? '-contact' : ''}-qr.svg`,
                     )
                   }
                 >
@@ -134,6 +145,48 @@ export function QrCodeDialog({
           </>
         }
       >
+        {published && contactCard && (
+          <fieldset className="mb-4 space-y-2">
+            <legend className="mb-1 text-sm font-medium">What the code holds</legend>
+            {(
+              [
+                ['link', 'A link to my page', 'Easy to scan from a distance. Best for most uses.'],
+                [
+                  'card',
+                  'My contact card',
+                  'Name, title, page address and one email, saved straight to contacts.',
+                ],
+              ] as const
+            ).map(([value, label, hint]) => (
+              // eslint-disable-next-line jsx-a11y/label-has-associated-control -- the input is inside, its text is in the nested spans
+              <label key={value} className="flex items-start gap-2 text-sm">
+                <input
+                  type="radio"
+                  name="qr-kind"
+                  className="mt-1 size-4"
+                  checked={kind === value}
+                  onChange={() => setKind(value)}
+                />
+                <span>
+                  <span className="font-medium">{label}</span>
+                  <span className="block text-xs text-muted">{hint}</span>
+                </span>
+              </label>
+            ))}
+            {card && (
+              <p
+                role="note"
+                className="rounded-control bg-warning-bg px-3 py-2 text-xs text-warning-fg"
+              >
+                This code holds {card.length} characters, about{' '}
+                {Math.round(card.length / url.length)} times as many as your link. The squares are
+                smaller and it is harder to scan from far away: print it large, keep the contrast
+                high, and test it with a phone before you share it. Your phone number, links and
+                photo are not in it.
+              </p>
+            )}
+          </fieldset>
+        )}
         {published && (
           <figure className="space-y-2 text-center">
             <div className="mx-auto aspect-square w-full max-w-64 rounded-control border border-line bg-white">
@@ -147,7 +200,9 @@ export function QrCodeDialog({
                 </p>
               )}
             </div>
-            <figcaption className="text-sm font-medium break-all">{shown}</figcaption>
+            <figcaption className="text-sm font-medium break-all">
+              {card ? `Contact card of ${name}` : shown}
+            </figcaption>
           </figure>
         )}
       </Modal>

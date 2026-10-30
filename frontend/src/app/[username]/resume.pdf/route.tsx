@@ -2,6 +2,7 @@ import { unstable_cache } from 'next/cache';
 import { renderToBuffer } from '@react-pdf/renderer';
 import type { PublicProfile } from '@parichay/shared';
 import { PUBLIC_PROFILES_TAG, getPublicProfile } from '@/lib/api';
+import { clientIp, createLimiter, tooManyRequests } from '@/lib/public-rate-limit';
 import { ResumeDocument } from '@/lib/resume-pdf';
 
 export const runtime = 'nodejs';
@@ -47,25 +48,7 @@ const renderResume = unstable_cache(
   { revalidate: 300, tags: [PUBLIC_PROFILES_TAG] },
 );
 
-// Rate limit, per visitor address. In memory, so each server instance counts for itself: it
-// stops a script hammering one instance, and the caches above do the rest.
-const WINDOW_MS = 60_000;
-const MAX_PER_WINDOW = 20;
-const hits = new Map<string, { count: number; resetAt: number }>();
-
-function limited(ip: string): number {
-  const now = Date.now();
-  if (hits.size > 5000) {
-    for (const [key, entry] of hits) if (entry.resetAt <= now) hits.delete(key);
-  }
-  const entry = hits.get(ip);
-  if (!entry || entry.resetAt <= now) {
-    hits.set(ip, { count: 1, resetAt: now + WINDOW_MS });
-    return 0;
-  }
-  entry.count += 1;
-  return entry.count > MAX_PER_WINDOW ? Math.ceil((entry.resetAt - now) / 1000) : 0;
-}
+const limited = createLimiter(60_000, 20);
 
 // "Jane Q. Doe" -> "jane-q-doe-resume.pdf". ASCII only, so every browser saves it as written;
 // a name with no Latin letters falls back to the page address.
@@ -82,15 +65,8 @@ function fileName(profile: PublicProfile): string {
 const notFound = () => new Response('Not found', { status: 404 });
 
 export async function GET(req: Request, { params }: { params: Promise<{ username: string }> }) {
-  const forwarded = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
-  const ip = req.headers.get('x-real-ip') ?? forwarded ?? 'unknown';
-  const wait = limited(ip);
-  if (wait > 0) {
-    return new Response('Too many requests', {
-      status: 429,
-      headers: { 'Retry-After': String(wait) },
-    });
-  }
+  const wait = limited(clientIp(req));
+  if (wait > 0) return tooManyRequests(wait);
 
   const { username } = await params;
   const profile = await getPublicProfile(username);

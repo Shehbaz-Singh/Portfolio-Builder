@@ -64,6 +64,12 @@
     "reset": "Redefinir",
     "close": "Fechar"
   },
+  "contact": {
+    "button": "Adicionar aos contatos",
+    "hint": "Baixa um cartão de contato (.vcf)",
+    "help": "No celular, geralmente abre o app de contatos. No computador, o arquivo é baixado.",
+    "note": "Adicionado de {url}"
+  },
   "share": {
     "label": "Compartilhar",
     "copyLink": "Copiar link",

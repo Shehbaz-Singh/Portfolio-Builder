@@ -77,6 +77,15 @@ export default async function PrivacyPage() {
               wait for your approval, and the email is only ever shown to you.
             </li>
             <li>
+              <strong>Your contact card,</strong> if you switch on “Let visitors save my contact
+              card”: a small file (.vcf) that your page offers through an “Add to contacts” button.
+              It is made fresh from your page each time and holds only what you chose to show: your
+              name, your tagline, your page address, the place you list, and the email, phone and
+              other links you have not hidden. Your photo is in it only if you also switch on
+              “Include my photo”. Links you hide are never in it. Anyone who opens your page can
+              save this card, so check the preview in your dashboard first.
+            </li>
+            <li>
               <strong>Technical data:</strong> when you use the site, your internet address (IP) is
               used briefly to limit abuse (see “Cookies, storage and analytics” below).
             </li>
@@ -226,6 +235,15 @@ export default async function PrivacyPage() {
               never leave your browser.
             </li>
           </ul>
+          <p>
+            <strong>On a published page,</strong> if a visitor opens “Reading preferences” and
+            changes something, their choices (text size, font, line spacing, motion) are kept in one
+            small note in their own browser’s local storage (“parichay:reading-prefs”). It never
+            leaves their browser, is not a cookie, and is used only to show the page the way they
+            asked. Downloading a contact card or a resume stores nothing about the visitor: we do
+            not record who downloaded it, and the contact card contains only what the owner chose to
+            show.
+          </p>
           <p>
             Visitors to a published page get no cookies from us. We do not use the cookies or
             storage above for tracking, so we do not show a cookie banner.

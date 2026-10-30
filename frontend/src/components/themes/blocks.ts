@@ -420,6 +420,8 @@ export interface HeaderModel {
   links: { id: string; type: PublicLink['type']; href: string; label: string; external: boolean }[];
   // What the Share menu needs (the message is the owner's own, when they wrote one).
   share: { url: string; title: string; message: string | null; subject: string };
+  // The "Add to contacts" vCard link: while the owner has it on and shows at least one link.
+  contact: { href: string; label: string; hint: string; help: string } | null;
   // The "Download resume" link, while the owner has it switched on.
   resume: { href: string; label: string } | null;
   // The "open to work" badge: what it says, and the contact option the owner has made visible (an
@@ -458,6 +460,15 @@ export function buildHeader(profile: PublicProfile): HeaderModel {
       message: profile.shareMessage ?? null,
       subject: profile.tagline ? `${profile.fullName} - ${profile.tagline}` : profile.fullName,
     },
+    contact:
+      profile.contactCardEnabled && !profile.isSample && profile.links.length > 0
+        ? {
+            href: `/${profile.slug}/contact.vcf${profile.locale === profile.defaultLocale ? '' : `?lang=${profile.locale}`}`,
+            label: ui.contact.button,
+            hint: ui.contact.hint,
+            help: ui.contact.help,
+          }
+        : null,
     resume: profile.resumeEnabled
       ? { href: `/${profile.slug}/resume.pdf`, label: ui.downloadResume }
       : null,

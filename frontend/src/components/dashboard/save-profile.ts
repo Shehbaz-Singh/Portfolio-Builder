@@ -6,7 +6,7 @@ import { api } from '@/lib/client-api';
 export function saveProfile(profile: MyProfile, changes: Partial<ProfileUpdateInput>) {
   const { fullName, tagline, about, location, avatarUrl, theme, accentColor } = profile;
   const { availabilityEnabled, availabilityStatus, availabilityMessage } = profile;
-  const { resumeEnabled } = profile;
+  const { resumeEnabled, contactCardEnabled, contactCardPhoto } = profile;
   const { workCardEnabled, timezone, workingHours, replyTime, preferredContact, workNote } =
     profile;
   const { shareMessage } = profile;
@@ -24,6 +24,8 @@ export function saveProfile(profile: MyProfile, changes: Partial<ProfileUpdateIn
       availabilityStatus,
       availabilityMessage,
       resumeEnabled,
+      contactCardEnabled,
+      contactCardPhoto,
       workCardEnabled,
       timezone,
       workingHours,

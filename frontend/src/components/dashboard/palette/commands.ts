@@ -22,6 +22,7 @@ import {
   UserRound,
   Wrench,
   FileUp,
+  UserPlus,
   type LucideIcon,
 } from 'lucide-react';
 import type { MyProfile, ProfileUpdateInput } from '@parichay/shared';
@@ -276,6 +277,25 @@ const actions: Source = ({ profile, actions: getActions, notify }) => {
       run: () => {
         const a = document.createElement('a');
         a.href = `/${profile.slug}/resume.pdf`;
+        a.download = '';
+        a.click();
+      },
+    },
+    {
+      id: 'action:contact-card',
+      group: 'Actions',
+      title: 'Download my contact card',
+      subtitle: 'The .vcf file visitors get from “Add to contacts”',
+      keywords: ['vcard', 'vcf', 'contact', 'contacts', 'address book', 'download'],
+      icon: UserPlus,
+      disabled: !profile.published
+        ? 'Publish your page first'
+        : !profile.contactCardEnabled
+          ? 'Switch on the contact card in Basics'
+          : undefined,
+      run: () => {
+        const a = document.createElement('a');
+        a.href = `/${profile.slug}/contact.vcf`;
         a.download = '';
         a.click();
       },

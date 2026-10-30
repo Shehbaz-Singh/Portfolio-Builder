@@ -19,6 +19,7 @@ import {
   EmptyPage,
   AvailabilityBadge,
   HeaderLink,
+  ContactLink,
   ResumeLink,
   WritingList,
   NewTabLink,
@@ -118,6 +119,11 @@ function Sidebar({
               <HeaderLink link={item} className={contact} />
             </li>
           ))}
+          {header.contact && (
+            <li className="print:hidden">
+              <ContactLink contact={header.contact} className={contact} />
+            </li>
+          )}
           {header.resume && (
             <li className="print:hidden">
               <ResumeLink resume={header.resume} className={contact} />

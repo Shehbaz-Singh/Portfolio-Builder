@@ -133,6 +133,10 @@ export const profileInputSchema = z.object({
   availabilityMessage: optionalLine(AVAILABILITY_MESSAGE_MAX),
   // Whether the public page offers a "Download resume" PDF made from it (/<slug>/resume.pdf).
   resumeEnabled: z.boolean().default(true),
+  // Whether the public page offers an "Add to contacts" vCard (/<slug>/contact.vcf), and whether the
+  // card includes the profile photo (contact-card.ts). Both are off until the owner switches them on.
+  contactCardEnabled: z.boolean().default(false),
+  contactCardPhoto: z.boolean().default(false),
   // The "Working together" card (work-card.ts): when to reach the owner. Public only while enabled.
   workCardEnabled: z.boolean().default(false),
   timezone: timeZoneSchema.nullish().transform((zone) => zone ?? null),

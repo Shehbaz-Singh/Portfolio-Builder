@@ -83,6 +83,9 @@ model Profile {
   isSample            Boolean            @default(false)
   // Whether the public page offers a PDF resume generated from it (/<slug>/resume.pdf).
   resumeEnabled       Boolean            @default(true)
+  // The "Add to contacts" vCard of the public page (shared/src/contact-card.ts), and whether it holds the photo.
+  contactCardEnabled  Boolean            @default(false)
+  contactCardPhoto    Boolean            @default(false)
   // The language the profile is written in, and up to MAX_EXTRA_LANGUAGES more it is offered in
   // (shared/src/languages.ts). The words of the extra languages are in Translation.
   // The "Working together" card (shared/src/work-card.ts). Public only while workCardEnabled.

@@ -64,6 +64,12 @@
     "reset": "Reset",
     "close": "Close"
   },
+  "contact": {
+    "button": "Add to contacts",
+    "hint": "Downloads a contact card (.vcf)",
+    "help": "On a phone this usually opens your contacts app. On a computer the file downloads.",
+    "note": "Added from {url}"
+  },
   "share": {
     "label": "Share",
     "copyLink": "Copy link",

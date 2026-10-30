@@ -29,6 +29,7 @@ import { useEditor, useReportDirty, useSection } from '../editor-context';
 import { SectionManager, type ItemFormProps } from '../SectionManager';
 import { AvailabilityCard } from './AvailabilityCard';
 import { ResumeCard } from './ResumeCard';
+import { ContactCardCard } from './ContactCardCard';
 import { WorkingTogetherCard } from './WorkingTogetherCard';
 import { NOTICES, PROBLEMS } from '@/lib/messages';
 import { useImageUpload } from '../use-image-upload';
@@ -337,6 +338,13 @@ export function BasicsStep() {
           Working together
         </h2>
         <WorkingTogetherCard />
+      </section>
+
+      <section aria-labelledby="contact-card-heading" className="space-y-4">
+        <h2 id="contact-card-heading" className="type-section">
+          Contact card
+        </h2>
+        <ContactCardCard />
       </section>
 
       <section aria-labelledby="resume-heading" className="space-y-4">

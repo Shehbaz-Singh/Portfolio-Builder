@@ -19,6 +19,7 @@ import {
   EmptyPage,
   AvailabilityBadge,
   HeaderLink,
+  ContactLink,
   ResumeLink,
   WritingList,
   NewTabLink,
@@ -152,6 +153,14 @@ function Masthead({ header }: { header: HeaderModel }) {
                 <HeaderLink link={item} className={`inline-flex items-center gap-2 ${link}`} />
               </li>
             ))}
+            {header.contact && (
+              <li className="print:hidden">
+                <ContactLink
+                  contact={header.contact}
+                  className={`inline-flex items-center gap-2 ${link}`}
+                />
+              </li>
+            )}
             {header.resume && (
               <li>
                 <ResumeLink

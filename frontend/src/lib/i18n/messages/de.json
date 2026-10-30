@@ -64,6 +64,12 @@
     "reset": "Zurücksetzen",
     "close": "Schließen"
   },
+  "contact": {
+    "button": "Zu Kontakten hinzufügen",
+    "hint": "Lädt eine Kontaktkarte (.vcf) herunter",
+    "help": "Auf dem Handy öffnet sich meist die Kontakte-App. Am Computer wird die Datei heruntergeladen.",
+    "note": "Hinzugefügt von {url}"
+  },
   "share": {
     "label": "Teilen",
     "copyLink": "Link kopieren",

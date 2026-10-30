@@ -21,6 +21,7 @@ import {
   EmptyPage,
   AvailabilityBadge,
   HeaderLink,
+  ContactLink,
   ResumeLink,
   WritingList,
   InitialsBadge,
@@ -276,6 +277,11 @@ function linksTile(header: HeaderModel, idPrefix: string): Tile {
               <HeaderLink link={item} className={link} />
             </li>
           ))}
+          {header.contact && (
+            <li className="print:hidden">
+              <ContactLink contact={header.contact} className={link} />
+            </li>
+          )}
           {header.resume && (
             <li>
               <ResumeLink resume={header.resume} className={link} />

@@ -19,6 +19,7 @@ import {
   EmptyPage,
   AvailabilityBadge,
   HeaderLink,
+  ContactLink,
   ResumeLink,
   WritingList,
   NewTabLink,
@@ -99,6 +100,11 @@ function Header({ header }: { header: HeaderModel }) {
                 <HeaderLink link={link} className={pill} />
               </li>
             ))}
+            {header.contact && (
+              <li className="print:hidden">
+                <ContactLink contact={header.contact} className={pill} />
+              </li>
+            )}
             {header.resume && (
               <li>
                 <ResumeLink resume={header.resume} className={pill} />

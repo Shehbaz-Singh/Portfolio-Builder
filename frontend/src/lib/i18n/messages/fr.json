@@ -64,6 +64,12 @@
     "reset": "Réinitialiser",
     "close": "Fermer"
   },
+  "contact": {
+    "button": "Ajouter aux contacts",
+    "hint": "Télécharge une carte de contact (.vcf)",
+    "help": "Sur un téléphone, elle s'ouvre généralement dans l'application Contacts. Sur un ordinateur, le fichier se télécharge.",
+    "note": "Ajouté depuis {url}"
+  },
   "share": {
     "label": "Partager",
     "copyLink": "Copier le lien",

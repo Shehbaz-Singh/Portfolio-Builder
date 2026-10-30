@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Logo } from '@/components/Logo';
 import { Check, CircleAlert, Copy, ExternalLink, LoaderCircle, QrCode } from 'lucide-react';
+import { contactQrCard } from '@parichay/shared';
 import { api } from '@/lib/client-api';
 import { readFlag, writeFlag } from '@/lib/storage';
 import { SITE_URL } from '@/lib/config';
@@ -196,6 +197,9 @@ function PublishControls() {
         slug={profile.slug}
         name={profile.fullName}
         published={profile.published}
+        contactCard={
+          profile.contactCardEnabled && profile.published ? contactQrCard(profile, url) : null
+        }
       />
 
       <PublishCelebration

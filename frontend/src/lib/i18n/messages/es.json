@@ -64,6 +64,12 @@
     "reset": "Restablecer",
     "close": "Cerrar"
   },
+  "contact": {
+    "button": "Añadir a contactos",
+    "hint": "Descarga una tarjeta de contacto (.vcf)",
+    "help": "En un teléfono suele abrirse en la app de contactos. En un ordenador, el archivo se descarga.",
+    "note": "Añadido desde {url}"
+  },
   "share": {
     "label": "Compartir",
     "copyLink": "Copiar enlace",

@@ -1,6 +1,6 @@
 import type { ComponentType, ReactNode } from 'react';
 import Link from 'next/link';
-import { FileDown, Globe, Link2, Mail, Phone } from 'lucide-react';
+import { FileDown, Globe, Link2, Mail, Phone, UserPlus } from 'lucide-react';
 import type { PublicLink } from '@parichay/shared';
 import { formatDate, formatMonthYear, initials } from '@/lib/format';
 import { fill } from '@/lib/i18n';
@@ -213,6 +213,37 @@ export function ResumeLink({
         PDF
       </span>
     </a>
+  );
+}
+
+// "Add to contacts": a plain link to the vCard, with the download attribute, so it works without
+// JavaScript. The visible text carries the name; the hint (what it downloads, and what happens on a
+// phone and on a computer) is read out as its description and shown as a tooltip, not as page text.
+export function ContactLink({
+  contact,
+  className,
+}: {
+  contact: NonNullable<HeaderModel['contact']>;
+  className: string;
+}) {
+  return (
+    <>
+      <a
+        href={contact.href}
+        download
+        title={contact.hint}
+        aria-describedby="contact-card-hint"
+        className={className}
+      >
+        <span aria-hidden="true" className="inline-flex shrink-0">
+          <UserPlus className="size-4" />
+        </span>
+        {contact.label}
+      </a>
+      <span id="contact-card-hint" className="sr-only">
+        {contact.hint}. {contact.help}
+      </span>
+    </>
   );
 }
 

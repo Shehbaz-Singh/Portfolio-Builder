@@ -55,6 +55,8 @@ function toPublic(sample: SampleProfile): PublicProfile {
     locale: 'en',
     acceptTestimonials: false,
     resumeEnabled: true,
+    contactCardEnabled: false,
+    contactCardPhoto: false,
     shareMessage: null,
     ...(sample.availability && {
       availabilityEnabled: true as const,
